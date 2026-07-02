@@ -18,8 +18,8 @@
         color: var(--color-white);
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        padding: 80px;
+        justify-content: flex-start;
+        padding: 140px 80px 80px 80px;
         position: relative;
         overflow: hidden;
     }
@@ -58,11 +58,13 @@
     }
     
     .brand-logo {
+        position: absolute;
+        top: -90px;
+        left: 0;
         font-size: 3rem;
-        margin-bottom: 20px;
         filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         animation: float 4s ease-in-out infinite;
-    }
+     }
     
     .brand-title {
         font-size: 2.8rem;
@@ -138,11 +140,12 @@
     .form-panel {
         flex: 0.8;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
-        padding: 60px;
+        padding: 140px 60px 80px 60px;
         background-color: var(--color-white);
         position: relative;
+        overflow-y: auto;
     }
     
     .form-container {
@@ -185,7 +188,8 @@
     
     .custom-input {
         width: 100%;
-        padding: 14px 16px;
+        height: 50px;
+        padding: 12px 16px;
         font-size: 0.95rem;
         font-family: var(--font-body);
         color: var(--color-dark);
@@ -194,6 +198,7 @@
         border-radius: var(--border-radius-md);
         transition: var(--transition-smooth);
         outline: none;
+        box-sizing: border-box;
     }
     
     .custom-input:focus {

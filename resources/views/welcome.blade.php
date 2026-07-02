@@ -7,7 +7,7 @@
     <nav class="landing-navbar">
         <div class="logo">
             <div class="logo-icon">
-                <i class="fi fi-rr-flag" style="color: var(--color-secondary); font-size: 1.4rem; display: inline-block; vertical-align: middle; line-height: 1;"></i>
+                <i class="fi fi-rr-flag" style="font-size: 1.4rem; display: inline-block; vertical-align: middle; line-height: 1;"></i>
             </div>
             <div class="logo-text">EmpatPilar<span>SMA/K</span></div>
         </div>

@@ -18,8 +18,8 @@
         color: var(--color-white);
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        padding: 80px;
+        justify-content: flex-start;
+        padding: 140px 80px 80px 80px;
         position: relative;
         overflow: hidden;
     }
@@ -58,11 +58,13 @@
     }
     
     .brand-logo {
+        position: absolute;
+        top: -90px;
+        left: 0;
         font-size: 3rem;
-        margin-bottom: 20px;
         filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         animation: float 4s ease-in-out infinite;
-    }
+     }
     
     .brand-title {
         font-size: 2.8rem;
@@ -137,11 +139,12 @@
     .form-panel {
         flex: 0.8;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
-        padding: 60px;
+        padding: 140px 60px 80px 60px;
         background-color: var(--color-white);
         position: relative;
+        overflow-y: auto;
     }
     
     .form-container {
@@ -184,7 +187,8 @@
     
     .custom-input {
         width: 100%;
-        padding: 14px 16px;
+        height: 50px;
+        padding: 12px 16px;
         font-size: 0.95rem;
         font-family: var(--font-body);
         color: var(--color-dark);
@@ -193,6 +197,7 @@
         border-radius: var(--border-radius-md);
         transition: var(--transition-smooth);
         outline: none;
+        box-sizing: border-box;
     }
     
     .custom-input:focus {
@@ -321,15 +326,15 @@
     <div class="brand-panel">
         <div class="brand-content">
             <div class="brand-logo">
-                <i class="fi fi-rr-bank" style="color: var(--color-secondary); display: inline-block; vertical-align: middle;"></i>
+                <i class="fi fi-rr-bank text-white" style="display: inline-block; vertical-align: middle;"></i>
             </div>
-            <h1 class="brand-title">Portal Admin <br><span>Empat Pilar</span></h1>
+            <h1 class="brand-title text-white">Portal Admin <br><span>Empat Pilar</span></h1>
             <p class="brand-subtitle">Panel Kelola Pembelajaran, Kuis, dan Monitoring Pemahaman Siswa Program Empat Pilar Kebangsaan SMA/K.</p>
             
             <div class="pillars-grid">
                 <div class="pillar-card">
                     <div class="pillar-icon">
-                        <i class="fi fi-rr-book" style="color: #40c4ff; font-size: 1.5rem;"></i>
+                        <i class="fi fi-rr-book text-white" style="font-size: 1.5rem;"></i>
                     </div>
                     <div class="pillar-info">
                         <h4>Materi Modul</h4>
@@ -338,7 +343,7 @@
                 </div>
                 <div class="pillar-card">
                     <div class="pillar-icon">
-                        <i class="fi fi-rr-document" style="color: #ff5252; font-size: 1.5rem;"></i>
+                        <i class="fi fi-rr-document text-white" style="font-size: 1.5rem;"></i>
                     </div>
                     <div class="pillar-info">
                         <h4>Kuis & Soal</h4>
@@ -347,7 +352,7 @@
                 </div>
                 <div class="pillar-card">
                     <div class="pillar-icon">
-                        <i class="fi fi-rr-stats" style="color: #69f0ae; font-size: 1.5rem;"></i>
+                        <i class="fi fi-rr-stats text-white" style="font-size: 1.5rem;"></i>
                     </div>
                     <div class="pillar-info">
                         <h4>Pantau Siswa</h4>
@@ -356,7 +361,7 @@
                 </div>
                 <div class="pillar-card">
                     <div class="pillar-icon">
-                        <i class="fi fi-rr-settings" style="color: #e040fb; font-size: 1.5rem;"></i>
+                        <i class="fi fi-rr-settings text-white" style="font-size: 1.5rem;"></i>
                     </div>
                     <div class="pillar-info">
                         <h4>Konfigurasi</h4>

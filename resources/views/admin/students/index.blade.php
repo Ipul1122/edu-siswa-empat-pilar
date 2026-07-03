@@ -3,10 +3,18 @@
 @section('title', 'Pemantauan Siswa - Admin')
 
 @section('content')
-<div class="page-header">
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div class="page-title">
         <h1>Pemantauan Siswa</h1>
         <p>Pantau kemajuan baca materi dan pencapaian skor kuis kewarganegaraan siswa.</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <a href="{{ route('admin.students.export') }}" class="btn btn-secondary" style="background-color: var(--color-white); border: 1px solid var(--color-gray-300); color: var(--color-gray-700);">
+            <i class="fi fi-rr-download" style="margin-right: 4px; vertical-align: middle;"></i> Ekspor CSV
+        </a>
+        <a href="{{ route('admin.students.report') }}" target="_blank" class="btn btn-primary">
+            <i class="fi fi-rr-print" style="margin-right: 4px; vertical-align: middle;"></i> Cetak Laporan
+        </a>
     </div>
 </div>
 

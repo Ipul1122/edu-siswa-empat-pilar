@@ -45,6 +45,33 @@
     </div>
 </div>
 
+<!-- Charts Section -->
+<div class="dashboard-grid" style="margin-bottom: 32px; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 32px;">
+    <!-- Pillar Average Scores Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Rata-rata Nilai per Pilar</h3>
+        </div>
+        <div class="card-body" style="padding: 20px;">
+            <div style="position: relative; height: 220px; width: 100%;">
+                <canvas id="adminPillarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7 Days Activity Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Aktivitas Pengerjaan Kuis (7 Hari Terakhir)</h3>
+        </div>
+        <div class="card-body" style="padding: 20px;">
+            <div style="position: relative; height: 220px; width: 100%;">
+                <canvas id="adminActivityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="dashboard-grid">
     <!-- Recent Attempts -->
     <div class="card">
@@ -117,4 +144,134 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Pillar Average Chart
+        const pillarCtx = document.getElementById('adminPillarChart').getContext('2d');
+        new Chart(pillarCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Pancasila', 'UUD 1945', 'NKRI', 'Bhinneka'],
+                datasets: [{
+                    label: 'Nilai Rata-rata',
+                    data: [
+                        {{ $chartData['pancasila'] }},
+                        {{ $chartData['uud_1945'] }},
+                        {{ $chartData['nkri'] }},
+                        {{ $chartData['bhinneka_tunggal_ika'] }}
+                    ],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.75)',   // Pancasila (red)
+                        'rgba(245, 158, 11, 0.75)',  // UUD (yellow)
+                        'rgba(59, 130, 246, 0.75)',  // NKRI (blue)
+                        'rgba(16, 185, 129, 0.75)'   // Bhinneka (green)
+                    ],
+                    borderColor: [
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)'
+                    ],
+                    borderWidth: 1.5,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            color: 'var(--color-gray-500)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'var(--color-gray-700)',
+                            font: {
+                                weight: '600'
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ' Rata-rata Skor: ' + context.formattedValue + ' / 100';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Activity Chart (Line Chart)
+        const activityCtx = document.getElementById('adminActivityChart').getContext('2d');
+        new Chart(activityCtx, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode(array_keys($activityLast7Days)) !!},
+                datasets: [{
+                    label: 'Jumlah Percobaan',
+                    data: {!! json_encode(array_values($activityLast7Days)) !!},
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.35,
+                    pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0,
+                            color: 'var(--color-gray-500)'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'var(--color-gray-700)',
+                            font: {
+                                weight: '500'
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    });
+</script>
 @endsection

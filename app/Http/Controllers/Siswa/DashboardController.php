@@ -50,6 +50,21 @@ class DashboardController extends Controller
         $recommendedMaterial = Material::whereNotIn('id', $completedMaterialIds)
             ->first();
 
+        // 5. Calculate average scores per pillar for Chart.js visualization
+        $pillarScores = QuizAttempt::join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id')
+            ->where('quiz_attempts.user_id', $user->id)
+            ->selectRaw('quizzes.pillar, AVG(quiz_attempts.score) as avg_score')
+            ->groupBy('quizzes.pillar')
+            ->pluck('avg_score', 'quizzes.pillar')
+            ->toArray();
+
+        $chartData = [
+            'pancasila' => round($pillarScores['pancasila'] ?? 0),
+            'uud_1945' => round($pillarScores['uud_1945'] ?? 0),
+            'nkri' => round($pillarScores['nkri'] ?? 0),
+            'bhinneka_tunggal_ika' => round($pillarScores['bhinneka_tunggal_ika'] ?? 0),
+        ];
+
         return view('siswa.dashboard', compact(
             'readingProgress',
             'completedMaterials',
@@ -57,7 +72,8 @@ class DashboardController extends Controller
             'averageScore',
             'totalQuizzesTaken',
             'recentAttempts',
-            'recommendedMaterial'
+            'recommendedMaterial',
+            'chartData'
         ));
     }
 }

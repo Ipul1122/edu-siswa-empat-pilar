@@ -21,6 +21,9 @@
     
     <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -47,6 +50,11 @@
                 <li class="sidebar-menu-item {{ Route::is('siswa.quizzes.*') ? 'active' : '' }}">
                     <a href="{{ route('siswa.quizzes.index') }}">
                         <i class="fi fi-rr-edit"></i> Latihan Kuis
+                    </a>
+                </li>
+                <li class="sidebar-menu-item {{ Route::is('siswa.leaderboard') ? 'active' : '' }}">
+                    <a href="{{ route('siswa.leaderboard') }}">
+                        <i class="fi fi-rr-trophy"></i> Papan Peringkat
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.profile.*') ? 'active' : '' }}">

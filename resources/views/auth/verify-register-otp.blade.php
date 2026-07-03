@@ -256,7 +256,7 @@
     <div class="brand-panel">
         <div class="brand-content">
             <div class="brand-logo">🎓</div>
-            <h1 class="brand-title">Satu Langkah Lagi <br><span>Menuju Ruang Belajar</span></h1>
+            <h1 class="brand-title text-white">Satu Langkah Lagi <br><span>Menuju Ruang Belajar</span></h1>
             <p class="brand-subtitle">Kami telah mengirimkan 6-digit kode OTP ke alamat email Anda untuk memastikan validitas akun Anda sebelum mulai belajar.</p>
         </div>
     </div>

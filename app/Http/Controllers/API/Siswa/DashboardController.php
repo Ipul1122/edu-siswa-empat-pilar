@@ -18,24 +18,24 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // 1. Calculate reading progress percentage
-        $totalMaterials = Material::count();
-        $completedMaterials = StudentProgress::where('user_id', $user->id)
+        $totalMaterials = Material::query()->count('*');
+        $completedMaterials = StudentProgress::query()->where('user_id', $user->id)
             ->where('is_completed', true)
-            ->count();
+            ->count('*');
 
         $readingProgress = $totalMaterials > 0 
             ? round(($completedMaterials / $totalMaterials) * 100) 
             : 0;
 
         // 2. Fetch quiz statistics
-        $attempts = QuizAttempt::where('user_id', $user->id)->get();
+        $attempts = QuizAttempt::query()->where('user_id', $user->id)->get();
         $averageScore = $attempts->count() > 0 
             ? round($attempts->avg('score'), 1) 
             : 0;
         $totalQuizzesTaken = $attempts->count();
 
         // 3. Fetch 3 recent quiz attempts
-        $recentAttempts = QuizAttempt::where('user_id', $user->id)
+        $recentAttempts = QuizAttempt::query()->where('user_id', $user->id)
             ->with('quiz:id,pillar,title,duration_minutes')
             ->latest()
             ->take(3)
@@ -55,12 +55,12 @@ class DashboardController extends Controller
             });
 
         // 4. Find one unread material to recommend, if any
-        $completedMaterialIds = StudentProgress::where('user_id', $user->id)
+        $completedMaterialIds = StudentProgress::query()->where('user_id', $user->id)
             ->where('is_completed', true)
             ->pluck('material_id')
             ->toArray();
 
-        $recommendedMaterial = Material::whereNotIn('id', $completedMaterialIds)
+        $recommendedMaterial = Material::query()->whereNotIn('id', $completedMaterialIds, 'and')
             ->first();
 
         return response()->json([

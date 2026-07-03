@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Material;
 use App\Models\StudentProgress;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class LeaderboardController extends Controller
 {
@@ -17,49 +19,46 @@ class LeaderboardController extends Controller
     {
         $currentUserId = Auth::id();
 
-        // Fetch all students with completed progress count and their attempts
-        $students = User::query()->where('role', 'siswa')
-            ->withCount(['progress as completed_progress_count' => function ($query) {
-                $query->where('is_completed', true);
-            }])
-            ->with(['attempts'])
-            ->get();
+        // Fetch student leaderboard using optimized database query and caching
+        $leaderboard = Cache::remember('leaderboard_data', 300, function () {
+            $progressSub = DB::table('student_progress')
+                ->select('user_id')
+                ->selectRaw('COUNT(*) as completed_count')
+                ->where('is_completed', true)
+                ->groupBy('user_id');
 
-        foreach ($students as $student) {
-            // Group attempts by quiz_id to get the highest score for each unique quiz
-            $highestQuizScores = [];
-            foreach ($student->attempts as $attempt) {
-                $quizId = $attempt->quiz_id;
-                if (!isset($highestQuizScores[$quizId]) || $attempt->score > $highestQuizScores[$quizId]) {
-                    $highestQuizScores[$quizId] = $attempt->score;
-                }
-            }
+            $maxAttemptsSub = DB::table('quiz_attempts')
+                ->select('user_id', 'quiz_id')
+                ->selectRaw('MAX(score) as max_score')
+                ->groupBy('user_id', 'quiz_id');
 
-            $totalQuizScore = array_sum($highestQuizScores);
-            $materialsRead = $student->completed_progress_count;
-            
-            // Formula: (Materials completed * 10) + Total highest score of each quiz
-            $student->points = ($materialsRead * 10) + $totalQuizScore;
-            $student->total_quiz_score = $totalQuizScore;
-            $student->materials_read = $materialsRead;
-            
-            // Average score calculation
-            $student->average_score = $student->attempts->count() > 0 
-                ? round($student->attempts->avg('score'), 1) 
-                : 0;
-            $student->quizzes_count = $student->attempts->count();
-        }
+            $quizScoresSub = DB::table($maxAttemptsSub, 'max_attempts')
+                ->select('user_id')
+                ->selectRaw('SUM(max_score) as total_score')
+                ->groupBy('user_id');
 
-        // Sort by points desc, then by average_score desc, then by name asc
-        $leaderboard = $students->sort(function ($a, $b) {
-            if ($b->points !== $a->points) {
-                return $b->points <=> $a->points;
-            }
-            if ($b->average_score !== $a->average_score) {
-                return $b->average_score <=> $a->average_score;
-            }
-            return strcmp($a->name, $b->name);
-        })->values();
+            $attemptsStatsSub = DB::table('quiz_attempts')
+                ->select('user_id')
+                ->selectRaw('ROUND(AVG(score), 1) as avg_score')
+                ->selectRaw('COUNT(*) as attempts_count')
+                ->groupBy('user_id');
+
+            return User::query()
+                ->select('users.*')
+                ->selectRaw('COALESCE(progress_counts.completed_count, 0) as materials_read')
+                ->selectRaw('COALESCE(quiz_scores.total_score, 0) as total_quiz_score')
+                ->selectRaw('(COALESCE(progress_counts.completed_count, 0) * 10 + COALESCE(quiz_scores.total_score, 0)) as points')
+                ->selectRaw('COALESCE(attempts_stats.avg_score, 0) as average_score')
+                ->selectRaw('COALESCE(attempts_stats.attempts_count, 0) as quizzes_count')
+                ->leftJoinSub($progressSub, 'progress_counts', 'progress_counts.user_id', '=', 'users.id')
+                ->leftJoinSub($quizScoresSub, 'quiz_scores', 'quiz_scores.user_id', '=', 'users.id')
+                ->leftJoinSub($attemptsStatsSub, 'attempts_stats', 'attempts_stats.user_id', '=', 'users.id')
+                ->where('users.role', 'siswa')
+                ->orderByDesc('points')
+                ->orderByDesc('average_score')
+                ->orderBy('users.name')
+                ->get();
+        });
 
         // Find current user's rank
         $currentUserRank = null;

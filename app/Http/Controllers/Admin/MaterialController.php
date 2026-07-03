@@ -13,7 +13,7 @@ class MaterialController extends Controller
      */
     public function index()
     {
-        $materials = Material::latest()->get();
+        $materials = Material::query()->latest()->get();
         return view('admin.materials.index', compact('materials'));
     }
 
@@ -90,7 +90,7 @@ class MaterialController extends Controller
      */
     public function destroy(Material $material)
     {
-        $material->delete();
+        Material::destroy($material->id);
 
         return redirect()->route('admin.materials.index')
             ->with('success', 'Materi berhasil dihapus!');

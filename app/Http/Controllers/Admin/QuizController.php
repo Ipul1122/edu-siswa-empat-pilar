@@ -97,7 +97,7 @@ class QuizController extends Controller
      */
     public function destroy(Quiz $quiz)
     {
-        $quiz->delete();
+        Quiz::destroy($quiz->id);
 
         return redirect()->route('admin.quizzes.index')
             ->with('success', 'Kuis berhasil dihapus!');

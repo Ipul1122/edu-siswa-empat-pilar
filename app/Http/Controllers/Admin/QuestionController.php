@@ -94,7 +94,7 @@ class QuestionController extends Controller
     public function destroy(Question $question)
     {
         $quizId = $question->quiz_id;
-        $question->delete();
+        Question::destroy($question->id);
 
         return redirect()->route('admin.quizzes.show', $quizId)
             ->with('success', 'Soal kuis berhasil dihapus!');

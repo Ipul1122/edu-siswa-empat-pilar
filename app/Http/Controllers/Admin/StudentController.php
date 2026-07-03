@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Material;
 use App\Models\StudentProgress;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -14,24 +15,36 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $students = User::query()->where('role', 'siswa')
-            ->withCount(['progress as completed_progress_count' => function ($query) {
-                $query->where('is_completed', true);
-            }])
-            ->with(['attempts'])
+        $attemptsStatsSub = DB::table('quiz_attempts')
+            ->select('user_id')
+            ->selectRaw('ROUND(AVG(score), 1) as avg_score')
+            ->selectRaw('COUNT(*) as attempts_count')
+            ->groupBy('user_id');
+
+        $progressSub = DB::table('student_progress')
+            ->select('user_id')
+            ->selectRaw('COUNT(*) as completed_count')
+            ->where('is_completed', true)
+            ->groupBy('user_id');
+
+        $students = User::query()
+            ->select('users.*')
+            ->selectRaw('COALESCE(progress_counts.completed_count, 0) as completed_progress_count')
+            ->selectRaw('COALESCE(attempts_stats.avg_score, 0) as average_score')
+            ->selectRaw('COALESCE(attempts_stats.attempts_count, 0) as total_quizzes_taken')
+            ->leftJoinSub($progressSub, 'progress_counts', 'progress_counts.user_id', '=', 'users.id')
+            ->leftJoinSub($attemptsStatsSub, 'attempts_stats', 'attempts_stats.user_id', '=', 'users.id')
+            ->where('users.role', 'siswa')
             ->latest()
             ->get();
 
-        $totalMaterialsCount = Material::query()->count();
-
-        // Calculate average score for each student manually in php or using SQL
         foreach ($students as $student) {
-            $attempts = $student->attempts;
-            $student->average_score = $attempts->count() > 0 
-                ? round($attempts->avg('score'), 1) 
-                : '-';
-            $student->total_quizzes_taken = $attempts->count();
+            if ($student->total_quizzes_taken == 0) {
+                $student->average_score = '-';
+            }
         }
+
+        $totalMaterialsCount = Material::query()->count('*');
 
         return view('admin.students.index', compact('students', 'totalMaterialsCount'));
     }
@@ -45,7 +58,7 @@ class StudentController extends Controller
             abort(404);
         }
 
-        $totalMaterialsCount = Material::query()->count();
+        $totalMaterialsCount = Material::query()->count('*');
         
         // Fetch all materials and check if this student has completed them
         $materials = Material::all();
@@ -74,37 +87,43 @@ class StudentController extends Controller
      */
     public function export()
     {
-        $students = User::query()->where('role', 'siswa')
-            ->withCount(['progress as completed_progress_count' => function ($query) {
-                $query->where('is_completed', true);
-            }])
-            ->with(['attempts'])
+        $progressSub = DB::table('student_progress')
+            ->select('user_id')
+            ->selectRaw('COUNT(*) as completed_count')
+            ->where('is_completed', true)
+            ->groupBy('user_id');
+
+        $maxAttemptsSub = DB::table('quiz_attempts')
+            ->select('user_id', 'quiz_id')
+            ->selectRaw('MAX(score) as max_score')
+            ->groupBy('user_id', 'quiz_id');
+
+        $quizScoresSub = DB::table($maxAttemptsSub, 'max_attempts')
+            ->select('user_id')
+            ->selectRaw('SUM(max_score) as total_score')
+            ->groupBy('user_id');
+
+        $attemptsStatsSub = DB::table('quiz_attempts')
+            ->select('user_id')
+            ->selectRaw('ROUND(AVG(score), 1) as avg_score')
+            ->selectRaw('COUNT(*) as attempts_count')
+            ->groupBy('user_id');
+
+        $students = User::query()
+            ->select('users.*')
+            ->selectRaw('COALESCE(progress_counts.completed_count, 0) as completed_progress_count')
+            ->selectRaw('COALESCE(quiz_scores.total_score, 0) as total_quiz_score')
+            ->selectRaw('(COALESCE(progress_counts.completed_count, 0) * 10 + COALESCE(quiz_scores.total_score, 0)) as points')
+            ->selectRaw('COALESCE(attempts_stats.avg_score, 0) as average_score')
+            ->selectRaw('COALESCE(attempts_stats.attempts_count, 0) as quizzes_count')
+            ->leftJoinSub($progressSub, 'progress_counts', 'progress_counts.user_id', '=', 'users.id')
+            ->leftJoinSub($quizScoresSub, 'quiz_scores', 'quiz_scores.user_id', '=', 'users.id')
+            ->leftJoinSub($attemptsStatsSub, 'attempts_stats', 'attempts_stats.user_id', '=', 'users.id')
+            ->where('users.role', 'siswa')
+            ->orderByDesc('points')
+            ->orderByDesc('average_score')
+            ->orderBy('users.name')
             ->get();
-
-        foreach ($students as $student) {
-            $highestQuizScores = [];
-            foreach ($student->attempts as $attempt) {
-                $quizId = $attempt->quiz_id;
-                if (!isset($highestQuizScores[$quizId]) || $attempt->score > $highestQuizScores[$quizId]) {
-                    $highestQuizScores[$quizId] = $attempt->score;
-                }
-            }
-            $student->points = ($student->completed_progress_count * 10) + array_sum($highestQuizScores);
-            $student->average_score = $student->attempts->count() > 0 
-                ? round($student->attempts->avg('score'), 1) 
-                : 0;
-            $student->quizzes_count = $student->attempts->count();
-        }
-
-        $students = $students->sort(function ($a, $b) {
-            if ($b->points !== $a->points) {
-                return $b->points <=> $a->points;
-            }
-            if ($b->average_score !== $a->average_score) {
-                return $b->average_score <=> $a->average_score;
-            }
-            return strcmp($a->name, $b->name);
-        })->values();
 
         $headers = [
             'Content-type' => 'text/csv; charset=UTF-8',
@@ -156,39 +175,45 @@ class StudentController extends Controller
      */
     public function report()
     {
-        $students = User::query()->where('role', 'siswa')
-            ->withCount(['progress as completed_progress_count' => function ($query) {
-                $query->where('is_completed', true);
-            }])
-            ->with(['attempts'])
+        $progressSub = DB::table('student_progress')
+            ->select('user_id')
+            ->selectRaw('COUNT(*) as completed_count')
+            ->where('is_completed', true)
+            ->groupBy('user_id');
+
+        $maxAttemptsSub = DB::table('quiz_attempts')
+            ->select('user_id', 'quiz_id')
+            ->selectRaw('MAX(score) as max_score')
+            ->groupBy('user_id', 'quiz_id');
+
+        $quizScoresSub = DB::table($maxAttemptsSub, 'max_attempts')
+            ->select('user_id')
+            ->selectRaw('SUM(max_score) as total_score')
+            ->groupBy('user_id');
+
+        $attemptsStatsSub = DB::table('quiz_attempts')
+            ->select('user_id')
+            ->selectRaw('ROUND(AVG(score), 1) as avg_score')
+            ->selectRaw('COUNT(*) as attempts_count')
+            ->groupBy('user_id');
+
+        $students = User::query()
+            ->select('users.*')
+            ->selectRaw('COALESCE(progress_counts.completed_count, 0) as completed_progress_count')
+            ->selectRaw('COALESCE(quiz_scores.total_score, 0) as total_quiz_score')
+            ->selectRaw('(COALESCE(progress_counts.completed_count, 0) * 10 + COALESCE(quiz_scores.total_score, 0)) as points')
+            ->selectRaw('COALESCE(attempts_stats.avg_score, 0) as average_score')
+            ->selectRaw('COALESCE(attempts_stats.attempts_count, 0) as quizzes_count')
+            ->leftJoinSub($progressSub, 'progress_counts', 'progress_counts.user_id', '=', 'users.id')
+            ->leftJoinSub($quizScoresSub, 'quiz_scores', 'quiz_scores.user_id', '=', 'users.id')
+            ->leftJoinSub($attemptsStatsSub, 'attempts_stats', 'attempts_stats.user_id', '=', 'users.id')
+            ->where('users.role', 'siswa')
+            ->orderByDesc('points')
+            ->orderByDesc('average_score')
+            ->orderBy('users.name')
             ->get();
 
-        foreach ($students as $student) {
-            $highestQuizScores = [];
-            foreach ($student->attempts as $attempt) {
-                $quizId = $attempt->quiz_id;
-                if (!isset($highestQuizScores[$quizId]) || $attempt->score > $highestQuizScores[$quizId]) {
-                    $highestQuizScores[$quizId] = $attempt->score;
-                }
-            }
-            $student->points = ($student->completed_progress_count * 10) + array_sum($highestQuizScores);
-            $student->average_score = $student->attempts->count() > 0 
-                ? round($student->attempts->avg('score'), 1) 
-                : 0;
-            $student->quizzes_count = $student->attempts->count();
-        }
-
-        $students = $students->sort(function ($a, $b) {
-            if ($b->points !== $a->points) {
-                return $b->points <=> $a->points;
-            }
-            if ($b->average_score !== $a->average_score) {
-                return $b->average_score <=> $a->average_score;
-            }
-            return strcmp($a->name, $b->name);
-        })->values();
-
-        $totalMaterialsCount = Material::query()->count();
+        $totalMaterialsCount = Material::query()->count('*');
 
         return view('admin.students.report', compact('students', 'totalMaterialsCount'));
     }

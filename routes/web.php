@@ -56,6 +56,8 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
 
     // Student Monitoring
     Route::get('/students', [App\Http\Controllers\Admin\StudentController::class, 'index'])->name('students.index');
+    Route::get('/students/export', [App\Http\Controllers\Admin\StudentController::class, 'export'])->name('students.export');
+    Route::get('/students/report', [App\Http\Controllers\Admin\StudentController::class, 'report'])->name('students.report');
     Route::get('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'show'])->name('students.show');
 });
 
@@ -75,6 +77,9 @@ Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->
     Route::get('/quizzes/{quiz}/start', [App\Http\Controllers\Siswa\QuizController::class, 'start'])->name('quizzes.start');
     Route::post('/quizzes/{quiz}/submit', [App\Http\Controllers\Siswa\QuizController::class, 'submit'])->name('quizzes.submit');
     Route::get('/attempts/{attempt}/result', [App\Http\Controllers\Siswa\QuizController::class, 'result'])->name('quizzes.result');
+
+    // Leaderboard
+    Route::get('/leaderboard', [App\Http\Controllers\Siswa\LeaderboardController::class, 'index'])->name('leaderboard');
 
     // Profile Settings
     Route::get('/profile', [App\Http\Controllers\Siswa\ProfileController::class, 'edit'])->name('profile.edit');

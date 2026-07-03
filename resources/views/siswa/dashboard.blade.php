@@ -137,6 +137,25 @@
 
     <!-- Right Column: Info & Tips -->
     <div style="display: flex; flex-direction: column; gap: 32px;">
+        <!-- Radar Chart Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Analisis Pemahaman Pilar</h3>
+            </div>
+            <div class="card-body" style="padding: 20px; text-align: center;">
+                @if($totalQuizzesTaken > 0)
+                    <div style="position: relative; height: 220px; width: 100%;">
+                        <canvas id="pillarRadarChart"></canvas>
+                    </div>
+                @else
+                    <div style="padding: 30px 20px; color: var(--color-gray-400); font-size: 0.9rem;">
+                        <span style="font-size: 2.2rem; display: block; margin-bottom: 12px; color: var(--color-gray-300);"><i class="fi fi-rr-chart-radar"></i></span>
+                        Belum ada data kuis untuk dianalisis. Selesaikan kuis untuk melihat grafik kemampuan Anda.
+                    </div>
+                @endif
+            </div>
+        </div>
+
         <div class="card" style="background: radial-gradient(circle at 10% 20%, rgba(211, 47, 47, 0.04) 0%, rgba(255, 193, 7, 0.02) 90%);">
             <div class="card-header" style="background: none; border: none; padding-bottom: 0;">
                 <h3>Empat Pilar Kebangsaan</h3>
@@ -162,4 +181,80 @@
         </div>
     </div>
 </div>
+
+@if($totalQuizzesTaken > 0)
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('pillarRadarChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Pancasila', 'UUD 1945', 'NKRI', 'Bhinneka'],
+                datasets: [{
+                    label: 'Skor Rata-rata',
+                    data: [
+                        {{ $chartData['pancasila'] }},
+                        {{ $chartData['uud_1945'] }},
+                        {{ $chartData['nkri'] }},
+                        {{ $chartData['bhinneka_tunggal_ika'] }}
+                    ],
+                    backgroundColor: 'rgba(211, 47, 47, 0.15)',
+                    borderColor: 'rgba(211, 47, 47, 0.8)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(211, 47, 47, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(211, 47, 47, 1)',
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: {
+                            stepSize: 20,
+                            backdropColor: 'transparent',
+                            color: 'var(--color-gray-400)',
+                            font: {
+                                size: 9
+                            }
+                        },
+                        pointLabels: {
+                            color: 'var(--color-dark)',
+                            font: {
+                                family: 'Outfit, sans-serif',
+                                weight: '600',
+                                size: 11
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ' Rata-rata: ' + context.formattedValue + ' / 100';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+@endif
 @endsection

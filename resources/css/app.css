@@ -421,6 +421,7 @@ a:hover {
 
 .btn-primary:hover {
     background-color: var(--color-primary-hover);
+    color: var(--color-white);
     box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
 }
 
@@ -432,6 +433,7 @@ a:hover {
 
 .btn-secondary:hover {
     background-color: var(--color-gray-200);
+    color: var(--color-dark);
 }
 
 .btn-warning {
@@ -441,6 +443,7 @@ a:hover {
 
 .btn-warning:hover {
     background-color: var(--color-primary-hover);
+    color: var(--color-white);
 }
 
 .btn-danger {
@@ -450,6 +453,7 @@ a:hover {
 
 .btn-danger:hover {
     background-color: var(--color-secondary-hover);
+    color: var(--color-white);
 }
 
 .btn-sm {

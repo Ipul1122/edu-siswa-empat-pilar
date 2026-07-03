@@ -7,6 +7,7 @@ use App\Models\Material;
 use App\Models\StudentProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class MaterialController extends Controller
 {
@@ -18,7 +19,7 @@ class MaterialController extends Controller
         $user = Auth::user();
 
         // Fetch completed material IDs for this student
-        $completedMaterialIds = StudentProgress::where('user_id', $user->id)
+        $completedMaterialIds = StudentProgress::query()->where('user_id', $user->id)
             ->where('is_completed', true)
             ->pluck('material_id')
             ->toArray();
@@ -63,7 +64,7 @@ class MaterialController extends Controller
         $user = Auth::user();
 
         // Check if already completed
-        $progress = StudentProgress::where('user_id', $user->id)
+        $progress = StudentProgress::query()->where('user_id', $user->id)
             ->where('material_id', $material->id)
             ->first();
 
@@ -99,6 +100,9 @@ class MaterialController extends Controller
                 'is_completed' => true,
             ]
         );
+
+        // Clear leaderboard cache
+        Cache::forget('leaderboard_data');
 
         return response()->json([
             'status' => 'success',

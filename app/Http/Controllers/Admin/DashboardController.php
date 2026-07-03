@@ -16,10 +16,10 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $totalStudents = User::where('role', 'siswa')->count();
-        $totalMaterials = Material::count();
-        $totalQuizzes = Quiz::count();
-        $totalAttempts = QuizAttempt::count();
+        $totalStudents = User::query()->where('role', 'siswa')->count('*');
+        $totalMaterials = Material::query()->count('*');
+        $totalQuizzes = Quiz::query()->count('*');
+        $totalAttempts = QuizAttempt::query()->count('*');
 
         // Get 5 recent attempts with student and quiz relations
         $recentAttempts = QuizAttempt::with(['user', 'quiz'])
@@ -28,7 +28,7 @@ class DashboardController extends Controller
             ->get();
 
         // 1. Calculate global average scores per pillar for Chart.js
-        $pillarScores = QuizAttempt::join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id')
+        $pillarScores = QuizAttempt::query()->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id', 'inner', false)
             ->selectRaw('quizzes.pillar, AVG(quiz_attempts.score) as avg_score')
             ->groupBy('quizzes.pillar')
             ->pluck('avg_score', 'quizzes.pillar')
@@ -47,7 +47,7 @@ class DashboardController extends Controller
             $date = Carbon::today()->subDays($i)->format('Y-m-d');
             $formattedDate = Carbon::today()->subDays($i)->format('d M');
             
-            $count = QuizAttempt::whereDate('created_at', $date)->count();
+            $count = QuizAttempt::query()->whereDate('created_at', '=', $date, 'and')->count('*');
             $activityLast7Days[$formattedDate] = $count;
         }
 

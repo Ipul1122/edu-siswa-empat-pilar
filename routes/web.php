@@ -11,26 +11,26 @@ Route::get('/', function () {
 Route::middleware('guest:web')->group(function () {
     // Siswa (Student) Auth
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
     
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth');
     Route::get('/register/verify-otp', [AuthController::class, 'showRegisterVerifyOtp'])->name('register.verify_otp');
-    Route::post('/register/verify-otp', [AuthController::class, 'registerVerifyOtp']);
-    Route::post('/register/resend-otp', [AuthController::class, 'registerResendOtp'])->name('register.resend_otp');
+    Route::post('/register/verify-otp', [AuthController::class, 'registerVerifyOtp'])->middleware('throttle:auth');
+    Route::post('/register/resend-otp', [AuthController::class, 'registerResendOtp'])->name('register.resend_otp')->middleware('throttle:otp');
 
     // Siswa Lupa Password OTP
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'sendResetOtp'])->name('password.email');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetOtp'])->name('password.email')->middleware('throttle:otp');
     Route::get('/forgot-password/verify-otp', [AuthController::class, 'showResetVerifyOtp'])->name('password.verify_otp');
-    Route::post('/forgot-password/verify-otp', [AuthController::class, 'resetPassword'])->name('password.update');
-    Route::post('/forgot-password/resend-otp', [AuthController::class, 'resetResendOtp'])->name('password.resend_otp');
+    Route::post('/forgot-password/verify-otp', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:auth');
+    Route::post('/forgot-password/resend-otp', [AuthController::class, 'resetResendOtp'])->name('password.resend_otp')->middleware('throttle:otp');
 });
 
 Route::middleware('guest:admin')->group(function () {
     // Admin Auth
     Route::get('/admin/login', [AuthController::class, 'showAdminLogin'])->name('admin.login');
-    Route::post('/admin/login', [AuthController::class, 'adminLogin']);
+    Route::post('/admin/login', [AuthController::class, 'adminLogin'])->middleware('throttle:auth');
 });
 
 // Auth Route

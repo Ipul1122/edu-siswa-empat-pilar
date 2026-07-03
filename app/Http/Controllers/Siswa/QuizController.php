@@ -8,6 +8,7 @@ use App\Models\Question;
 use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class QuizController extends Controller
 {
@@ -22,7 +23,7 @@ class QuizController extends Controller
         $quizzes = Quiz::withCount('questions')->get();
 
         // Get highest attempt score for each quiz by this user
-        $highestScores = QuizAttempt::where('user_id', $user->id)
+        $highestScores = QuizAttempt::query()->where('user_id', $user->id)
             ->selectRaw('quiz_id, max(score) as max_score')
             ->groupBy('quiz_id')
             ->pluck('max_score', 'quiz_id')
@@ -103,6 +104,9 @@ class QuizController extends Controller
             'total_questions' => $totalQuestionsCount,
             'duration_seconds_taken' => $durationTaken,
         ]);
+
+        // Clear leaderboard cache
+        Cache::forget('leaderboard_data');
 
         // Flash student's detailed choices to the session for review on the next screen
         session()->flash('last_attempt_answers_' . $attempt->id, $submittedAnswers);

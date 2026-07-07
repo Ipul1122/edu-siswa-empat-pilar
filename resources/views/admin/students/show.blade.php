@@ -52,46 +52,92 @@
 </div>
 
 <div class="dashboard-grid" style="margin-top: 8px;">
-    <!-- Reading Progress Details -->
-    <div class="card">
-        <div class="card-header">
-            <h3>Daftar Progres Baca Materi</h3>
-        </div>
-        <div class="card-body" style="padding: 16px;">
-            @if($materials->count() > 0)
-                <div class="table-responsive">
-                    <table class="table" style="font-size: 0.95rem;">
-                        <thead>
-                            <tr>
-                                <th>Pilar</th>
-                                <th>Judul Materi</th>
-                                <th>Status Membaca</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($materials as $material)
+    <!-- Left Column: Text and Video Progress -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Reading Progress Details -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Progres Membaca Materi ({{ $completedTextCount }}/{{ $totalTextCount }})</h3>
+            </div>
+            <div class="card-body" style="padding: 16px;">
+                @if($textMaterials->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table" style="font-size: 0.95rem;">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <span class="badge {{ $material->pillar }}" style="font-size: 0.7rem;">
-                                            {{ str_replace('_', ' ', $material->pillar) }}
-                                        </span>
-                                    </td>
-                                    <td style="font-weight: 500;">{{ $material->title }}</td>
-                                    <td>
-                                        @if($material->is_completed_by_student)
-                                            <span class="badge completed" style="font-size: 0.7rem;">Selesai Dibaca</span>
-                                        @else
-                                            <span class="badge pending" style="font-size: 0.7rem;">Belum Dibaca</span>
-                                        @endif
-                                    </td>
+                                    <th>Pilar</th>
+                                    <th>Judul Materi</th>
+                                    <th>Status</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <p style="text-align: center; color: var(--color-gray-400); padding: 20px;">Belum ada materi pelajaran.</p>
-            @endif
+                            </thead>
+                            <tbody>
+                                @foreach($textMaterials as $material)
+                                    <tr>
+                                        <td>
+                                            <span class="badge {{ $material->pillar }}" style="font-size: 0.7rem;">
+                                                {{ str_replace('_', ' ', $material->pillar) }}
+                                            </span>
+                                        </td>
+                                        <td style="font-weight: 500;">{{ $material->title }}</td>
+                                        <td>
+                                            @if($material->is_completed_by_student)
+                                                <span class="badge completed" style="font-size: 0.7rem;">Selesai</span>
+                                            @else
+                                                <span class="badge pending" style="font-size: 0.7rem;">Belum Baca</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <p style="text-align: center; color: var(--color-gray-400); padding: 20px;">Belum ada materi pelajaran teks.</p>
+                @endif
+            </div>
+        </div>
+
+        <!-- Video Progress Details -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Progres Menonton Video ({{ $completedVideoCount }}/{{ $totalVideoCount }})</h3>
+            </div>
+            <div class="card-body" style="padding: 16px;">
+                @if($videoMaterials->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table" style="font-size: 0.95rem;">
+                            <thead>
+                                <tr>
+                                    <th>Pilar</th>
+                                    <th>Judul Video</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($videoMaterials as $video)
+                                    <tr>
+                                        <td>
+                                            <span class="badge {{ $video->pillar }}" style="font-size: 0.7rem;">
+                                                {{ str_replace('_', ' ', $video->pillar) }}
+                                            </span>
+                                        </td>
+                                        <td style="font-weight: 500;">{{ $video->title }}</td>
+                                        <td>
+                                            @if($video->is_completed_by_student)
+                                                <span class="badge completed" style="font-size: 0.7rem;">Selesai</span>
+                                            @else
+                                                <span class="badge pending" style="font-size: 0.7rem;">Belum Tonton</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <p style="text-align: center; color: var(--color-gray-400); padding: 20px;">Belum ada materi video.</p>
+                @endif
+            </div>
         </div>
     </div>
 

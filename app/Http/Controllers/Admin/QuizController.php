@@ -32,13 +32,14 @@ class QuizController extends Controller
     {
         $request->validate([
             'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika'],
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255', 'unique:quizzes,title'],
             'description' => ['nullable', 'string'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
         ], [
             'pillar.required' => 'Pilar Kebangsaan wajib dipilih.',
             'pillar.in' => 'Pilar Kebangsaan tidak valid.',
             'title.required' => 'Judul kuis wajib diisi.',
+            'title.unique' => 'Judul kuis sudah digunakan.',
             'duration_minutes.required' => 'Durasi kuis wajib diisi.',
             'duration_minutes.integer' => 'Durasi kuis harus berupa angka.',
             'duration_minutes.min' => 'Durasi kuis minimal 1 menit.',
@@ -74,13 +75,14 @@ class QuizController extends Controller
     {
         $request->validate([
             'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika'],
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255', 'unique:quizzes,title,' . $quiz->id],
             'description' => ['nullable', 'string'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
         ], [
             'pillar.required' => 'Pilar Kebangsaan wajib dipilih.',
             'pillar.in' => 'Pilar Kebangsaan tidak valid.',
             'title.required' => 'Judul kuis wajib diisi.',
+            'title.unique' => 'Judul kuis sudah digunakan.',
             'duration_minutes.required' => 'Durasi kuis wajib diisi.',
             'duration_minutes.integer' => 'Durasi kuis harus berupa angka.',
             'duration_minutes.min' => 'Durasi kuis minimal 1 menit.',

@@ -23,7 +23,13 @@ class QuestionController extends Controller
     public function store(Request $request, Quiz $quiz)
     {
         $request->validate([
-            'question_text' => ['required', 'string'],
+            'question_text' => [
+                'required', 
+                'string',
+                \Illuminate\Validation\Rule::unique('questions', 'question_text')->where(function ($query) use ($quiz) {
+                    return $query->where('quiz_id', $quiz->id);
+                })
+            ],
             'option_a' => ['required', 'string', 'max:255'],
             'option_b' => ['required', 'string', 'max:255'],
             'option_c' => ['required', 'string', 'max:255'],
@@ -33,6 +39,7 @@ class QuestionController extends Controller
             'explanation' => ['nullable', 'string'],
         ], [
             'question_text.required' => 'Pertanyaan wajib diisi.',
+            'question_text.unique' => 'Pertanyaan ini sudah ada di dalam kuis.',
             'option_a.required' => 'Pilihan A wajib diisi.',
             'option_b.required' => 'Pilihan B wajib diisi.',
             'option_c.required' => 'Pilihan C wajib diisi.',
@@ -63,7 +70,15 @@ class QuestionController extends Controller
     public function update(Request $request, Question $question)
     {
         $request->validate([
-            'question_text' => ['required', 'string'],
+            'question_text' => [
+                'required', 
+                'string',
+                \Illuminate\Validation\Rule::unique('questions', 'question_text')
+                    ->where(function ($query) use ($question) {
+                        return $query->where('quiz_id', $question->quiz_id);
+                    })
+                    ->ignore($question->id)
+            ],
             'option_a' => ['required', 'string', 'max:255'],
             'option_b' => ['required', 'string', 'max:255'],
             'option_c' => ['required', 'string', 'max:255'],
@@ -73,6 +88,7 @@ class QuestionController extends Controller
             'explanation' => ['nullable', 'string'],
         ], [
             'question_text.required' => 'Pertanyaan wajib diisi.',
+            'question_text.unique' => 'Pertanyaan ini sudah ada di dalam kuis.',
             'option_a.required' => 'Pilihan A wajib diisi.',
             'option_b.required' => 'Pilihan B wajib diisi.',
             'option_c.required' => 'Pilihan C wajib diisi.',

@@ -44,6 +44,9 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     // Materials CRUD
     Route::resource('materials', App\Http\Controllers\Admin\MaterialController::class)->except(['show']);
 
+    // Videos CRUD
+    Route::resource('videos', App\Http\Controllers\Admin\VideoMaterialController::class)->except(['show']);
+
     // Quizzes CRUD
     Route::resource('quizzes', App\Http\Controllers\Admin\QuizController::class);
 
@@ -70,6 +73,11 @@ Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->
     Route::get('/materials', [App\Http\Controllers\Siswa\MaterialController::class, 'index'])->name('materials.index');
     Route::get('/materials/{material}', [App\Http\Controllers\Siswa\MaterialController::class, 'show'])->name('materials.show');
     Route::post('/materials/{material}/complete', [App\Http\Controllers\Siswa\MaterialController::class, 'complete'])->name('materials.complete');
+
+    // Video Materials
+    Route::get('/videos', [App\Http\Controllers\Siswa\VideoMaterialController::class, 'index'])->name('videos.index');
+    Route::get('/videos/{material}', [App\Http\Controllers\Siswa\VideoMaterialController::class, 'show'])->name('videos.show');
+    Route::post('/videos/{material}/complete', [App\Http\Controllers\Siswa\VideoMaterialController::class, 'complete'])->name('videos.complete');
 
     // Quizzes & pengerjaan
     Route::get('/quizzes', [App\Http\Controllers\Siswa\QuizController::class, 'index'])->name('quizzes.index');

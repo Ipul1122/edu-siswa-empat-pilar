@@ -9,10 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
-class MaterialController extends Controller
+class VideoMaterialController extends Controller
 {
     /**
-     * Display listing of materials grouped by pillar.
+     * Display listing of video materials grouped by pillar.
      */
     public function index()
     {
@@ -24,11 +24,11 @@ class MaterialController extends Controller
             ->pluck('material_id')
             ->toArray();
 
-        // Get materials
-        $materials = Material::query()->where('type', 'text')->get();
+        // Get only video materials
+        $materials = Material::query()->where('type', 'video')->get();
 
         // Group by pillar and append is_completed flag
-        $groupedMaterials = [
+        $groupedVideos = [
             'pancasila' => [],
             'uud_1945' => [],
             'nkri' => [],
@@ -37,20 +37,20 @@ class MaterialController extends Controller
 
         foreach ($materials as $material) {
             $material->is_completed = in_array($material->id, $completedMaterialIds);
-            if (array_key_exists($material->pillar, $groupedMaterials)) {
-                $groupedMaterials[$material->pillar][] = $material;
+            if (array_key_exists($material->pillar, $groupedVideos)) {
+                $groupedVideos[$material->pillar][] = $material;
             }
         }
 
-        return view('siswa.materials.index', compact('groupedMaterials'));
+        return view('siswa.videos.index', compact('groupedVideos'));
     }
 
     /**
-     * Display a specific material.
+     * Display a specific video material.
      */
     public function show(Material $material)
     {
-        if ($material->type !== 'text') {
+        if ($material->type !== 'video') {
             abort(404);
         }
 
@@ -63,14 +63,18 @@ class MaterialController extends Controller
 
         $isCompleted = $progress ? $progress->is_completed : false;
 
-        return view('siswa.materials.show', compact('material', 'isCompleted'));
+        return view('siswa.videos.show', compact('material', 'isCompleted'));
     }
 
     /**
-     * Mark material as completed/read.
+     * Mark video material as completed/watched.
      */
     public function complete(Request $request, Material $material)
     {
+        if ($material->type !== 'video') {
+            abort(404);
+        }
+
         $user = Auth::user();
 
         StudentProgress::updateOrCreate(
@@ -86,7 +90,7 @@ class MaterialController extends Controller
         // Clear leaderboard cache
         Cache::forget('leaderboard_data');
 
-        return redirect()->route('siswa.materials.show', $material)
-            ->with('success', 'Selamat! Anda telah menyelesaikan materi ini.');
+        return redirect()->route('siswa.videos.show', $material)
+            ->with('success', 'Selamat! Anda telah selesai menonton video ini.');
     }
 }

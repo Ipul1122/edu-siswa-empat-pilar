@@ -47,6 +47,11 @@
                         <i class="fi fi-rr-book-alt"></i> Materi Belajar
                     </a>
                 </li>
+                <li class="sidebar-menu-item {{ Route::is('siswa.videos.*') ? 'active' : '' }}">
+                    <a href="{{ route('siswa.videos.index') }}">
+                        <i class="fi fi-rr-play-alt"></i> Video Pembelajaran
+                    </a>
+                </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.quizzes.*') ? 'active' : '' }}">
                     <a href="{{ route('siswa.quizzes.index') }}">
                         <i class="fi fi-rr-edit"></i> Latihan Kuis

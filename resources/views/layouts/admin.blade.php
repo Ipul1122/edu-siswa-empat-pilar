@@ -47,6 +47,11 @@
                         <i class="fi fi-rr-book-alt"></i> Materi Belajar
                     </a>
                 </li>
+                <li class="sidebar-menu-item {{ Route::is('admin.videos.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.videos.index') }}">
+                        <i class="fi fi-rr-play-alt"></i> Materi Video
+                    </a>
+                </li>
                 <li class="sidebar-menu-item {{ Route::is('admin.quizzes.*') || Route::is('admin.questions.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.quizzes.index') }}">
                         <i class="fi fi-rr-clipboard-list"></i> Kuis & Soal

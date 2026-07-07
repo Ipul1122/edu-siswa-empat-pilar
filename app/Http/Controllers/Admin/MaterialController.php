@@ -13,7 +13,7 @@ class MaterialController extends Controller
      */
     public function index()
     {
-        $materials = Material::query()->latest()->get();
+        $materials = Material::query()->where('type', 'text')->latest()->get();
         return view('admin.materials.index', compact('materials'));
     }
 
@@ -32,20 +32,23 @@ class MaterialController extends Controller
     {
         $request->validate([
             'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika'],
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255', 'unique:materials,title'],
             'content' => ['required', 'string'],
             'read_time' => ['required', 'integer', 'min:1'],
         ], [
             'pillar.required' => 'Pilar Kebangsaan wajib dipilih.',
             'pillar.in' => 'Pilar Kebangsaan tidak valid.',
             'title.required' => 'Judul materi wajib diisi.',
+            'title.unique' => 'Judul materi sudah digunakan.',
             'content.required' => 'Konten materi wajib diisi.',
             'read_time.required' => 'Estimasi waktu baca wajib diisi.',
             'read_time.integer' => 'Estimasi waktu baca harus berupa angka.',
             'read_time.min' => 'Estimasi waktu baca minimal 1 menit.',
         ]);
 
-        Material::create($request->all());
+        $data = $request->all();
+        $data['type'] = 'text';
+        Material::create($data);
 
         return redirect()->route('admin.materials.index')
             ->with('success', 'Materi berhasil ditambahkan!');
@@ -56,6 +59,9 @@ class MaterialController extends Controller
      */
     public function edit(Material $material)
     {
+        if ($material->type !== 'text') {
+            abort(404);
+        }
         return view('admin.materials.edit', compact('material'));
     }
 
@@ -64,15 +70,20 @@ class MaterialController extends Controller
      */
     public function update(Request $request, Material $material)
     {
+        if ($material->type !== 'text') {
+            abort(404);
+        }
+
         $request->validate([
             'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika'],
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255', 'unique:materials,title,' . $material->id],
             'content' => ['required', 'string'],
             'read_time' => ['required', 'integer', 'min:1'],
         ], [
             'pillar.required' => 'Pilar Kebangsaan wajib dipilih.',
             'pillar.in' => 'Pilar Kebangsaan tidak valid.',
             'title.required' => 'Judul materi wajib diisi.',
+            'title.unique' => 'Judul materi sudah digunakan.',
             'content.required' => 'Konten materi wajib diisi.',
             'read_time.required' => 'Estimasi waktu baca wajib diisi.',
             'read_time.integer' => 'Estimasi waktu baca harus berupa angka.',
@@ -90,6 +101,10 @@ class MaterialController extends Controller
      */
     public function destroy(Material $material)
     {
+        if ($material->type !== 'text') {
+            abort(404);
+        }
+
         Material::destroy($material->id);
 
         return redirect()->route('admin.materials.index')

@@ -58,18 +58,29 @@ class StudentController extends Controller
             abort(404);
         }
 
-        $totalMaterialsCount = Material::query()->count('*');
-        
-        // Fetch all materials and check if this student has completed them
-        $materials = Material::all();
+        // Fetch completed material IDs for this student
         $completedMaterialIds = StudentProgress::query()->where('user_id', $student->id)
             ->where('is_completed', true)
             ->pluck('material_id')
             ->toArray();
 
-        foreach ($materials as $material) {
+        // Fetch text materials
+        $textMaterials = Material::query()->where('type', 'text')->get();
+        foreach ($textMaterials as $material) {
             $material->is_completed_by_student = in_array($material->id, $completedMaterialIds);
         }
+
+        // Fetch video materials
+        $videoMaterials = Material::query()->where('type', 'video')->get();
+        foreach ($videoMaterials as $video) {
+            $video->is_completed_by_student = in_array($video->id, $completedMaterialIds);
+        }
+
+        $totalTextCount = $textMaterials->count();
+        $completedTextCount = $textMaterials->where('is_completed_by_student', true)->count();
+
+        $totalVideoCount = $videoMaterials->count();
+        $completedVideoCount = $videoMaterials->where('is_completed_by_student', true)->count();
 
         // Fetch all quiz attempts by this student
         $attempts = $student->attempts()->with('quiz')->latest()->get();
@@ -79,7 +90,17 @@ class StudentController extends Controller
             ? round($attempts->avg('score'), 1) 
             : '-';
 
-        return view('admin.students.show', compact('student', 'materials', 'attempts', 'averageScore', 'totalMaterialsCount'));
+        return view('admin.students.show', compact(
+            'student', 
+            'textMaterials', 
+            'videoMaterials', 
+            'completedTextCount', 
+            'totalTextCount',
+            'completedVideoCount',
+            'totalVideoCount',
+            'attempts', 
+            'averageScore'
+        ));
     }
 
     /**

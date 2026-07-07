@@ -15,6 +15,8 @@ class Material extends Model
         'title',
         'content',
         'read_time',
+        'type',
+        'video_url',
     ];
 
     /**
@@ -37,5 +39,24 @@ class Material extends Model
             'bhinneka_tunggal_ika' => 'Bhinneka Tunggal Ika',
             default => ucfirst(str_replace('_', ' ', $this->pillar)),
         };
+    }
+
+    /**
+     * Helper to get YouTube embed URL.
+     */
+    public function getYoutubeEmbedUrlAttribute(): ?string
+    {
+        if (!$this->video_url) {
+            return null;
+        }
+
+        // Regular expression to parse YouTube ID from various YouTube URL formats
+        $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i';
+        if (preg_match($pattern, $this->video_url, $matches)) {
+            return 'https://www.youtube.com/embed/' . $matches[1];
+        }
+
+        // Return original if it is already an embed URL or doesn't match
+        return $this->video_url;
     }
 }

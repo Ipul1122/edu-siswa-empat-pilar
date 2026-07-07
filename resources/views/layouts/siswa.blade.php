@@ -57,6 +57,11 @@
                         <i class="fi fi-rr-edit"></i> Latihan Kuis
                     </a>
                 </li>
+                <li class="sidebar-menu-item {{ Route::is('siswa.real-materi.*') ? 'active' : '' }}">
+                    <a href="{{ route('siswa.real-materi.index') }}">
+                        <i class="fi fi-rr-document-signed"></i> Real Materi
+                    </a>
+                </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.leaderboard') ? 'active' : '' }}">
                     <a href="{{ route('siswa.leaderboard') }}">
                         <i class="fi fi-rr-trophy"></i> Papan Peringkat

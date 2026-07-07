@@ -5,7 +5,13 @@ use Illuminate\Support\Facades\Route;
 
 // Public / Guest Routes
 Route::get('/', function () {
-    return view('welcome');
+    $siswaCount = \App\Models\User::query()->where('role', '=', 'siswa', 'and')->count('*');
+    $materiCount = \App\Models\Material::query()->where('type', '=', 'text', 'and')->count('*');
+    $videoCount = \App\Models\Material::query()->where('type', '=', 'video', 'and')->count('*');
+    $quizCount = \App\Models\Quiz::query()->count('*');
+    $soalCount = \App\Models\Question::query()->count('*');
+
+    return view('welcome', compact('siswaCount', 'materiCount', 'videoCount', 'quizCount', 'soalCount'));
 })->name('home');
 
 Route::middleware('guest:web')->group(function () {
@@ -85,6 +91,13 @@ Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->
     Route::get('/quizzes/{quiz}/start', [App\Http\Controllers\Siswa\QuizController::class, 'start'])->name('quizzes.start');
     Route::post('/quizzes/{quiz}/submit', [App\Http\Controllers\Siswa\QuizController::class, 'submit'])->name('quizzes.submit');
     Route::get('/attempts/{attempt}/result', [App\Http\Controllers\Siswa\QuizController::class, 'result'])->name('quizzes.result');
+
+    // Real Materi & pengerjaan (Hanya 1x pengerjaan)
+    Route::get('/real-materi', [App\Http\Controllers\Siswa\RealQuizController::class, 'index'])->name('real-materi.index');
+    Route::get('/real-materi/{quiz}', [App\Http\Controllers\Siswa\RealQuizController::class, 'show'])->name('real-materi.show');
+    Route::get('/real-materi/{quiz}/start', [App\Http\Controllers\Siswa\RealQuizController::class, 'start'])->name('real-materi.start');
+    Route::post('/real-materi/{quiz}/submit', [App\Http\Controllers\Siswa\RealQuizController::class, 'submit'])->name('real-materi.submit');
+    Route::get('/real-attempts/{attempt}/result', [App\Http\Controllers\Siswa\RealQuizController::class, 'result'])->name('real-materi.result');
 
     // Leaderboard
     Route::get('/leaderboard', [App\Http\Controllers\Siswa\LeaderboardController::class, 'index'])->name('leaderboard');

@@ -32,11 +32,37 @@
                         allowfullscreen>
                 </iframe>
             </div>
+
+            <!-- YouTube Direct Link Notification and Button -->
+            <div style="margin-top: 20px; padding: 16px; background-color: rgba(220, 38, 38, 0.04); border: 1px solid rgba(220, 38, 38, 0.15); border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 280px; flex: 1;">
+                    <div style="background-color: rgba(220, 38, 38, 0.1); width: 42px; height: 42px; border-radius: var(--border-radius-full); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fi fi-rr-play-alt" style="color: #dc2626; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;"></i>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--color-dark); margin: 0 0 2px 0; font-family: var(--font-heading);">
+                            Video tidak dapat diputar atau "tidak tersedia"?
+                        </h4>
+                        <p style="font-size: 0.85rem; color: var(--color-gray-600); margin: 0; line-height: 1.4;">
+                            Beberapa pencipta membatasi video untuk diputar langsung di situs web lain. Klik tombol di samping untuk menonton langsung di YouTube.
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <a href="{{ $material->video_url }}" target="_blank" class="btn btn-primary" style="background: linear-gradient(135deg, #ff0000, #cc0000); border: none; color: var(--color-white); box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); font-size: 0.85rem; padding: 10px 18px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; white-space: nowrap; border-radius: var(--border-radius-sm); text-decoration: none;">
+                        <span>Tonton di YouTube</span>
+                        <i class="fi fi-rr-play-alt" style="font-size: 0.85rem; color: var(--color-white); transform: scale(0.9);"></i>
+                    </a>
+                </div>
+            </div>
         @else
             <div style="background-color: var(--color-gray-100); border-radius: var(--border-radius-md); border: 2px dashed var(--color-gray-300); padding: 50px 20px; text-align: center; color: var(--color-gray-400);">
                 <i class="fi fi-rr-video-slash" style="font-size: 3rem; margin-bottom: 12px;"></i>
                 <p>Tautan video tidak valid atau tidak didukung.</p>
-                <p style="font-size: 0.85rem; margin-top: 4px;">URL: {{ $material->video_url }}</p>
+                <p style="font-size: 0.85rem; margin-top: 4px; margin-bottom: 16px;">URL: {{ $material->video_url }}</p>
+                <a href="{{ $material->video_url }}" target="_blank" class="btn btn-secondary" style="border: 1px solid var(--color-gray-300); text-decoration: none;">
+                    <i class="fi fi-rr-play-alt" style="color: #dc2626; margin-right: 4px; vertical-align: middle;"></i> Tonton Langsung di YouTube
+                </a>
             </div>
         @endif
     </div>

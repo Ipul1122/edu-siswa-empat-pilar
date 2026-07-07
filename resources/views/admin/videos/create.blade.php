@@ -47,7 +47,7 @@
             <!-- Video URL -->
             <div class="form-group">
                 <label for="video_url">Tautan Video (YouTube)</label>
-                <input type="text" name="video_url" id="video_url" class="form-control @error('video_url') is-invalid @enderror" value="{{ old('video_url') }}" placeholder="Contoh: https://www.youtube.com/watch?v=z44q-rBntSg" required>
+                <input type="text" name="video_url" id="video_url" class="form-control @error('video_url') is-invalid @enderror" value="{{ old('video_url') }}" placeholder="Contoh: https://www.youtube.com/watch?v=XaMRSuZSt0E" required>
                 <div style="font-size: 0.8rem; color: var(--color-gray-600); margin-top: 4px;">Dukung tautan YouTube biasa, share link (youtu.be), atau format embed langsung.</div>
                 @error('video_url')
                     <span class="invalid-feedback">{{ $message }}</span>

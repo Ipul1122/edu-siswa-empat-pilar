@@ -124,7 +124,7 @@ class PillarSeeder extends Seeder
             ],
             [
                 'type' => 'video',
-                'video_url' => 'https://www.youtube.com/watch?v=z44q-rBntSg',
+                'video_url' => 'https://www.youtube.com/watch?v=XaMRSuZSt0E',
                 'read_time' => 8, // Duration in minutes
                 'content' => '<p>Video ini menjelaskan tentang nilai-nilai luhur yang terkandung dalam setiap sila Pancasila dan bagaimana menerapkannya dalam kehidupan sehari-hari sebagai pelajar Pancasila yang baik.</p>'
             ]
@@ -138,7 +138,7 @@ class PillarSeeder extends Seeder
             ],
             [
                 'type' => 'video',
-                'video_url' => 'https://www.youtube.com/watch?v=8-rYlX24rT4',
+                'video_url' => 'https://www.youtube.com/watch?v=MsLJ34Xl1Pc',
                 'read_time' => 10,
                 'content' => '<p>Video edukasi mengenai sejarah perumusan UUD 1945, kedudukannya dalam tata hukum di Indonesia, serta jalannya proses amandemen ke-1 hingga ke-4 oleh MPR.</p>'
             ]
@@ -152,7 +152,7 @@ class PillarSeeder extends Seeder
             ],
             [
                 'type' => 'video',
-                'video_url' => 'https://www.youtube.com/watch?v=G6jWcZ6wEzo',
+                'video_url' => 'https://www.youtube.com/watch?v=pgyx_OtnuEQ',
                 'read_time' => 7,
                 'content' => '<p>Mempelajari pentingnya Deklarasi Djuanda tahun 1957 dalam memperjuangkan kedaulatan laut pedalaman Indonesia hingga diakui oleh UNCLOS 1982.</p>'
             ]
@@ -166,7 +166,7 @@ class PillarSeeder extends Seeder
             ],
             [
                 'type' => 'video',
-                'video_url' => 'https://www.youtube.com/watch?v=9g_2h3T6F-0',
+                'video_url' => 'https://www.youtube.com/watch?v=UVw3fcInSuc',
                 'read_time' => 6,
                 'content' => '<p>Memahami kekayaan keragaman budaya, suku, dan agama di Indonesia, serta pentingnya toleransi untuk menjaga kerukunan nasional.</p>'
             ]

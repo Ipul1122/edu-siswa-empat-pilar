@@ -1,6 +1,6 @@
 @extends('layouts.siswa')
 
-@section('title', 'Mengerjakan Kuis - Empat Pilar')
+@section('title', 'Mengerjakan Real Materi - Empat Pilar')
 
 @section('content')
 <div class="quiz-wrapper">
@@ -8,7 +8,7 @@
     <div class="quiz-timer-bar">
         <div>
             <h3 style="font-size: 1.05rem; font-family: var(--font-heading); color: var(--color-white);">{{ $quiz->title }}</h3>
-            <p style="font-size: 0.75rem; color: var(--color-gray-300);">Pilar: {{ $quiz->formatted_pillar }}</p>
+            <p style="font-size: 0.75rem; color: var(--color-gray-300);">Pilar: {{ $quiz->formatted_pillar }} (Real Materi)</p>
         </div>
         <div style="text-align: right;">
             <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-gray-300); font-weight: 600;">Sisa Waktu</div>
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Questions Form -->
-    <form action="{{ route('siswa.quizzes.submit', $quiz) }}" method="POST" id="quiz-form">
+    <form action="{{ route('siswa.real-materi.submit', $quiz) }}" method="POST" id="quiz-form">
         @csrf
         <!-- Field to store seconds taken -->
         <input type="hidden" name="duration_seconds_taken" id="duration_seconds_taken" value="0">
@@ -81,10 +81,10 @@
         <!-- Submit Panel -->
         <div style="margin-top: 40px; display: flex; justify-content: space-between; align-items: center; background-color: var(--color-white); padding: 24px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-gray-200);">
             <div style="font-size: 0.9rem; color: var(--color-gray-600); font-weight: 500;">
-                Harap periksa kembali semua jawaban sebelum mengirim.
+                Kuis Real Materi hanya dapat dikerjakan 1 kali. Harap periksa kembali semua jawaban sebelum mengirim.
             </div>
             <button type="submit" class="btn btn-primary" style="background-color: var(--color-success); border: none; padding: 12px 28px; font-size: 1rem;">
-                💾 Selesai
+                Selesai
             </button>
         </div>
     </form>

@@ -28,9 +28,11 @@ class LeaderboardController extends Controller
                 ->groupBy('user_id');
 
             $maxAttemptsSub = DB::table('quiz_attempts')
-                ->select('user_id', 'quiz_id')
-                ->selectRaw('MAX(score) as max_score')
-                ->groupBy('user_id', 'quiz_id');
+                ->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id')
+                ->where('quizzes.type', 'real')
+                ->select('quiz_attempts.user_id', 'quiz_attempts.quiz_id')
+                ->selectRaw('MAX(quiz_attempts.score) as max_score')
+                ->groupBy('quiz_attempts.user_id', 'quiz_attempts.quiz_id');
 
             $quizScoresSub = DB::table($maxAttemptsSub, 'max_attempts')
                 ->select('user_id')
@@ -38,10 +40,12 @@ class LeaderboardController extends Controller
                 ->groupBy('user_id');
 
             $attemptsStatsSub = DB::table('quiz_attempts')
-                ->select('user_id')
-                ->selectRaw('ROUND(AVG(score), 1) as avg_score')
+                ->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id')
+                ->where('quizzes.type', 'real')
+                ->select('quiz_attempts.user_id')
+                ->selectRaw('ROUND(AVG(quiz_attempts.score), 1) as avg_score')
                 ->selectRaw('COUNT(*) as attempts_count')
-                ->groupBy('user_id');
+                ->groupBy('quiz_attempts.user_id');
 
             return User::query()
                 ->select('users.*')

@@ -27,17 +27,26 @@ class DashboardController extends Controller
             ? round(($completedMaterials / $totalMaterials) * 100) 
             : 0;
 
-        // 2. Fetch quiz statistics
-        $attempts = QuizAttempt::query()->where('user_id', $user->id)->get();
+        // 2. Fetch quiz statistics (filtered by Real Materi)
+        $attempts = QuizAttempt::query()
+            ->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id', 'inner', false)
+            ->where('quiz_attempts.user_id', $user->id)
+            ->where('quizzes.type', 'real')
+            ->select('quiz_attempts.*')
+            ->get();
         $averageScore = $attempts->count() > 0 
             ? round($attempts->avg('score'), 1) 
             : 0;
         $totalQuizzesTaken = $attempts->count();
 
-        // 3. Fetch 3 recent quiz attempts
-        $recentAttempts = QuizAttempt::query()->where('user_id', $user->id)
+        // 3. Fetch 3 recent quiz attempts (filtered by Real Materi)
+        $recentAttempts = QuizAttempt::query()
+            ->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id', 'inner', false)
+            ->where('quiz_attempts.user_id', $user->id)
+            ->where('quizzes.type', 'real')
+            ->select('quiz_attempts.*')
             ->with('quiz')
-            ->latest()
+            ->latest('quiz_attempts.created_at')
             ->take(3)
             ->get();
 
@@ -50,9 +59,10 @@ class DashboardController extends Controller
         $recommendedMaterial = Material::query()->whereNotIn('id', $completedMaterialIds, 'and')
             ->first();
 
-        // 5. Calculate average scores per pillar for Chart.js visualization
+        // 5. Calculate average scores per pillar for Chart.js visualization (filtered by Real Materi)
         $pillarScores = QuizAttempt::query()->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id', 'inner', false)
             ->where('quiz_attempts.user_id', $user->id)
+            ->where('quizzes.type', 'real')
             ->selectRaw('quizzes.pillar, AVG(quiz_attempts.score) as avg_score')
             ->groupBy('quizzes.pillar')
             ->pluck('avg_score', 'quizzes.pillar')

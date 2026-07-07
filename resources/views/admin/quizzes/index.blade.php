@@ -22,6 +22,7 @@
                         <tr>
                             <th>Pilar</th>
                             <th>Judul Kuis</th>
+                            <th>Tipe</th>
                             <th>Jumlah Soal</th>
                             <th>Durasi</th>
                             <th style="width: 250px; text-align: center;">Aksi</th>
@@ -37,6 +38,13 @@
                                 </td>
                                 <td style="font-weight: 600; color: var(--color-dark);">
                                     {{ $quiz->title }}
+                                </td>
+                                <td>
+                                    @if($quiz->type === 'real')
+                                        <span class="badge admin" style="background-color: #d32f2f; color: white;">Real Materi</span>
+                                    @else
+                                        <span class="badge student" style="background-color: #0288d1; color: white;">Latihan Kuis</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <span style="font-weight: 600;">{{ $quiz->questions_count }}</span> Soal

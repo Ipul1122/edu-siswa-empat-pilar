@@ -38,6 +38,7 @@ class QuizSeeder extends Seeder
             [
                 'description' => 'Uji pemahaman Anda mengenai sejarah, nilai-nilai butir, dan kedudukan Pancasila sebagai dasar negara.',
                 'duration_minutes' => 10,
+                'type' => 'practice',
             ]
         );
 
@@ -112,6 +113,7 @@ class QuizSeeder extends Seeder
             [
                 'description' => 'Uji pemahaman Anda tentang UUD NRI 1945 sebagai hukum dasar tertulis tertinggi di Indonesia.',
                 'duration_minutes' => 10,
+                'type' => 'practice',
             ]
         );
 
@@ -186,6 +188,7 @@ class QuizSeeder extends Seeder
             [
                 'description' => 'Uji pengetahuan Anda tentang konsepsi keutuhan wilayah NKRI, otonomi daerah, dan peran bela negara.',
                 'duration_minutes' => 10,
+                'type' => 'practice',
             ]
         );
 
@@ -243,6 +246,7 @@ class QuizSeeder extends Seeder
             [
                 'description' => 'Uji pemahaman Anda tentang semboyan pemersatu bangsa Indonesia di tengah keragaman multikultural.',
                 'duration_minutes' => 10,
+                'type' => 'practice',
             ]
         );
 
@@ -288,6 +292,251 @@ class QuizSeeder extends Seeder
                 'option_e' => 'Patriotisme',
                 'correct_option' => 'a',
                 'explanation' => 'Etnosentrisme adalah kecenderungan melihat dunia hanya melalui sudut pandang budaya sendiri serta menilai budaya lain lebih rendah dibanding budayanya sendiri.',
+            ]
+        );
+
+        // Seeding Real Materi Quizzes
+        // 1. Real Pancasila
+        $realPancasila = Quiz::updateOrCreate(
+            [
+                'pillar' => 'pancasila',
+                'title' => 'Evaluasi Real Pancasila'
+            ],
+            [
+                'description' => 'Uji pemahaman nyata Anda mengenai Pancasila secara keseluruhan. Kuis ini hanya dapat diikuti 1 kali.',
+                'duration_minutes' => 10,
+                'type' => 'real',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realPancasila->id,
+                'question_text' => 'Pancasila memiliki kedudukan yang sangat penting dalam ketatanegaraan Indonesia, yaitu sebagai...'
+            ],
+            [
+                'option_a' => 'Hukum dasar tertulis tertinggi',
+                'option_b' => 'Sumber dari segala sumber hukum negara',
+                'option_c' => 'Aturan tata tertib kenegaraan',
+                'option_d' => 'Konstitusi tertulis daerah',
+                'option_e' => 'Lambang kedaulatan pemerintah',
+                'correct_option' => 'b',
+                'explanation' => 'Pancasila berkedudukan sebagai sumber dari segala sumber hukum negara Indonesia, artinya seluruh peraturan perundang-undangan harus bersumber pada nilai Pancasila.',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realPancasila->id,
+                'question_text' => 'Menghargai hasil karya orang lain yang bermanfaat bagi kemajuan dan kesejahteraan bersama adalah pengamalan Pancasila...'
+            ],
+            [
+                'option_a' => 'Sila ke-1',
+                'option_b' => 'Sila ke-2',
+                'option_c' => 'Sila ke-3',
+                'option_d' => 'Sila ke-4',
+                'option_e' => 'Sila ke-5',
+                'correct_option' => 'e',
+                'explanation' => 'Menghargai hasil karya orang lain merupakan salah satu butir pengamalan dari Sila Kelima (Keadilan Sosial bagi Seluruh Rakyat Indonesia).',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realPancasila->id,
+                'question_text' => 'Berikut ini yang merupakan perwujudan nilai kemanusiaan yang adil dan beradab adalah...'
+            ],
+            [
+                'option_a' => 'Mengembangkan toleransi antarumat beragama',
+                'option_b' => 'Menjunjung tinggi nilai kemanusiaan dan gemar melakukan kegiatan kemanusiaan',
+                'option_c' => 'Bangga sebagai bangsa Indonesia yang bertanah air satu',
+                'option_d' => 'Mengutamakan musyawarah dalam menyelesaikan masalah',
+                'option_e' => 'Bersikap adil dan suka menolong sesama',
+                'correct_option' => 'b',
+                'explanation' => 'Menjunjung tinggi nilai kemanusiaan dan gemar melakukan kegiatan kemanusiaan adalah bentuk konkret pengamalan dari Sila Kedua.',
+            ]
+        );
+
+        // 2. Real UUD 1945
+        $realUUD = Quiz::updateOrCreate(
+            [
+                'pillar' => 'uud_1945',
+                'title' => 'Evaluasi Real UUD NRI 1945'
+            ],
+            [
+                'description' => 'Uji pemahaman nyata Anda mengenai Undang-Undang Dasar NRI 1945. Kuis ini hanya dapat diikuti 1 kali.',
+                'duration_minutes' => 10,
+                'type' => 'real',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realUUD->id,
+                'question_text' => 'Kekuasaan kehakiman di Indonesia merupakan kekuasaan yang merdeka untuk menyelenggarakan peradilan guna menegakkan hukum dan keadilan, hal ini diatur dalam UUD 1945 pasal...'
+            ],
+            [
+                'option_a' => 'Pasal 24 ayat 1',
+                'option_b' => 'Pasal 25',
+                'option_c' => 'Pasal 26 ayat 1',
+                'option_d' => 'Pasal 27 ayat 2',
+                'option_e' => 'Pasal 28',
+                'correct_option' => 'a',
+                'explanation' => 'Pasal 24 ayat (1) menegaskan bahwa kekuasaan kehakiman merupakan kekuasaan yang merdeka untuk menyelenggarakan peradilan guna menegakkan hukum dan keadilan.',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realUUD->id,
+                'question_text' => 'Lembaga negara baru yang dibentuk setelah amandemen UUD NRI 1945 yang berwenang mengadili pada tingkat pertama dan terakhir yang putusannya bersifat final untuk menguji undang-undang terhadap Undang-Undang Dasar adalah...'
+            ],
+            [
+                'option_a' => 'Mahkamah Agung',
+                'option_b' => 'Komisi Yudisial',
+                'option_c' => 'Mahkamah Konstitusi',
+                'option_d' => 'Dewan Perwakilan Daerah',
+                'option_e' => 'Badan Pemeriksa Keuangan',
+                'correct_option' => 'c',
+                'explanation' => 'Mahkamah Konstitusi berwenang mengadili pada tingkat pertama dan terakhir yang putusannya bersifat final untuk menguji undang-undang terhadap UUD.',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realUUD->id,
+                'question_text' => 'Berdasarkan Pasal 1 ayat (2) UUD NRI 1945 setelah amandemen, kedaulatan berada di tangan rakyat dan dilaksanakan menurut...'
+            ],
+            [
+                'option_a' => 'Ketetapan MPR',
+                'option_b' => 'Undang-Undang Dasar',
+                'option_c' => 'Keputusan Presiden',
+                'option_d' => 'Peraturan Pemerintah',
+                'option_e' => 'Kehendak Dewan Perwakilan Rakyat',
+                'correct_option' => 'b',
+                'explanation' => 'Setelah amandemen, bunyi Pasal 1 ayat (2) adalah "Kedaulatan berada di tangan rakyat dan dilaksanakan menurut Undang-Undang Dasar".',
+            ]
+        );
+
+        // 3. Real NKRI
+        $realNKRI = Quiz::updateOrCreate(
+            [
+                'pillar' => 'nkri',
+                'title' => 'Evaluasi Real NKRI'
+            ],
+            [
+                'description' => 'Uji pemahaman nyata Anda mengenai NKRI dan keutuhan wilayah. Kuis ini hanya dapat diikuti 1 kali.',
+                'duration_minutes' => 10,
+                'type' => 'real',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realNKRI->id,
+                'question_text' => 'Bentuk negara Indonesia adalah Kesatuan, sedangkan bentuk pemerintahannya adalah Republik. Hal ini ditegaskan dalam UUD 1945...'
+            ],
+            [
+                'option_a' => 'Pasal 1 ayat 1',
+                'option_b' => 'Pasal 1 ayat 2',
+                'option_c' => 'Pasal 1 ayat 3',
+                'option_d' => 'Pasal 2 ayat 1',
+                'option_e' => 'Pasal 3 ayat 1',
+                'correct_option' => 'a',
+                'explanation' => 'Pasal 1 ayat (1) UUD 1945 menyatakan bahwa Negara Indonesia ialah Negara Kesatuan, yang berbentuk Republik.',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realNKRI->id,
+                'question_text' => 'Wilayah NKRI dibagi atas daerah-daerah provinsi dan daerah provinsi itu dibagi atas kabupaten dan kota, yang tiap-tiap provinsi, kabupaten, dan kota itu mempunyai pemerintahan daerah, yang diatur dengan undang-undang. Hal ini merupakan isi UUD 1945...'
+            ],
+            [
+                'option_a' => 'Pasal 17 UUD 1945',
+                'option_b' => 'Pasal 18 ayat 1 UUD 1945',
+                'option_c' => 'Pasal 19 UUD 1945',
+                'option_d' => 'Pasal 20 UUD 1945',
+                'option_e' => 'Pasal 21 UUD 1945',
+                'correct_option' => 'b',
+                'explanation' => 'Pasal 18 ayat (1) UUD 1945 mengatur pembagian wilayah NKRI menjadi provinsi, kabupaten, dan kota beserta pemerintahan daerahnya.',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realNKRI->id,
+                'question_text' => 'Salah satu tujuan dibentuknya Pemerintahan Negara Indonesia yang tercantum dalam Pembukaan UUD NRI 1945 alinea keempat adalah...'
+            ],
+            [
+                'option_a' => 'Mewujudkan perdamaian abadi yang menguntungkan blok tertentu',
+                'option_b' => 'Mencerdaskan kehidupan bangsa',
+                'option_c' => 'Memperbanyak utang luar negeri untuk pembangunan',
+                'option_d' => 'Menjajah bangsa lain yang belum merdeka',
+                'option_e' => 'Membatasi perdagangan dengan dunia luar',
+                'correct_option' => 'b',
+                'explanation' => 'Mencerdaskan kehidupan bangsa merupakan salah satu dari empat tujuan negara Indonesia yang termaktub dalam Pembukaan UUD 1945 alinea keempat.',
+            ]
+        );
+
+        // 4. Real Bhinneka Tunggal Ika
+        $realBhinneka = Quiz::updateOrCreate(
+            [
+                'pillar' => 'bhinneka_tunggal_ika',
+                'title' => 'Evaluasi Real Bhinneka Tunggal Ika'
+            ],
+            [
+                'description' => 'Uji pemahaman nyata Anda mengenai Bhinneka Tunggal Ika. Kuis ini hanya dapat diikuti 1 kali.',
+                'duration_minutes' => 10,
+                'type' => 'real',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realBhinneka->id,
+                'question_text' => 'Semboyan Bhinneka Tunggal Ika bagi bangsa Indonesia memiliki makna...'
+            ],
+            [
+                'option_a' => 'Keberagaman harus dilebur menjadi satu kebudayaan yang sama',
+                'option_b' => 'Walaupun berbeda-beda tetapi pada hakikatnya bangsa Indonesia tetap satu kesatuan',
+                'option_c' => 'Saling menonjolkan kelebihan suku masing-masing',
+                'option_d' => 'Membagi wilayah Indonesia berdasarkan ras dan agama',
+                'option_e' => 'Menyatukan seluruh negara di Asia Tenggara',
+                'correct_option' => 'b',
+                'explanation' => 'Bhinneka Tunggal Ika berarti berbeda-beda tetapi tetap satu jua, melambangkan kesatuan dalam kemajemukan bangsa Indonesia.',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realBhinneka->id,
+                'question_text' => 'Sikap toleransi dalam keberagaman suku, ras, agama, dan antargolongan dapat diwujudkan dengan cara...'
+            ],
+            [
+                'option_a' => 'Menganggap ajaran agama sendiri yang paling benar dan menjelekkan agama lain',
+                'option_b' => 'Menghargai dan menghormati perayaan hari besar keagamaan umat lain',
+                'option_c' => 'Hanya mau bergaul dengan orang yang sukunya sama',
+                'option_d' => 'Memaksa kehendak pribadi kepada orang lain dalam diskusi',
+                'option_e' => 'Membantu orang lain hanya jika seagama',
+                'correct_option' => 'b',
+                'explanation' => 'Toleransi diwujudkan dengan cara menghargai, menghormati, dan memberikan kebebasan kepada pemeluk agama lain untuk merayakan hari besar keagamaan mereka.',
+            ]
+        );
+
+        Question::updateOrCreate(
+            [
+                'quiz_id' => $realBhinneka->id,
+                'question_text' => 'Yang bukan merupakan contoh integrasi sosial di tengah kemajemukan masyarakat Indonesia adalah...'
+            ],
+            [
+                'option_a' => 'Gotong royong membersihkan lingkungan tanpa membedakan suku',
+                'option_b' => 'Pelaksanaan musyawarah warga untuk mufakat',
+                'option_c' => 'Tawuran antarkelompok karena perbedaan etnis',
+                'option_d' => 'Saling berkunjung saat hari raya keagamaan',
+                'option_e' => 'Pernikahan antarsuku bangsa yang harmonis',
+                'correct_option' => 'c',
+                'explanation' => 'Tawuran antarkelompok merupakan bentuk konflik sosial dan disintegrasi, bukan integrasi sosial.',
             ]
         );
     }

@@ -75,8 +75,57 @@
                     <span style="font-size: 0.55rem; font-weight: 700; text-align: center; line-height: 1;">BHINNEKA</span>
                 </div>
             </div>
-        </div>
     </header>
+
+    <!-- Statistics Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <!-- Siswa Terdaftar -->
+            <div class="stat-box siswa-box">
+                <div class="stat-icon-wrapper">
+                    <i class="fi fi-rr-users-alt"></i>
+                </div>
+                <div class="stat-numbers">{{ number_format($siswaCount) }}</div>
+                <div class="stat-desc">Siswa Terdaftar</div>
+            </div>
+
+            <!-- Materi Bacaan -->
+            <div class="stat-box materi-box">
+                <div class="stat-icon-wrapper">
+                    <i class="fi fi-rr-book-open-reader"></i>
+                </div>
+                <div class="stat-numbers">{{ number_format($materiCount) }}</div>
+                <div class="stat-desc">Materi Bacaan</div>
+            </div>
+
+            <!-- Video Belajar -->
+            <div class="stat-box video-box">
+                <div class="stat-icon-wrapper">
+                    <i class="fi fi-rr-play-alt"></i>
+                </div>
+                <div class="stat-numbers">{{ number_format($videoCount) }}</div>
+                <div class="stat-desc">Video Belajar</div>
+            </div>
+
+            <!-- Kuis Evaluasi -->
+            <div class="stat-box quiz-box">
+                <div class="stat-icon-wrapper">
+                    <i class="fi fi-rr-clipboard-list"></i>
+                </div>
+                <div class="stat-numbers">{{ number_format($quizCount) }}</div>
+                <div class="stat-desc">Kuis Evaluasi</div>
+            </div>
+
+            <!-- Total Soal -->
+            <div class="stat-box soal-box">
+                <div class="stat-icon-wrapper">
+                    <i class="fi fi-rr-question"></i>
+                </div>
+                <div class="stat-numbers">{{ number_format($soalCount) }}</div>
+                <div class="stat-desc">Total Soal</div>
+            </div>
+        </div>
+    </section>
 
     <!-- Pillars Info Section -->
     <section class="pillars-section" id="pillars">
@@ -129,6 +178,65 @@
                 <h3>Bhinneka Tunggal Ika</h3>
                 <p>
                     Sebagai semboyan pemersatu bangsa Indonesia yang menekankan bahwa di tengah keberagaman ras, suku, agama, dan budaya, kita tetap merupakan satu kesatuan utuh.
+                </p>
+            </div>
+    </section>
+
+    <!-- Steps Section -->
+    <section class="steps-section" id="steps">
+        <div class="section-title">
+            <h2>Langkah Memulai Pembelajaran</h2>
+            <p style="max-width: 600px; margin: 8px auto 0 auto; color: var(--color-gray-600);">
+                Ikuti 4 langkah mudah berikut ini sebelum kamu mulai membaca materi dan melaksanakan kuis evaluasi 4 Pilar Kebangsaan.
+            </p>
+        </div>
+
+        <div class="steps-grid">
+            <!-- Step 1 -->
+            <div class="step-card">
+                <div class="step-badge">01</div>
+                <div class="step-icon-wrapper">
+                    <i class="fi fi-rr-user-add"></i>
+                </div>
+                <h3>1. Registrasi Akun</h3>
+                <p>
+                    Tekan tombol <strong>Daftar</strong> di pojok kanan atas, lalu lengkapi biodata dirimu seperti nama lengkap, sekolah, kelas, email aktif, dan kata sandi.
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card">
+                <div class="step-badge">02</div>
+                <div class="step-icon-wrapper">
+                    <i class="fi fi-rr-shield-check"></i>
+                </div>
+                <h3>2. Verifikasi Akun</h3>
+                <p>
+                    Sistem akan mengirimkan kode OTP unik ke email yang kamu daftarkan. Masukkan kode tersebut pada halaman verifikasi untuk mengaktifkan akunmu.
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card">
+                <div class="step-badge">03</div>
+                <div class="step-icon-wrapper">
+                    <i class="fi fi-rr-sign-in-alt"></i>
+                </div>
+                <h3>3. Masuk (Login)</h3>
+                <p>
+                    Setelah akun aktif, silakan masuk ke platform menggunakan email dan kata sandi yang telah didaftarkan melalui tombol <strong>Masuk</strong>.
+                </p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-card">
+                <div class="step-badge">04</div>
+                <div class="step-icon-wrapper">
+                    <i class="fi fi-rr-graduation-cap"></i>
+                </div>
+                <h3>4. Mulai Belajar!</h3>
+                <p>
+                    Akses menu dashboard siswa untuk mulai membaca materi literasi, menonton video interaktif, dan kerjakan kuis evaluasi untuk menguji pemahamanmu.
                 </p>
             </div>
         </div>

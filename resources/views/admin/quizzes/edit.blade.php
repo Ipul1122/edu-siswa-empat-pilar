@@ -44,13 +44,27 @@
                 </div>
             </div>
 
-            <!-- Duration -->
-            <div class="form-group" style="width: 250px;">
-                <label for="duration_minutes">Durasi Pengerjaan (Menit)</label>
-                <input type="number" name="duration_minutes" id="duration_minutes" class="form-control @error('duration_minutes') is-invalid @enderror" value="{{ old('duration_minutes', $quiz->duration_minutes) }}" min="1" required>
-                @error('duration_minutes')
-                    <span class="invalid-feedback">{{ $message }}</span>
-                @enderror
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Duration -->
+                <div class="form-group">
+                    <label for="duration_minutes">Durasi Pengerjaan (Menit)</label>
+                    <input type="number" name="duration_minutes" id="duration_minutes" class="form-control @error('duration_minutes') is-invalid @enderror" value="{{ old('duration_minutes', $quiz->duration_minutes) }}" min="1" required>
+                    @error('duration_minutes')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Type -->
+                <div class="form-group">
+                    <label for="type">Tipe Kuis</label>
+                    <select name="type" id="type" class="form-control @error('type') is-invalid @enderror" required>
+                        <option value="practice" {{ old('type', $quiz->type) === 'practice' ? 'selected' : '' }}>Latihan Kuis</option>
+                        <option value="real" {{ old('type', $quiz->type) === 'real' ? 'selected' : '' }}>Real Materi</option>
+                    </select>
+                    @error('type')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                    @enderror
+                </div>
             </div>
 
             <!-- Description -->

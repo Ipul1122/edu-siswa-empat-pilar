@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 // Public / Guest Routes
@@ -109,31 +110,26 @@ Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->
 
 Route::get('/extract-icons', function () {
     $url = 'https://www.flaticon.com/free-icons/web';
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language: en-US,en;q=0.9',
-        'Cache-Control: no-cache',
-        'Pragma: no-cache',
-        'Referer: https://www.google.com/'
-    ]);
-    $html = curl_exec($ch);
-    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    
+    $response = Http::withHeaders([
+        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language' => 'en-US,en;q=0.9',
+        'Cache-Control' => 'no-cache',
+        'Pragma' => 'no-cache',
+        'Referer' => 'https://www.google.com/',
+    ])->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+      ->get($url);
 
-    if ($status !== 200) {
+    if (!$response->successful()) {
         return response()->json([
             'status' => 'error',
-            'code' => $status,
-            'message' => 'Failed to fetch Flaticon page (status: ' . $status . ')',
-            'html_preview' => substr($html, 0, 1000)
+            'code' => $response->status(),
+            'message' => 'Failed to fetch Flaticon page (status: ' . $response->status() . ')',
+            'html_preview' => substr($response->body(), 0, 1000)
         ]);
     }
 
+    $html = $response->body();
     preg_match_all('/https:\/\/cdn-icons-png\.flaticon\.com\/(?:128|512|64|32)\/\d+\/\d+\.png/i', $html, $matches);
     $imageUrls = array_unique($matches[0]);
 

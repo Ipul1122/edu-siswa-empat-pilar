@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Ruang Siswa - Empat Pilar')</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/mpr-logo.svg') }}">
+    
     <!-- Meta tags for SweetAlert2 -->
     @if(session('success'))
         <meta name="flash-success" content="{{ session('success') }}">
@@ -30,7 +33,9 @@
         <!-- Sidebar -->
         <aside class="app-sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo-icon"><i class="fi fi-rr-graduation-cap" style="color: var(--color-white); line-height: 1; font-size: 1.3rem;"></i></div>
+                <div class="sidebar-logo-icon">
+                    <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
                 <div class="sidebar-logo-text">
                     Empat Pilar <span>Ruang Siswa</span>
                 </div>

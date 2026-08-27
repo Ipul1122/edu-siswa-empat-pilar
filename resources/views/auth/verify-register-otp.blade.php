@@ -60,10 +60,16 @@
         position: absolute;
         top: -90px;
         left: 0;
-        font-size: 3rem;
+        width: 72px;
+        height: 72px;
         filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         animation: float 4s ease-in-out infinite;
-     }
+    }
+    .brand-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
     
     .brand-title {
         font-size: 2.8rem;
@@ -255,7 +261,9 @@
     <!-- Left Section: Brand Showcase -->
     <div class="brand-panel">
         <div class="brand-content">
-            <div class="brand-logo">🎓</div>
+            <div class="brand-logo">
+                <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR">
+            </div>
             <h1 class="brand-title text-white">Satu Langkah Lagi <br><span>Menuju Ruang Belajar</span></h1>
             <p class="brand-subtitle">Kami telah mengirimkan 6-digit kode OTP ke alamat email Anda untuk memastikan validitas akun Anda sebelum mulai belajar.</p>
         </div>

@@ -60,10 +60,16 @@
         position: absolute;
         top: -90px;
         left: 0;
-        font-size: 3rem;
+        width: 72px;
+        height: 72px;
         filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         animation: float 4s ease-in-out infinite;
-     }
+    }
+    .brand-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
     
     .brand-title {
         font-size: 2.8rem;
@@ -286,7 +292,9 @@
     <!-- Left Section: Brand Showcase -->
     <div class="brand-panel">
         <div class="brand-content">
-            <div class="brand-logo">🔒</div>
+            <div class="brand-logo">
+                <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR">
+            </div>
             <h1 class="brand-title">Atur Ulang <br><span>Kata Sandi Anda</span></h1>
             <p class="brand-subtitle">Masukkan kode OTP yang dikirim ke email Anda, lalu tentukan kata sandi baru Anda yang aman untuk dapat masuk kembali ke sistem.</p>
         </div>

@@ -7,7 +7,7 @@
     <nav class="landing-navbar">
         <div class="logo">
             <div class="logo-icon">
-                <i class="fi fi-rr-flag" style="font-size: 1.4rem; display: inline-block; vertical-align: middle; line-height: 1;"></i>
+                <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
             <div class="logo-text">EmpatPilar<span>SMA/K</span></div>
         </div>
@@ -56,7 +56,7 @@
             <!-- Rotating Pillars Illustration -->
             <div class="pillars-circle">
                 <div class="center-logo" style="display: flex; align-items: center; justify-content: center;">
-                    <i class="fi fi-rr-flag" style="color: var(--color-secondary); font-size: 2.2rem; line-height: 1;"></i>
+                    <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <div class="pillar-node node-1" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
                     <i class="fi fi-rr-shield" style="font-size: 1.25rem; color: #ff5252; line-height: 1;"></i>

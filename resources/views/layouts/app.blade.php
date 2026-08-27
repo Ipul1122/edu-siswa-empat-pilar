@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Empat Pilar Kebangsaan SMA/K')</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/mpr-logo.svg') }}">
+    
     <!-- Meta tags for SweetAlert2 notifications -->
     @if(session('success'))
         <meta name="flash-success" content="{{ session('success') }}">

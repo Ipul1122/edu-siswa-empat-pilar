@@ -20,7 +20,7 @@ class QuizController extends Controller
         $user = Auth::user();
 
         // Get quizzes with questions count
-        $quizzes = Quiz::where('type', '=', 'practice', 'and')->withCount('questions')->get();
+        $quizzes = Quiz::where('type', '=', 'practice')->withCount('questions')->latest()->get();
 
         // Get highest attempt score for each quiz by this user
         $highestScores = QuizAttempt::query()->where('user_id', $user->id)
@@ -33,7 +33,8 @@ class QuizController extends Controller
             'pancasila' => [],
             'uud_1945' => [],
             'nkri' => [],
-            'bhinneka_tunggal_ika' => []
+            'bhinneka_tunggal_ika' => [],
+            'twk_kedinasan' => []
         ];
 
         foreach ($quizzes as $quiz) {

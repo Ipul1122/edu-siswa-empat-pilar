@@ -6,27 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Models\Quiz;
 use Illuminate\Http\Request;
 
-class QuizController extends Controller
+class RealQuizController extends Controller
 {
     /**
-     * Display listing of practice quizzes.
+     * Display listing of Real Materi quizzes.
      */
     public function index()
     {
-        $quizzes = Quiz::query()->where('type', '=', 'practice', 'and')->withCount('questions')->latest()->get();
-        return view('admin.quizzes.index', compact('quizzes'));
+        $quizzes = Quiz::query()->where('type', '=', 'real', 'and')->withCount('questions')->latest()->get();
+        return view('admin.real_quizzes.index', compact('quizzes'));
     }
 
     /**
-     * Show form to create practice quiz.
+     * Show form to create Real Materi quiz.
      */
     public function create()
     {
-        return view('admin.quizzes.create');
+        return view('admin.real_quizzes.create');
     }
 
     /**
-     * Store new practice quiz.
+     * Store new Real Materi quiz.
      */
     public function store(Request $request)
     {
@@ -46,38 +46,41 @@ class QuizController extends Controller
         ]);
 
         $data = $request->all();
-        $data['type'] = 'practice';
+        $data['type'] = 'real';
         Quiz::create($data);
 
-        return redirect()->route('admin.quizzes.index')
-            ->with('success', 'Latihan kuis berhasil dibuat!');
+        return redirect()->route('admin.real-materi.index')
+            ->with('success', 'Real Materi evaluasi berhasil dibuat!');
     }
 
     /**
-     * Display details of a quiz including its questions.
+     * Display details of a Real Materi quiz including its questions.
      */
-    public function show(Quiz $quiz)
+    public function show(Quiz $real_materi)
     {
+        $quiz = $real_materi;
         $quiz->load('questions');
         return view('admin.quizzes.show', compact('quiz'));
     }
 
     /**
-     * Show form to edit practice quiz.
+     * Show form to edit Real Materi quiz.
      */
-    public function edit(Quiz $quiz)
+    public function edit(Quiz $real_materi)
     {
-        if ($quiz->type !== 'practice') {
-            return redirect()->route('admin.real-materi.edit', $quiz);
+        $quiz = $real_materi;
+        if ($quiz->type !== 'real') {
+            return redirect()->route('admin.quizzes.edit', $quiz);
         }
-        return view('admin.quizzes.edit', compact('quiz'));
+        return view('admin.real_quizzes.edit', compact('quiz'));
     }
 
     /**
-     * Update practice quiz.
+     * Update Real Materi quiz.
      */
-    public function update(Request $request, Quiz $quiz)
+    public function update(Request $request, Quiz $real_materi)
     {
+        $quiz = $real_materi;
         $request->validate([
             'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika,twk_kedinasan'],
             'title' => ['required', 'string', 'max:255', 'unique:quizzes,title,' . $quiz->id],
@@ -94,27 +97,21 @@ class QuizController extends Controller
         ]);
 
         $data = $request->all();
-        $data['type'] = 'practice';
+        $data['type'] = 'real';
         $quiz->update($data);
 
-        return redirect()->route('admin.quizzes.index')
-            ->with('success', 'Latihan kuis berhasil diperbarui!');
+        return redirect()->route('admin.real-materi.index')
+            ->with('success', 'Real Materi evaluasi berhasil diperbarui!');
     }
 
     /**
-     * Delete quiz.
+     * Delete Real Materi quiz.
      */
-    public function destroy(Quiz $quiz)
+    public function destroy(Quiz $real_materi)
     {
-        $type = $quiz->type;
-        Quiz::destroy($quiz->id);
+        Quiz::destroy($real_materi->id);
 
-        if ($type === 'real') {
-            return redirect()->route('admin.real-materi.index')
-                ->with('success', 'Real Materi berhasil dihapus!');
-        }
-
-        return redirect()->route('admin.quizzes.index')
-            ->with('success', 'Latihan kuis berhasil dihapus!');
+        return redirect()->route('admin.real-materi.index')
+            ->with('success', 'Real Materi evaluasi berhasil dihapus!');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Material;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class VideoMaterialController extends Controller
 {
@@ -13,7 +14,7 @@ class VideoMaterialController extends Controller
      */
     public function index()
     {
-        $materials = Material::query()->where('type', 'video')->latest()->get();
+        $materials = Material::query()->where('type', '=', 'video', 'and')->latest()->get();
         return view('admin.videos.index', compact('materials'));
     }
 
@@ -31,27 +32,45 @@ class VideoMaterialController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika'],
+            'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika,twk_kedinasan'],
             'title' => ['required', 'string', 'max:255', 'unique:materials,title'],
-            'video_url' => ['required', 'string'],
+            'video_source_type' => ['required', 'string', 'in:upload,url'],
+            'video_file' => ['required_if:video_source_type,upload', 'nullable', 'file', 'mimes:mp4,webm,mov,ogg,mkv,avi', 'max:102400'], // max 100MB
+            'video_url' => ['required_if:video_source_type,url', 'nullable', 'string', 'max:1000'],
             'read_time' => ['required', 'integer', 'min:1'],
             'content' => ['nullable', 'string'],
         ], [
-            'pillar.required' => 'Pilar Kebangsaan wajib dipilih.',
-            'pillar.in' => 'Pilar Kebangsaan tidak valid.',
+            'pillar.required' => 'Kategori / Pilar wajib dipilih.',
+            'pillar.in' => 'Kategori / Pilar tidak valid.',
             'title.required' => 'Judul video wajib diisi.',
             'title.unique' => 'Judul video sudah digunakan.',
-            'video_url.required' => 'Tautan video wajib diisi.',
+            'video_source_type.required' => 'Pilih metode sumber video.',
+            'video_file.required_if' => 'File video MP4 wajib diunggah.',
+            'video_file.mimes' => 'Format file video harus berupa MP4, WebM, MOV, OGG, atau MKV.',
+            'video_file.max' => 'Ukuran file video maksimal 100MB.',
+            'video_url.required_if' => 'Tautan / link video wajib diisi.',
             'read_time.required' => 'Estimasi durasi video wajib diisi.',
             'read_time.integer' => 'Estimasi durasi video harus berupa angka.',
             'read_time.min' => 'Estimasi durasi video minimal 1 menit.',
         ]);
 
-        $data = $request->all();
-        $data['type'] = 'video';
-        if (empty($data['content'])) {
-            $data['content'] = '<p>Belum ada deskripsi untuk video ini.</p>';
+        $videoUrl = null;
+        if ($request->input('video_source_type') === 'upload' && $request->hasFile('video_file')) {
+            $path = $request->file('video_file')->store('videos', 'public');
+            $videoUrl = 'storage/' . $path;
+        } else {
+            $videoUrl = $request->input('video_url');
         }
+
+        $data = [
+            'pillar' => $request->input('pillar'),
+            'title' => $request->input('title'),
+            'type' => 'video',
+            'video_url' => $videoUrl,
+            'read_time' => $request->input('read_time'),
+            'content' => $request->input('content') ?: '<p>Belum ada deskripsi untuk video ini.</p>',
+        ];
+
         Material::create($data);
 
         return redirect()->route('admin.videos.index')
@@ -79,26 +98,56 @@ class VideoMaterialController extends Controller
         }
 
         $request->validate([
-            'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika'],
+            'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika,twk_kedinasan'],
             'title' => ['required', 'string', 'max:255', 'unique:materials,title,' . $video->id],
-            'video_url' => ['required', 'string'],
+            'video_source_type' => ['required', 'string', 'in:upload,url'],
+            'video_file' => ['nullable', 'file', 'mimes:mp4,webm,mov,ogg,mkv,avi', 'max:102400'], // max 100MB
+            'video_url' => ['required_if:video_source_type,url', 'nullable', 'string', 'max:1000'],
             'read_time' => ['required', 'integer', 'min:1'],
             'content' => ['nullable', 'string'],
         ], [
-            'pillar.required' => 'Pilar Kebangsaan wajib dipilih.',
-            'pillar.in' => 'Pilar Kebangsaan tidak valid.',
+            'pillar.required' => 'Kategori / Pilar wajib dipilih.',
+            'pillar.in' => 'Kategori / Pilar tidak valid.',
             'title.required' => 'Judul video wajib diisi.',
             'title.unique' => 'Judul video sudah digunakan.',
-            'video_url.required' => 'Tautan video wajib diisi.',
+            'video_source_type.required' => 'Pilih metode sumber video.',
+            'video_file.mimes' => 'Format file video harus berupa MP4, WebM, MOV, OGG, atau MKV.',
+            'video_file.max' => 'Ukuran file video maksimal 100MB.',
+            'video_url.required_if' => 'Tautan / link video wajib diisi.',
             'read_time.required' => 'Estimasi durasi video wajib diisi.',
             'read_time.integer' => 'Estimasi durasi video harus berupa angka.',
             'read_time.min' => 'Estimasi durasi video minimal 1 menit.',
         ]);
 
-        $data = $request->all();
-        if (empty($data['content'])) {
-            $data['content'] = '<p>Belum ada deskripsi untuk video ini.</p>';
+        $videoUrl = $video->video_url;
+
+        if ($request->input('video_source_type') === 'upload') {
+            if ($request->hasFile('video_file')) {
+                // Delete old storage file if existed
+                if ($video->video_url && str_starts_with($video->video_url, 'storage/')) {
+                    $oldPath = str_replace('storage/', '', $video->video_url);
+                    Storage::disk('public')->delete($oldPath);
+                }
+                $path = $request->file('video_file')->store('videos', 'public');
+                $videoUrl = 'storage/' . $path;
+            }
+        } else {
+            // Switched to URL, delete old storage file if existed
+            if ($video->video_url && str_starts_with($video->video_url, 'storage/')) {
+                $oldPath = str_replace('storage/', '', $video->video_url);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $videoUrl = $request->input('video_url');
         }
+
+        $data = [
+            'pillar' => $request->input('pillar'),
+            'title' => $request->input('title'),
+            'video_url' => $videoUrl,
+            'read_time' => $request->input('read_time'),
+            'content' => $request->input('content') ?: '<p>Belum ada deskripsi untuk video ini.</p>',
+        ];
+
         $video->update($data);
 
         return redirect()->route('admin.videos.index')
@@ -112,6 +161,12 @@ class VideoMaterialController extends Controller
     {
         if ($video->type !== 'video') {
             abort(404);
+        }
+
+        // Delete uploaded file if stored locally
+        if ($video->video_url && str_starts_with($video->video_url, 'storage/')) {
+            $oldPath = str_replace('storage/', '', $video->video_url);
+            Storage::disk('public')->delete($oldPath);
         }
 
         Material::destroy($video->id);

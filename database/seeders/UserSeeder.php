@@ -22,6 +22,9 @@ class UserSeeder extends Seeder
                 'role' => 'admin',
                 'class_name' => null,
                 'school_name' => null,
+                'image' => null,
+                'address' => null,
+                'dapil' => null,
             ]
         );
 
@@ -32,8 +35,11 @@ class UserSeeder extends Seeder
                 'name' => 'Budi Santoso',
                 'password' => Hash::make('password'),
                 'role' => 'siswa',
-                'class_name' => 'XII',
+                'class_name' => 'SMA/SMK',
                 'school_name' => 'SMK Negeri 1 Jakarta',
+                'image' => null,
+                'dapil' => 'DKI JAKARTA I',
+                'address' => 'Jl. Merdeka No. 45, Gambir, Jakarta Pusat',
             ]
         );
     }

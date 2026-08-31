@@ -20,7 +20,7 @@ class RealQuizController extends Controller
         $user = Auth::user();
 
         // Get quizzes with questions count
-        $quizzes = Quiz::where('type', '=', 'real', 'and')->withCount('questions')->get();
+        $quizzes = Quiz::where('type', '=', 'real')->withCount('questions')->latest()->get();
 
         // Get attempt score for each quiz by this user (since only 1x, it's the score)
         $attempts = QuizAttempt::query()->where('user_id', $user->id)
@@ -33,7 +33,8 @@ class RealQuizController extends Controller
             'pancasila' => [],
             'uud_1945' => [],
             'nkri' => [],
-            'bhinneka_tunggal_ika' => []
+            'bhinneka_tunggal_ika' => [],
+            'twk_kedinasan' => []
         ];
 
         foreach ($quizzes as $quiz) {

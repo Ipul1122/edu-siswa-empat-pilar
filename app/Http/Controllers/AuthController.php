@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-
 class AuthController extends Controller
 {
     /**
@@ -119,7 +118,8 @@ class AuthController extends Controller
         if (Auth::guard('web')->check()) {
             return redirect()->route('siswa.dashboard');
         }
-        return view('auth.register');
+        $dapilDetails = User::DAPIL_DETAILS;
+        return view('auth.register', compact('dapilDetails'));
     }
 
     /**
@@ -131,18 +131,31 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
-            'class_name' => ['required', 'string', 'in:X,XI,XII'],
             'school_name' => ['required', 'string', 'max:100'],
+            'dapil' => ['required', 'string', 'in:' . implode(',', User::DAPIL_LIST)],
+            'address' => ['required', 'string', 'max:500'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'email.required' => 'Email wajib diisi.',
             'email.unique' => 'Email sudah terdaftar.',
             'password.required' => 'Kata sandi wajib diisi.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
-            'class_name.required' => 'Kelas wajib diisi.',
-            'class_name.in' => 'Pilihan kelas tidak valid.',
             'school_name.required' => 'Nama sekolah wajib diisi.',
+            'dapil.required' => 'Daerah Pemilihan (Dapil) wajib dipilih.',
+            'dapil.in' => 'Pilihan Daerah Pemilihan (Dapil) tidak valid.',
+            'address.required' => 'Alamat rumah tinggal wajib diisi.',
+            'image.required' => 'Foto profil siswa wajib diunggah.',
+            'image.image' => 'File foto harus berupa gambar.',
+            'image.mimes' => 'Format foto harus berupa JPG, JPEG, PNG, atau WEBP.',
+            'image.max' => 'Ukuran foto maksimal 2MB.',
         ]);
+
+        // Upload image
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('avatars', 'public');
+        }
 
         // Generate 6 digit OTP
         $otp = rand(100000, 999999);
@@ -152,8 +165,11 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'class_name' => $request->class_name,
+            'class_name' => 'SMA/SMK',
             'school_name' => $request->school_name,
+            'dapil' => $request->dapil,
+            'address' => $request->address,
+            'image' => $imagePath,
         ]);
         session()->put('register_otp', $otp);
         session()->put('register_otp_expires_at', Carbon::now()->addMinutes(15));
@@ -215,7 +231,7 @@ class AuthController extends Controller
         // Create User
         $details = session()->get('register_details');
         
-        if (User::where('email', $details['email'])->exists()) {
+        if (User::query()->where('email', '=', $details['email'])->exists()) {
             session()->forget(['register_details', 'register_otp', 'register_otp_expires_at']);
             return redirect()->route('register')->with('error', 'Email ini sudah terdaftar. Silakan masuk.');
         }
@@ -225,8 +241,11 @@ class AuthController extends Controller
             'email' => $details['email'],
             'password' => $details['password'],
             'role' => 'siswa',
-            'class_name' => $details['class_name'],
+            'class_name' => $details['class_name'] ?? 'SMA/SMK',
             'school_name' => $details['school_name'],
+            'dapil' => $details['dapil'] ?? null,
+            'address' => $details['address'] ?? null,
+            'image' => $details['image'] ?? null,
             'email_verified_at' => Carbon::now(),
         ]);
 
@@ -295,7 +314,7 @@ class AuthController extends Controller
             'email.email' => 'Format email tidak valid.',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::query()->where('email', '=', $request->email)->first();
 
         if (!$user || $user->role !== 'siswa') {
             return back()->withErrors(['email' => 'Email tidak terdaftar sebagai Siswa.']);
@@ -373,7 +392,7 @@ class AuthController extends Controller
         }
 
         // Update password
-        $user = User::where('email', $email)->first();
+        $user = User::query()->where('email', '=', $email)->first();
         if ($user) {
             $user->password = Hash::make($request->password);
             $user->save();

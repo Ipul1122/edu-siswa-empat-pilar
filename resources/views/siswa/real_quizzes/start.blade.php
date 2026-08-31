@@ -30,7 +30,7 @@
                     <div class="question-number">Soal {{ $index + 1 }} dari {{ $quiz->questions->count() }}</div>
                     
                     <div class="question-text">
-                        {!! nl2br(e($question->question_text)) !!}
+                        {!! str_contains($question->question_text, '<') ? $question->question_text : nl2br(e($question->question_text)) !!}
                     </div>
 
                     <div class="options-list">

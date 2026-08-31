@@ -57,9 +57,14 @@
                         <i class="fi fi-rr-play-alt"></i> Materi Video
                     </a>
                 </li>
-                <li class="sidebar-menu-item {{ Route::is('admin.quizzes.*') || Route::is('admin.questions.*') ? 'active' : '' }}">
+                <li class="sidebar-menu-item {{ Route::is('admin.quizzes.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.quizzes.index') }}">
-                        <i class="fi fi-rr-clipboard-list"></i> Kuis & Soal
+                        <i class="fi fi-rr-clipboard-list"></i> Latihan Kuis
+                    </a>
+                </li>
+                <li class="sidebar-menu-item {{ Route::is('admin.real-materi.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.real-materi.index') }}">
+                        <i class="fi fi-rr-diploma"></i> Real Materi
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('admin.students.*') ? 'active' : '' }}">

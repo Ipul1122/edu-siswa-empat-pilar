@@ -44,6 +44,7 @@ class Quiz extends Model
             'uud_1945' => 'UUD NRI 1945',
             'nkri' => 'Negara Kesatuan Republik Indonesia (NKRI)',
             'bhinneka_tunggal_ika' => 'Bhinneka Tunggal Ika',
+            'twk_kedinasan' => 'Simulasi TWK Kedinasan',
             default => ucfirst(str_replace('_', ' ', $this->pillar)),
         };
     }

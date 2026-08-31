@@ -16,9 +16,10 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $totalStudents = User::query()->where('role', 'siswa')->count('*');
+        $totalStudents = User::query()->where('role', '=', 'siswa', 'and')->count('*');
         $totalMaterials = Material::query()->count('*');
-        $totalQuizzes = Quiz::query()->count('*');
+        $totalPracticeQuizzes = Quiz::query()->where('type', '=', 'practice', 'and')->count('*');
+        $totalRealQuizzes = Quiz::query()->where('type', '=', 'real', 'and')->count('*');
         $totalAttempts = QuizAttempt::query()->count('*');
 
         // Get 5 recent attempts with student and quiz relations
@@ -54,7 +55,8 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact(
             'totalStudents', 
             'totalMaterials', 
-            'totalQuizzes', 
+            'totalPracticeQuizzes',
+            'totalRealQuizzes',
             'totalAttempts', 
             'recentAttempts',
             'chartData',

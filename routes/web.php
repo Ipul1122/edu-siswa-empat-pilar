@@ -54,8 +54,11 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     // Videos CRUD
     Route::resource('videos', App\Http\Controllers\Admin\VideoMaterialController::class)->except(['show']);
 
-    // Quizzes CRUD
+    // Quizzes (Latihan Kuis) CRUD
     Route::resource('quizzes', App\Http\Controllers\Admin\QuizController::class);
+
+    // Real Materi CRUD
+    Route::resource('real-materi', App\Http\Controllers\Admin\RealQuizController::class)->names('real-materi');
 
     // Questions CRUD (Nest within quiz context)
     Route::get('/quizzes/{quiz}/questions/create', [App\Http\Controllers\Admin\QuestionController::class, 'create'])->name('questions.create');

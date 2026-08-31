@@ -3,6 +3,9 @@
 @section('title', 'Daftar Akun Siswa - Empat Pilar')
 
 @section('content')
+<!-- Tom Select CDN (Searchable Dropdown) -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
 <style>
     .split-container {
         display: flex;
@@ -13,13 +16,13 @@
     }
     
     .brand-panel {
-        flex: 1.2;
+        flex: 1.1;
         background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
         color: var(--color-white);
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        padding: 140px 80px 80px 80px;
+        padding: 90px 60px 50px 60px;
         position: relative;
         overflow: hidden;
     }
@@ -59,10 +62,10 @@
     
     .brand-logo {
         position: absolute;
-        top: -90px;
+        top: -65px;
         left: 0;
-        width: 72px;
-        height: 72px;
+        width: 56px;
+        height: 56px;
         filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         animation: float 4s ease-in-out infinite;
     }
@@ -73,10 +76,10 @@
     }
     
     .brand-title {
-        font-size: 2.8rem;
+        font-size: 2.3rem;
         font-weight: 800;
         line-height: 1.2;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
         letter-spacing: -0.5px;
     }
     
@@ -85,16 +88,17 @@
     }
     
     .brand-subtitle {
-        font-size: 1.1rem;
-        color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 40px;
+        font-size: 0.92rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 24px;
         font-weight: 400;
+        line-height: 1.5;
     }
     
     .pillars-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+        gap: 12px;
     }
     
     .pillar-card {
@@ -103,25 +107,25 @@
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: var(--border-radius-md);
-        padding: 20px;
+        padding: 12px;
         transition: var(--transition-smooth);
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
     }
     
     .pillar-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-3px);
         background: rgba(255, 255, 255, 0.1);
         border-color: rgba(255, 193, 7, 0.3);
         box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
     
     .pillar-icon {
-        font-size: 2rem;
+        font-size: 1.3rem;
         background: rgba(255, 255, 255, 0.1);
-        width: 50px;
-        height: 50px;
+        width: 38px;
+        height: 38px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -131,73 +135,81 @@
     
     .pillar-info h4 {
         color: var(--color-white);
-        font-size: 0.95rem;
+        font-size: 0.85rem;
         margin-bottom: 2px;
         font-weight: 600;
     }
     
     .pillar-info p {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: rgba(255, 255, 255, 0.6);
         font-weight: 400;
     }
     
     .form-panel {
-        flex: 0.8;
+        flex: 0.9;
         display: flex;
         align-items: flex-start;
         justify-content: center;
-        padding: 140px 60px 80px 60px;
+        padding: 35px 40px;
         background-color: var(--color-white);
         position: relative;
         overflow-y: auto;
+        max-height: 100vh;
     }
     
     .form-container {
         width: 100%;
-        max-width: 480px;
+        max-width: 500px;
         animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
     .form-header {
-        margin-bottom: 24px;
+        margin-bottom: 16px;
     }
     
     .form-header h3 {
-        font-size: 2rem;
+        font-size: 1.75rem;
         font-weight: 700;
         color: var(--color-dark);
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
     
     .form-header p {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         color: var(--color-gray-600);
     }
     
     .custom-form-group {
-        margin-bottom: 16px;
+        margin-bottom: 14px;
+        position: relative;
     }
     
     .custom-form-group label {
         display: block;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         font-weight: 600;
         color: var(--color-dark);
-        margin-bottom: 6px;
+        margin-bottom: 5px;
+    }
+
+    .required-star {
+        color: var(--color-danger);
+        font-weight: 700;
+        margin-left: 2px;
     }
     
     .input-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
+        gap: 12px;
     }
     
     .custom-input {
         width: 100%;
-        height: 50px;
-        padding: 12px 16px;
-        font-size: 0.95rem;
+        height: 42px;
+        padding: 8px 12px;
+        font-size: 0.88rem;
         font-family: var(--font-body);
         color: var(--color-dark);
         background-color: var(--color-gray-100);
@@ -211,22 +223,163 @@
     .custom-input:focus {
         background-color: var(--color-white);
         border-color: rgb(var(--color-primary-rgb));
-        box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.1);
+        box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
     }
     
     .custom-input.is-invalid {
         border-color: var(--color-danger);
         background-color: rgba(244, 67, 54, 0.02);
     }
-    
-    .custom-input.is-invalid:focus {
-        box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.1);
+
+    /* Modern Camera Avatar Trigger */
+    .register-avatar-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+    .register-avatar-wrapper {
+        position: relative;
+        width: 88px;
+        height: 88px;
+        cursor: pointer;
+        margin-bottom: 6px;
+    }
+    .register-avatar-preview {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgb(var(--color-primary-rgb));
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition-smooth);
+        background: #f1f5f9;
+    }
+    .register-avatar-wrapper:hover .register-avatar-preview {
+        filter: brightness(0.9);
+    }
+    .register-camera-badge {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background-color: rgb(var(--color-primary-rgb));
+        color: var(--color-white);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        border: 2px solid var(--color-white);
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .register-avatar-wrapper:hover .register-camera-badge {
+        transform: scale(1.1);
+        background-color: var(--color-primary-hover);
+    }
+
+    /* Tom Select Opaque & Robust Styling Fix */
+    .ts-wrapper {
+        width: 100% !important;
+        position: relative !important;
+    }
+    .ts-control {
+        border-radius: var(--border-radius-md) !important;
+        border: 2px solid transparent !important;
+        background-color: var(--color-gray-100) !important;
+        background: var(--color-gray-100) !important;
+        padding: 8px 14px !important;
+        font-size: 0.88rem !important;
+        font-family: var(--font-body) !important;
+        min-height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        transition: var(--transition-smooth) !important;
+        box-shadow: none !important;
+    }
+    .ts-control:focus, .ts-wrapper.focus .ts-control {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        border-color: rgb(var(--color-primary-rgb)) !important;
+        box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1) !important;
+    }
+    .ts-dropdown {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        border: 1px solid var(--color-gray-300) !important;
+        border-radius: var(--border-radius-md) !important;
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18), 0 10px 10px rgba(0, 0, 0, 0.12) !important;
+        font-size: 0.85rem !important;
+        max-height: 240px !important;
+        overflow-y: auto !important;
+        z-index: 999999 !important;
+        padding: 4px 0 !important;
+        margin-top: 4px !important;
+    }
+    .ts-dropdown .option {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        padding: 9px 14px !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        color: #1e293b !important;
+        cursor: pointer !important;
+    }
+    .ts-dropdown .option:last-child {
+        border-bottom: none !important;
+    }
+    .ts-dropdown .option:hover, .ts-dropdown .option.active {
+        background-color: #f1f5f9 !important;
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+    }
+    .ts-dropdown .option.selected {
+        background-color: rgba(var(--color-primary-rgb), 0.08) !important;
+        background: rgba(var(--color-primary-rgb), 0.08) !important;
+        color: rgb(var(--color-primary-rgb)) !important;
+        font-weight: 600 !important;
+    }
+    .dapil-select-option {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .dapil-main-title {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 0.88rem;
+    }
+    .dapil-subtext {
+        font-size: 0.74rem;
+        color: #64748b;
+        line-height: 1.3;
+    }
+    .dapil-selected-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #0f172a;
+    }
+    .dapil-badge-pill {
+        font-size: 0.72rem;
+        color: #64748b;
+        font-weight: normal;
     }
     
     .submit-btn {
         width: 100%;
-        padding: 14px;
-        font-size: 1rem;
+        padding: 12px;
+        font-size: 0.95rem;
         font-weight: 600;
         font-family: var(--font-heading);
         color: var(--color-white);
@@ -240,7 +393,7 @@
         justify-content: center;
         gap: 8px;
         box-shadow: var(--shadow-sm);
-        margin-top: 16px;
+        margin-top: 14px;
     }
     
     .submit-btn:hover {
@@ -249,14 +402,10 @@
         box-shadow: var(--shadow-md);
     }
     
-    .submit-btn:active {
-        transform: translateY(0);
-    }
-    
     .form-footer {
         text-align: center;
-        margin-top: 24px;
-        font-size: 0.9rem;
+        margin-top: 16px;
+        font-size: 0.85rem;
         color: var(--color-gray-600);
     }
     
@@ -265,28 +414,19 @@
         font-weight: 600;
     }
     
-    .form-footer a:hover {
-        color: var(--color-primary-hover);
-        text-decoration: underline;
-    }
-    
     .back-home {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        margin-top: 20px;
-        font-size: 0.85rem;
+        margin-top: 10px;
+        font-size: 0.8rem;
         color: var(--color-gray-400);
         font-weight: 500;
-    }
-    
-    .back-home:hover {
-        color: var(--color-gray-600);
     }
 
     @keyframes float {
         0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+        50% { transform: translateY(-8px); }
     }
     
     @keyframes fadeIn {
@@ -294,14 +434,14 @@
         to { opacity: 1; transform: translateY(0); }
     }
     
-    /* Responsive styling */
     @media (max-width: 992px) {
         .brand-panel {
             display: none;
         }
         .form-panel {
             flex: 1;
-            padding: 40px 20px;
+            padding: 30px 20px;
+            max-height: none;
         }
     }
     
@@ -310,17 +450,6 @@
             grid-template-columns: 1fr;
             gap: 0;
         }
-    }
-    
-    select.custom-input {
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 16px center;
-        background-size: 16px;
-        padding-right: 40px;
     }
 </style>
 
@@ -332,12 +461,12 @@
                 <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR">
             </div>
             <h1 class="brand-title text-white">Mari Belajar <br><span class="text-black">Empat Pilar</span></h1>
-            <p class="brand-subtitle">Buat akun siswa sekarang untuk mengakses modul pembelajaran interaktif, mengerjakan kuis, dan melacak perkembangan belajar Anda.</p>
+            <p class="brand-subtitle">Daftarkan akun siswa SMA/SMK Anda sekarang untuk mengakses modul pembelajaran interaktif, mengerjakan evaluasi kuis, dan meningkatkan kompetensi kenegaraan.</p>
             
             <div class="pillars-grid">
                 <div class="pillar-card">
                     <div class="pillar-icon">
-                        <i class="fi fi-rr-shield text-white" style="font-size: 1.5rem;"></i>
+                        <i class="fi fi-rr-shield text-white" style="font-size: 1.3rem;"></i>
                     </div>
                     <div class="pillar-info">
                         <h4>Pancasila</h4>
@@ -346,7 +475,7 @@
                 </div>
                 <div class="pillar-card">
                     <div class="pillar-icon">
-                        <i class="fi fi-rr-scroll text-white" style="font-size: 1.5rem;"></i>
+                        <i class="fi fi-rr-scroll text-white" style="font-size: 1.3rem;"></i>
                     </div>
                     <div class="pillar-info">
                         <h4>UUD 1945</h4>
@@ -355,7 +484,7 @@
                 </div>
                 <div class="pillar-card">
                     <div class="pillar-icon">
-                        <i class="fi fi-rr-map text-white" style="font-size: 1.5rem;"></i>
+                        <i class="fi fi-rr-map text-white" style="font-size: 1.3rem;"></i>
                     </div>
                     <div class="pillar-info">
                         <h4>NKRI</h4>
@@ -364,7 +493,7 @@
                 </div>
                 <div class="pillar-card">
                     <div class="pillar-icon">
-                        <i class="fi fi-rr-handshake text-white" style="font-size: 1.5rem;"></i>
+                        <i class="fi fi-rr-handshake text-white" style="font-size: 1.3rem;"></i>
                     </div>
                     <div class="pillar-info">
                         <h4>Bhinneka Tunggal Ika</h4>
@@ -379,15 +508,36 @@
     <div class="form-panel">
         <div class="form-container">
             <div class="form-header">
-                <h3>Daftar Akun</h3>
-                <p>Silakan isi data diri Anda untuk memulai pembelajaran.</p>
+                <h3>Daftar Akun Siswa</h3>
+                <p>Lengkapi formulir biodata diri Anda (bidang bertanda <span class="required-star">*</span> wajib diisi).</p>
             </div>
             
-            <form action="{{ route('register') }}" method="POST">
+            <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
+                <!-- Mandatory Profile Photo with Camera Icon Trigger -->
+                <div class="register-avatar-container">
+                    <div class="register-avatar-wrapper" onclick="document.getElementById('image').click()" title="Klik untuk mengunggah foto profil">
+                        <img id="register-avatar-preview" src="https://ui-avatars.com/api/?name=Siswa&background=dc2626&color=ffffff&size=120" alt="Preview Foto" class="register-avatar-preview">
+                        <div class="register-camera-badge">
+                            <i class="fi fi-rr-camera" style="font-size: 0.9rem; line-height: 1; display: flex; align-items: center; justify-content: center;"></i>
+                        </div>
+                    </div>
+
+                    <input type="file" name="image" id="image" style="display: none;" accept="image/jpeg,image/png,image/jpg,image/webp" required onchange="previewRegisterAvatar(event)">
+                    
+                    <button type="button" class="btn btn-secondary btn-sm" style="padding: 4px 12px; font-size: 0.78rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; background: var(--color-gray-100); border: 1px solid var(--color-gray-300);" onclick="document.getElementById('image').click()">
+                        <i class="fi fi-rr-camera" style="font-size: 0.8rem; color: rgb(var(--color-primary-rgb));"></i> Upload Foto Profil <span class="required-star">*</span>
+                    </button>
+                    <div style="font-size: 0.72rem; color: var(--color-gray-500); margin-top: 3px;">Format JPG, PNG, WEBP (Maks 2MB)</div>
+
+                    @error('image')
+                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                    @enderror
+                </div>
+
                 <div class="custom-form-group">
-                    <label for="name">Nama Lengkap</label>
+                    <label for="name">Nama Lengkap Siswa <span class="required-star">*</span></label>
                     <input type="text" name="name" id="name" class="custom-input @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Nama lengkap Anda" required autocomplete="name" autofocus>
                     @error('name')
                         <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
@@ -395,45 +545,60 @@
                 </div>
                 
                 <div class="custom-form-group">
-                    <label for="email">Alamat Email</label>
+                    <label for="email">Alamat Email <span class="required-star">*</span></label>
                     <input type="email" name="email" id="email" class="custom-input @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="Contoh: siswa@gmail.com" required autocomplete="email">
                     @error('email')
                         <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
                     @enderror
                 </div>
-                
-                <div class="input-row">
-                    <div class="custom-form-group">
-                        <label for="class_name">Kelas</label>
-                        <select name="class_name" id="class_name" class="custom-input @error('class_name') is-invalid @enderror" required>
-                            <option value="" disabled {{ old('class_name') == '' ? 'selected' : '' }}>Pilih Kelas</option>
-                            <option value="X" {{ old('class_name') == 'X' ? 'selected' : '' }}>X</option>
-                            <option value="XI" {{ old('class_name') == 'XI' ? 'selected' : '' }}>XI</option>
-                            <option value="XII" {{ old('class_name') == 'XII' ? 'selected' : '' }}>XII</option>
-                        </select>
-                        @error('class_name')
-                            <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
-                        @enderror
+
+                <div class="custom-form-group">
+                    <label for="school_name">Asal Sekolah (SMA / SMK) <span class="required-star">*</span></label>
+                    <input type="text" name="school_name" id="school_name" class="custom-input @error('school_name') is-invalid @enderror" value="{{ old('school_name') }}" placeholder="Contoh: SMAN 1 Jakarta / SMKN 2 Bandung" required>
+                    @error('school_name')
+                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Enhanced Searchable Dapil Dropdown with Regencies Coverage Search -->
+                <div class="custom-form-group">
+                    <label for="dapil">Daerah Pemilihan (Dapil) DPR-RI <span class="required-star">*</span></label>
+                    <div style="font-size: 0.78rem; color: var(--color-gray-600); margin-bottom: 4px;">
+                        Ketik nama kota/kabupaten Anda (contoh: <em>Bandung, Bogor, Surabaya, Medan, Depok</em>) untuk mencari otomatis.
                     </div>
-                    <div class="custom-form-group">
-                        <label for="school_name">Asal Sekolah</label>
-                        <input type="text" name="school_name" id="school_name" class="custom-input @error('school_name') is-invalid @enderror" value="{{ old('school_name') }}" placeholder="Contoh: SMKN 1 Jakarta" required>
-                        @error('school_name')
-                            <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
-                        @enderror
-                    </div>
+                    <select name="dapil" id="dapil" class="@error('dapil') is-invalid @enderror" required>
+                        <option value="">-- Cari Kota/Kabupaten atau Pilih Dapil --</option>
+                        @foreach($dapilDetails as $dapilName => $coverage)
+                            <option value="{{ $dapilName }}" data-coverage="{{ $coverage }}" {{ old('dapil') === $dapilName ? 'selected' : '' }}>
+                                {{ $dapilName }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    @error('dapil')
+                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Address (Mandatory) -->
+                <div class="custom-form-group">
+                    <label for="address">Alamat Rumah Tinggal Lengkap <span class="required-star">*</span></label>
+                    <input type="text" name="address" id="address" class="custom-input @error('address') is-invalid @enderror" value="{{ old('address') }}" placeholder="Alamat lengkap tempat tinggal siswa (Jalan, RT/RW, Kel/Kec)" required>
+                    @error('address')
+                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <div class="input-row">
                     <div class="custom-form-group">
-                        <label for="password">Kata Sandi</label>
+                        <label for="password">Kata Sandi <span class="required-star">*</span></label>
                         <input type="password" name="password" id="password" class="custom-input @error('password') is-invalid @enderror" placeholder="Min. 8 karakter" required autocomplete="new-password">
                         @error('password')
                             <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
                         @enderror
                     </div>
                     <div class="custom-form-group">
-                        <label for="password_confirmation">Konfirmasi Sandi</label>
+                        <label for="password_confirmation">Konfirmasi Sandi <span class="required-star">*</span></label>
                         <input type="password" name="password_confirmation" id="password_confirmation" class="custom-input" placeholder="Ulangi kata sandi" required autocomplete="new-password">
                     </div>
                 </div>
@@ -452,4 +617,33 @@
         </div>
     </div>
 </div>
+
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+    function previewRegisterAvatar(event) {
+        const input = event.target;
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('register-avatar-preview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        new TomSelect("#dapil", {
+            create: false,
+            sortField: {
+                field: "text",
+                direction: "asc"
+            },
+            searchField: ['text', 'coverage'],
+            maxOptions: 100,
+            allowEmptyOption: true,
+            dropdownParent: "body"
+        });
+    });
+</script>
 @endsection

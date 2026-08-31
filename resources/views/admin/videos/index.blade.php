@@ -6,7 +6,7 @@
 <div class="page-header">
     <div class="page-title">
         <h1>Manajemen Materi Video</h1>
-        <p>Kelola bahan pembelajaran berupa video interaktif Empat Pilar Kebangsaan untuk siswa.</p>
+        <p>Kelola bahan pembelajaran berupa video MP4 atau tautan video interaktif Empat Pilar Kebangsaan untuk siswa.</p>
     </div>
     <a href="{{ route('admin.videos.create') }}" class="btn btn-primary">
         <i class="fi fi-rr-plus"></i> Tambah Materi Video
@@ -20,10 +20,11 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Pilar Kebangsaan</th>
+                            <th>Kategori / Pilar</th>
                             <th>Judul Video</th>
-                            <th>Durasi Video</th>
-                            <th>Tautan Video</th>
+                            <th>Tipe Media</th>
+                            <th>Durasi</th>
+                            <th>Tautan / File</th>
                             <th>Tanggal Dibuat</th>
                             <th style="width: 150px; text-align: center;">Aksi</th>
                         </tr>
@@ -33,16 +34,27 @@
                             <tr>
                                 <td>
                                     <span class="badge {{ $video->pillar }}">
-                                        {{ str_replace('_', ' ', $video->pillar) }}
+                                        {{ $video->formatted_pillar }}
                                     </span>
                                 </td>
                                 <td style="font-weight: 600; color: var(--color-dark);">
                                     {{ $video->title }}
                                 </td>
+                                <td>
+                                    @if($video->is_direct_video || str_starts_with($video->video_url, 'storage/'))
+                                        <span class="badge" style="background-color: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 600;">
+                                            <i class="fi fi-rr-file-video" style="margin-right: 4px; vertical-align: middle;"></i> File MP4
+                                        </span>
+                                    @else
+                                        <span class="badge" style="background-color: rgba(220, 38, 38, 0.1); color: #dc2626; font-weight: 600;">
+                                            <i class="fi fi-rr-play-alt" style="margin-right: 4px; vertical-align: middle;"></i> YouTube/URL
+                                        </span>
+                                    @endif
+                                </td>
                                 <td><i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.85rem; vertical-align: middle;"></i>{{ $video->read_time }} Menit</td>
-                                <td style="font-size: 0.85rem; color: var(--color-gray-600); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                    <a href="{{ $video->video_url }}" target="_blank" style="text-decoration: underline;">
-                                        <i class="fi fi-rr-link" style="margin-right: 4px;"></i>Buka Tautan
+                                <td style="font-size: 0.85rem; color: var(--color-gray-600); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    <a href="{{ $video->playable_video_url }}" target="_blank" style="text-decoration: underline;">
+                                        <i class="fi fi-rr-link" style="margin-right: 4px;"></i>{{ str_starts_with($video->video_url, 'storage/') ? basename($video->video_url) : 'Buka Link' }}
                                     </a>
                                 </td>
                                 <td style="font-size: 0.85rem; color: var(--color-gray-600);">
@@ -71,7 +83,7 @@
             <div style="text-align: center; padding: 60px 20px; color: var(--color-gray-400);">
                 <p style="font-size: 2.5rem; margin-bottom: 12px;"><i class="fi fi-rr-video-slash" style="color: var(--color-gray-400); font-size: 2.5rem;"></i></p>
                 <h3>Belum Ada Materi Video</h3>
-                <p style="margin-top: 4px; margin-bottom: 20px;">Silakan tambahkan video pertama untuk mendukung pembelajaran interaktif siswa.</p>
+                <p style="margin-top: 4px; margin-bottom: 20px;">Silakan tambahkan video pertama (upload MP4 atau link YouTube) untuk siswa.</p>
                 <a href="{{ route('admin.videos.create') }}" class="btn btn-primary">Tambah Video Pertama</a>
             </div>
         @endif

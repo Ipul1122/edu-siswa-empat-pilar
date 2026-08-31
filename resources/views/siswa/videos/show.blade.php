@@ -24,7 +24,17 @@
 
     <!-- Body Content with Video Player -->
     <div style="padding: 30px 48px 0 48px;">
-        @if($material->youtube_embed_url)
+        @if($material->is_direct_video)
+            <!-- HTML5 Native MP4/WebM Video Player -->
+            <div style="position: relative; overflow: hidden; max-width: 100%; border-radius: var(--border-radius-md); box-shadow: var(--shadow-md); background-color: var(--color-black);">
+                <video controls controlsList="nodownload" playsinline style="width: 100%; max-height: 520px; display: block; border-radius: var(--border-radius-md); background: #000;">
+                    <source src="{{ $material->playable_video_url }}" type="video/mp4">
+                    <source src="{{ $material->playable_video_url }}" type="video/webm">
+                    Browser Anda tidak mendukung pemutar video HTML5.
+                </video>
+            </div>
+        @elseif($material->youtube_embed_url)
+            <!-- YouTube Embed Player -->
             <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: var(--border-radius-md); box-shadow: var(--shadow-md); background-color: var(--color-black);">
                 <iframe src="{{ $material->youtube_embed_url }}" 
                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
@@ -60,8 +70,8 @@
                 <i class="fi fi-rr-video-slash" style="font-size: 3rem; margin-bottom: 12px;"></i>
                 <p>Tautan video tidak valid atau tidak didukung.</p>
                 <p style="font-size: 0.85rem; margin-top: 4px; margin-bottom: 16px;">URL: {{ $material->video_url }}</p>
-                <a href="{{ $material->video_url }}" target="_blank" class="btn btn-secondary" style="border: 1px solid var(--color-gray-300); text-decoration: none;">
-                    <i class="fi fi-rr-play-alt" style="color: #dc2626; margin-right: 4px; vertical-align: middle;"></i> Tonton Langsung di YouTube
+                <a href="{{ $material->playable_video_url }}" target="_blank" class="btn btn-secondary" style="border: 1px solid var(--color-gray-300); text-decoration: none;">
+                    <i class="fi fi-rr-play-alt" style="color: #dc2626; margin-right: 4px; vertical-align: middle;"></i> Buka Tautan Video
                 </a>
             </div>
         @endif

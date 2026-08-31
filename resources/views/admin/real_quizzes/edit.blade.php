@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Buat Latihan Kuis Baru - Admin')
+@section('title', 'Edit Real Materi - Admin')
 
 @section('content')
 <!-- Quill.js Rich Text Editor CDN Stylesheet -->
@@ -34,24 +34,25 @@
 
 <div class="page-header">
     <div class="page-title">
-        <h1>Buat Latihan Kuis Baru</h1>
-        <p>Buat paket latihan soal evaluasi. Anda dapat menambahkan butir-butir soal setelah kuis dibuat.</p>
+        <h1>Edit Evaluasi Real Materi</h1>
+        <p>Perbarui informasi paket evaluasi resmi Real Materi.</p>
     </div>
-    <a href="{{ route('admin.quizzes.index') }}" class="btn btn-secondary">
+    <a href="{{ route('admin.real-materi.index') }}" class="btn btn-secondary">
         ← Kembali
     </a>
 </div>
 
 <div class="card" style="max-width: 800px; margin: 0 auto; width: 100%;">
     <div class="card-body">
-        <form action="{{ route('admin.quizzes.store') }}" method="POST" id="quiz-form">
+        <form action="{{ route('admin.real-materi.update', $quiz) }}" method="POST" id="real-quiz-form">
             @csrf
+            @method('PUT')
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
                 <!-- Title -->
                 <div class="form-group">
-                    <label for="title">Judul Latihan Kuis</label>
-                    <input type="text" name="title" id="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" placeholder="Masukkan judul latihan kuis" required>
+                    <label for="title">Judul Real Materi</label>
+                    <input type="text" name="title" id="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title', $quiz->title) }}" placeholder="Masukkan judul evaluasi real materi" required>
                     @error('title')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
@@ -61,12 +62,11 @@
                 <div class="form-group">
                     <label for="pillar">Kategori / Pilar</label>
                     <select name="pillar" id="pillar" class="form-control @error('pillar') is-invalid @enderror" required>
-                        <option value="" disabled selected>-- Pilih Kategori --</option>
-                        <option value="pancasila" {{ old('pillar') === 'pancasila' ? 'selected' : '' }}>Pancasila</option>
-                        <option value="uud_1945" {{ old('pillar') === 'uud_1945' ? 'selected' : '' }}>UUD NRI 1945</option>
-                        <option value="nkri" {{ old('pillar') === 'nkri' ? 'selected' : '' }}>NKRI</option>
-                        <option value="bhinneka_tunggal_ika" {{ old('pillar') === 'bhinneka_tunggal_ika' ? 'selected' : '' }}>Bhinneka Tunggal Ika</option>
-                        <option value="twk_kedinasan" {{ old('pillar') === 'twk_kedinasan' ? 'selected' : '' }}>Simulasi TWK Kedinasan</option>
+                        <option value="pancasila" {{ old('pillar', $quiz->pillar) === 'pancasila' ? 'selected' : '' }}>Pancasila</option>
+                        <option value="uud_1945" {{ old('pillar', $quiz->pillar) === 'uud_1945' ? 'selected' : '' }}>UUD NRI 1945</option>
+                        <option value="nkri" {{ old('pillar', $quiz->pillar) === 'nkri' ? 'selected' : '' }}>NKRI</option>
+                        <option value="bhinneka_tunggal_ika" {{ old('pillar', $quiz->pillar) === 'bhinneka_tunggal_ika' ? 'selected' : '' }}>Bhinneka Tunggal Ika</option>
+                        <option value="twk_kedinasan" {{ old('pillar', $quiz->pillar) === 'twk_kedinasan' ? 'selected' : '' }}>Simulasi TWK Kedinasan</option>
                     </select>
                     @error('pillar')
                         <span class="invalid-feedback">{{ $message }}</span>
@@ -77,7 +77,7 @@
             <!-- Duration -->
             <div class="form-group" style="width: 250px;">
                 <label for="duration_minutes">Durasi Pengerjaan (Menit)</label>
-                <input type="number" name="duration_minutes" id="duration_minutes" class="form-control @error('duration_minutes') is-invalid @enderror" value="{{ old('duration_minutes', 15) }}" min="1" required>
+                <input type="number" name="duration_minutes" id="duration_minutes" class="form-control @error('duration_minutes') is-invalid @enderror" value="{{ old('duration_minutes', $quiz->duration_minutes) }}" min="1" required>
                 @error('duration_minutes')
                     <span class="invalid-feedback">{{ $message }}</span>
                 @enderror
@@ -85,13 +85,13 @@
 
             <!-- Description with Rich Text Toolbar -->
             <div class="form-group">
-                <label for="editor_description">Deskripsi / Petunjuk Latihan Kuis</label>
+                <label for="editor_description">Deskripsi / Petunjuk Ujian</label>
                 <div style="font-size: 0.8rem; color: var(--color-gray-600); margin-bottom: 6px;">
                     Gunakan grup teks untuk memformat petunjuk pengerjaan (<strong>Tebal</strong>, <em>Miring</em>, <u>Garis Bawah</u>, List, Heading, Link, dll).
                 </div>
                 
-                <div id="editor_description">{!! old('description') !!}</div>
-                <input type="hidden" name="description" id="description" value="{{ old('description') }}">
+                <div id="editor_description">{!! old('description', $quiz->description) !!}</div>
+                <input type="hidden" name="description" id="description" value="{{ old('description', $quiz->description) }}">
 
                 @error('description')
                     <span class="invalid-feedback" style="display: block; margin-top: 6px;">{{ $message }}</span>
@@ -99,8 +99,8 @@
             </div>
 
             <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px;">
-                <a href="{{ route('admin.quizzes.index') }}" class="btn btn-secondary">Batal</a>
-                <button type="submit" class="btn btn-primary">Simpan Latihan Kuis</button>
+                <a href="{{ route('admin.real-materi.index') }}" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </div>
         </form>
     </div>
@@ -123,10 +123,10 @@
         const quill = new Quill('#editor_description', {
             modules: { toolbar: toolbarOptions },
             theme: 'snow',
-            placeholder: 'Tulis deskripsi kuis atau instruksi pengerjaan latihan kuis di sini...'
+            placeholder: 'Tulis deskripsi ujian atau instruksi pengerjaan di sini...'
         });
 
-        const form = document.getElementById('quiz-form');
+        const form = document.getElementById('real-quiz-form');
         const descriptionInput = document.getElementById('description');
 
         form.addEventListener('submit', function() {

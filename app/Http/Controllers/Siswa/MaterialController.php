@@ -25,14 +25,15 @@ class MaterialController extends Controller
             ->toArray();
 
         // Get materials
-        $materials = Material::query()->where('type', 'text')->get();
+        $materials = Material::query()->where('type', 'text')->latest()->get();
 
         // Group by pillar and append is_completed flag
         $groupedMaterials = [
             'pancasila' => [],
             'uud_1945' => [],
             'nkri' => [],
-            'bhinneka_tunggal_ika' => []
+            'bhinneka_tunggal_ika' => [],
+            'twk_kedinasan' => []
         ];
 
         foreach ($materials as $material) {

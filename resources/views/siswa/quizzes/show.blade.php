@@ -18,9 +18,9 @@
             <h2 style="font-size: 1.75rem; color: var(--color-dark); font-family: var(--font-heading);">{{ $quiz->title }}</h2>
         </div>
 
-        <p style="color: var(--color-gray-600); line-height: 1.6; font-size: 1rem;">
-            {{ $quiz->description ?? 'Uji pemahaman Anda mengenai pilar kebangsaan ini melalui beberapa butir soal pilihan ganda.' }}
-        </p>
+        <div style="color: var(--color-gray-600); line-height: 1.6; font-size: 1rem; text-align: left;">
+            {!! $quiz->description ? (str_contains($quiz->description, '<') ? $quiz->description : nl2br(e($quiz->description))) : 'Uji pemahaman Anda mengenai pilar kebangsaan ini melalui beberapa butir soal pilihan ganda.' !!}
+        </div>
 
         <!-- Quiz Meta Details -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 8px 0; background-color: var(--color-gray-100); padding: 20px; border-radius: var(--border-radius-md);">

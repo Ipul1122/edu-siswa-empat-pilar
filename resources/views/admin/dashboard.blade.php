@@ -11,7 +11,7 @@
 </div>
 
 <!-- Stats Grid -->
-<div class="stats-grid">
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
     <div class="stat-card">
         <div class="stat-icon primary"><i class="fi fi-rr-users-alt"></i></div>
         <div class="stat-info">
@@ -24,15 +24,23 @@
         <div class="stat-icon info"><i class="fi fi-rr-book-alt"></i></div>
         <div class="stat-info">
             <span class="stat-value">{{ $totalMaterials }}</span>
-            <span class="stat-label">Total Materi</span>
+            <span class="stat-label">Total Materi & Video</span>
         </div>
     </div>
     
     <div class="stat-card">
         <div class="stat-icon success"><i class="fi fi-rr-clipboard-list"></i></div>
         <div class="stat-info">
-            <span class="stat-value">{{ $totalQuizzes }}</span>
-            <span class="stat-label">Total Kuis</span>
+            <span class="stat-value">{{ $totalPracticeQuizzes }}</span>
+            <span class="stat-label">Latihan Kuis</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon warning" style="background-color: rgba(239, 68, 68, 0.1); color: #dc2626;"><i class="fi fi-rr-diploma"></i></div>
+        <div class="stat-info">
+            <span class="stat-value">{{ $totalRealQuizzes }}</span>
+            <span class="stat-label">Real Materi</span>
         </div>
     </div>
     

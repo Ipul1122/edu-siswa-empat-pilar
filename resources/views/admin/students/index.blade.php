@@ -29,7 +29,7 @@
                     <thead>
                         <tr>
                             <th>Nama Siswa</th>
-                            <th>Kelas</th>
+                            <th>Dapil</th>
                             <th>Sekolah</th>
                             <th style="width: 250px;">Progres Membaca</th>
                             <th>Kuis Diikuti</th>
@@ -43,7 +43,15 @@
                                 <td style="font-weight: 600; color: var(--color-dark);">
                                     {{ $student->name }}
                                 </td>
-                                <td>{{ $student->class_name }}</td>
+                                <td>
+                                    @if($student->dapil)
+                                        <span class="badge" style="background-color: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 600; font-size: 0.75rem;">
+                                            {{ $student->dapil }}
+                                        </span>
+                                    @else
+                                        <span style="color: var(--color-gray-400); font-size: 0.8rem;">-</span>
+                                    @endif
+                                </td>
                                 <td>{{ $student->school_name }}</td>
                                 <td>
                                     <!-- Reading progress bar -->

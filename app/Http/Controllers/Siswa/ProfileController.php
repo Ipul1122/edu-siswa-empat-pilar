@@ -18,8 +18,8 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        $dapilDetails = User::DAPIL_DETAILS;
-        return view('siswa.profile.edit', compact('user', 'dapilDetails'));
+        $dapilList = User::DAPIL_LIST;
+        return view('siswa.profile.edit', compact('user', 'dapilList'));
     }
 
     /**

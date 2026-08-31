@@ -16,7 +16,15 @@ class Quiz extends Model
         'description',
         'duration_minutes',
         'type',
+        'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     /**
      * Relationship to questions.

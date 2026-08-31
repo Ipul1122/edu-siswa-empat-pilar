@@ -188,7 +188,7 @@
             </div>
             <div class="meta-group" style="text-align: right;">
                 <div class="meta-item">Total Siswa Terdaftar: <span>{{ count($students) }} Siswa</span></div>
-                <div class="meta-item">Total Modul Pembelajaran: <span>{{ $totalMaterialsCount }} Modul</span></div>
+                <div class="meta-item">Total Paket Real Materi: <span>{{ $totalRealMateriCount }} Paket</span></div>
             </div>
         </div>
 
@@ -200,7 +200,7 @@
                     <th>Nama Siswa</th>
                     <th>Sekolah</th>
                     <th style="width: 130px;">Dapil</th>
-                    <th style="text-align: center; width: 100px;">Materi Selesai</th>
+                    <th style="text-align: center; width: 110px;">Real Materi Selesai</th>
                     <th style="text-align: center; width: 90px;">Kuis Diikuti</th>
                     <th style="text-align: center; width: 90px;">Rerata Nilai</th>
                     <th style="text-align: center; width: 70px;">Poin</th>
@@ -209,8 +209,8 @@
             <tbody>
                 @foreach($students as $index => $student)
                     @php
-                        $progressPercent = $totalMaterialsCount > 0 
-                            ? round(($student->completed_progress_count / $totalMaterialsCount) * 100) 
+                        $progressPercent = $totalRealMateriCount > 0 
+                            ? round(($student->completed_progress_count / $totalRealMateriCount) * 100) 
                             : 0;
                     @endphp
                     <tr>
@@ -219,7 +219,7 @@
                         <td>{{ $student->school_name }}</td>
                         <td>{{ $student->dapil ?? '-' }}</td>
                         <td style="text-align: center;">
-                            {{ $student->completed_progress_count }} / {{ $totalMaterialsCount }} ({{ $progressPercent }}%)
+                            {{ $student->completed_progress_count }} / {{ $totalRealMateriCount }} ({{ $progressPercent }}%)
                         </td>
                         <td style="text-align: center;">{{ $student->quizzes_count }} Kali</td>
                         <td style="text-align: center; font-weight: 700; color: {{ $student->average_score >= 70 ? '#10b981' : ($student->average_score > 0 ? '#ef4444' : '#64748b') }}">

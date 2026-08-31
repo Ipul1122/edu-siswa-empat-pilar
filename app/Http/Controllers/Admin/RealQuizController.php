@@ -13,8 +13,14 @@ class RealQuizController extends Controller
      */
     public function index()
     {
-        $quizzes = Quiz::query()->where('type', '=', 'real', 'and')->withCount('questions')->latest()->get();
-        return view('admin.real_quizzes.index', compact('quizzes'));
+        $quizzes = Quiz::query()->where('type', '=', 'real')->withCount('questions')->latest()->get();
+        
+        $totalRealCount = $quizzes->count();
+        $activeRealCount = $quizzes->where('is_active', true)->count();
+        $isAllClosed = ($activeRealCount === 0 && $totalRealCount > 0);
+        $isAllOpen = ($activeRealCount === $totalRealCount && $totalRealCount > 0);
+
+        return view('admin.real_quizzes.index', compact('quizzes', 'totalRealCount', 'activeRealCount', 'isAllClosed', 'isAllOpen'));
     }
 
     /**
@@ -47,6 +53,7 @@ class RealQuizController extends Controller
 
         $data = $request->all();
         $data['type'] = 'real';
+        $data['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
         Quiz::create($data);
 
         return redirect()->route('admin.real-materi.index')
@@ -98,10 +105,41 @@ class RealQuizController extends Controller
 
         $data = $request->all();
         $data['type'] = 'real';
+        $data['is_active'] = $request->boolean('is_active');
         $quiz->update($data);
 
         return redirect()->route('admin.real-materi.index')
             ->with('success', 'Real Materi evaluasi berhasil diperbarui!');
+    }
+
+    /**
+     * Global Master Switch: Open or Close ALL Real Materi simultaneously.
+     */
+    public function toggleAll(Request $request)
+    {
+        $targetStatus = $request->boolean('status'); // true = Buka Semua, false = Tutup Semua
+
+        Quiz::query()->where('type', 'real')->update(['is_active' => $targetStatus]);
+
+        $statusMsg = $targetStatus 
+            ? 'Seluruh paket evaluasi Real Materi BERHASIL DIBUKA untuk seluruh siswa!' 
+            : 'Seluruh evaluasi Real Materi BERHASIL DITUTUP serentak! Para siswa tidak dapat mengakses atau mengerjakan Real Materi.';
+
+        return redirect()->route('admin.real-materi.index')
+            ->with('success', $statusMsg);
+    }
+
+    /**
+     * Toggle active/closed status of an individual Real Materi quiz.
+     */
+    public function toggleStatus(Quiz $real_materi)
+    {
+        $real_materi->is_active = !$real_materi->is_active;
+        $real_materi->save();
+
+        $statusText = $real_materi->is_active ? 'dibuka kembali (siswa dapat mengerjakan)' : 'berhasil ditutup (siswa tidak dapat mengerjakan)';
+
+        return back()->with('success', "Status Real Materi '{$real_materi->title}' {$statusText}!");
     }
 
     /**

@@ -27,20 +27,5 @@ class UserSeeder extends Seeder
                 'dapil' => null,
             ]
         );
-
-        // Siswa Account
-        User::updateOrCreate(
-            ['email' => 'siswa@gmail.com'],
-            [
-                'name' => 'Budi Santoso',
-                'password' => Hash::make('password'),
-                'role' => 'siswa',
-                'class_name' => 'SMA/SMK',
-                'school_name' => 'SMK Negeri 1 Jakarta',
-                'image' => null,
-                'dapil' => 'DKI JAKARTA I',
-                'address' => 'Jl. Merdeka No. 45, Gambir, Jakarta Pusat',
-            ]
-        );
     }
 }

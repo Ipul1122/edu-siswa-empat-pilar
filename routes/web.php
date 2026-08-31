@@ -57,7 +57,9 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     // Quizzes (Latihan Kuis) CRUD
     Route::resource('quizzes', App\Http\Controllers\Admin\QuizController::class);
 
-    // Real Materi CRUD
+    // Real Materi CRUD & Global / Individual Toggle Status
+    Route::post('/real-materi/toggle-all', [App\Http\Controllers\Admin\RealQuizController::class, 'toggleAll'])->name('real-materi.toggle-all');
+    Route::patch('/real-materi/{real_materi}/toggle', [App\Http\Controllers\Admin\RealQuizController::class, 'toggleStatus'])->name('real-materi.toggle');
     Route::resource('real-materi', App\Http\Controllers\Admin\RealQuizController::class)->names('real-materi');
 
     // Questions CRUD (Nest within quiz context)
@@ -72,6 +74,10 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     Route::get('/students/export', [App\Http\Controllers\Admin\StudentController::class, 'export'])->name('students.export');
     Route::get('/students/report', [App\Http\Controllers\Admin\StudentController::class, 'report'])->name('students.report');
     Route::get('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'show'])->name('students.show');
+
+    // Admin Profile Settings
+    Route::get('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
 });
 
 // Siswa Panel Routes

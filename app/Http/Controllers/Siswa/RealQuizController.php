@@ -20,10 +20,10 @@ class RealQuizController extends Controller
         $user = Auth::user();
 
         // Get quizzes with questions count
-        $quizzes = Quiz::where('type', '=', 'real')->withCount('questions')->latest()->get();
+        $quizzes = Quiz::query()->where('type', '=', 'real')->withCount('questions')->latest()->get();
 
         // Get attempt score for each quiz by this user (since only 1x, it's the score)
-        $attempts = QuizAttempt::query()->where('user_id', $user->id)
+        $attempts = QuizAttempt::query()->where('user_id', '=', $user->id)
             ->selectRaw('quiz_id, max(score) as max_score')
             ->groupBy('quiz_id')
             ->pluck('max_score', 'quiz_id')
@@ -57,8 +57,14 @@ class RealQuizController extends Controller
             abort(404);
         }
 
+        // Check if quiz is closed by admin
+        if (!$quiz->is_active) {
+            return redirect()->route('siswa.real-materi.index')
+                ->with('error', 'Kuis Real Materi ini sedang ditutup oleh Admin dan tidak dapat diakses saat ini.');
+        }
+
         // Check if already completed
-        $exists = QuizAttempt::where('user_id', '=', Auth::id(), 'and')->where('quiz_id', '=', $quiz->id, 'and')->exists();
+        $exists = QuizAttempt::query()->where('user_id', '=', Auth::id())->where('quiz_id', '=', $quiz->id)->exists();
         if ($exists) {
             return redirect()->route('siswa.real-materi.index')
                 ->with('error', 'Anda sudah mengerjakan kuis ini. Setiap kuis Real Materi hanya dapat dikerjakan 1 kali.');
@@ -77,8 +83,14 @@ class RealQuizController extends Controller
             abort(404);
         }
 
+        // Check if quiz is closed by admin
+        if (!$quiz->is_active) {
+            return redirect()->route('siswa.real-materi.index')
+                ->with('error', 'Kuis Real Materi ini sedang ditutup oleh Admin.');
+        }
+
         // Check if already completed
-        $exists = QuizAttempt::where('user_id', '=', Auth::id(), 'and')->where('quiz_id', '=', $quiz->id, 'and')->exists();
+        $exists = QuizAttempt::query()->where('user_id', '=', Auth::id())->where('quiz_id', '=', $quiz->id)->exists();
         if ($exists) {
             return redirect()->route('siswa.real-materi.index')
                 ->with('error', 'Anda sudah mengerjakan kuis ini. Setiap kuis Real Materi hanya dapat dikerjakan 1 kali.');
@@ -102,10 +114,16 @@ class RealQuizController extends Controller
             abort(404);
         }
 
+        // Check if quiz is closed by admin
+        if (!$quiz->is_active) {
+            return redirect()->route('siswa.real-materi.index')
+                ->with('error', 'Kuis Real Materi ini telah ditutup oleh Admin.');
+        }
+
         $user = Auth::user();
 
         // Check if already completed
-        $exists = QuizAttempt::where('user_id', '=', $user->id, 'and')->where('quiz_id', '=', $quiz->id, 'and')->exists();
+        $exists = QuizAttempt::query()->where('user_id', '=', $user->id)->where('quiz_id', '=', $quiz->id)->exists();
         if ($exists) {
             return redirect()->route('siswa.real-materi.index')
                 ->with('error', 'Anda sudah mengerjakan kuis ini.');

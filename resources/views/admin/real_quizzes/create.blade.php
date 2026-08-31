@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Buat Latihan Kuis Baru - Admin')
+@section('title', 'Buat Real Materi Baru - Admin')
 
 @section('content')
 <!-- Quill.js Rich Text Editor CDN Stylesheet -->
@@ -34,24 +34,24 @@
 
 <div class="page-header">
     <div class="page-title">
-        <h1>Buat Latihan Kuis Baru</h1>
-        <p>Buat paket latihan soal evaluasi. Anda dapat menambahkan butir-butir soal setelah kuis dibuat.</p>
+        <h1>Buat Evaluasi Real Materi</h1>
+        <p>Buat paket evaluasi resmi Real Materi yang hanya dapat dikerjakan 1 kali oleh siswa.</p>
     </div>
-    <a href="{{ route('admin.quizzes.index') }}" class="btn btn-secondary">
+    <a href="{{ route('admin.real-materi.index') }}" class="btn btn-secondary">
         ← Kembali
     </a>
 </div>
 
 <div class="card" style="max-width: 800px; margin: 0 auto; width: 100%;">
     <div class="card-body">
-        <form action="{{ route('admin.quizzes.store') }}" method="POST" id="quiz-form">
+        <form action="{{ route('admin.real-materi.store') }}" method="POST" id="real-quiz-form">
             @csrf
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
                 <!-- Title -->
                 <div class="form-group">
-                    <label for="title">Judul Latihan Kuis</label>
-                    <input type="text" name="title" id="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" placeholder="Masukkan judul latihan kuis" required>
+                    <label for="title">Judul Real Materi</label>
+                    <input type="text" name="title" id="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" placeholder="Masukkan judul evaluasi real materi" required>
                     @error('title')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
@@ -85,7 +85,7 @@
 
             <!-- Description with Rich Text Toolbar -->
             <div class="form-group">
-                <label for="editor_description">Deskripsi / Petunjuk Latihan Kuis</label>
+                <label for="editor_description">Deskripsi / Petunjuk Ujian</label>
                 <div style="font-size: 0.8rem; color: var(--color-gray-600); margin-bottom: 6px;">
                     Gunakan grup teks untuk memformat petunjuk pengerjaan (<strong>Tebal</strong>, <em>Miring</em>, <u>Garis Bawah</u>, List, Heading, Link, dll).
                 </div>
@@ -99,8 +99,8 @@
             </div>
 
             <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px;">
-                <a href="{{ route('admin.quizzes.index') }}" class="btn btn-secondary">Batal</a>
-                <button type="submit" class="btn btn-primary">Simpan Latihan Kuis</button>
+                <a href="{{ route('admin.real-materi.index') }}" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">Simpan Real Materi</button>
             </div>
         </form>
     </div>
@@ -123,10 +123,10 @@
         const quill = new Quill('#editor_description', {
             modules: { toolbar: toolbarOptions },
             theme: 'snow',
-            placeholder: 'Tulis deskripsi kuis atau instruksi pengerjaan latihan kuis di sini...'
+            placeholder: 'Tulis deskripsi ujian atau instruksi pengerjaan di sini...'
         });
 
-        const form = document.getElementById('quiz-form');
+        const form = document.getElementById('real-quiz-form');
         const descriptionInput = document.getElementById('description');
 
         form.addEventListener('submit', function() {

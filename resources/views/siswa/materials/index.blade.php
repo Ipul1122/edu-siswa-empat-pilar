@@ -15,7 +15,8 @@
         'pancasila' => ['title' => 'Pancasila', 'desc' => 'Dasar Negara dan Ideologi Bangsa', 'icon_class' => 'fi fi-rr-shield', 'color' => '#ff5252'],
         'uud_1945' => ['title' => 'UUD NRI 1945', 'desc' => 'Hukum Dasar Tertulis Tertinggi Konstitusi', 'icon_class' => 'fi fi-rr-scroll', 'color' => '#ffd740'],
         'nkri' => ['title' => 'NKRI', 'desc' => 'Negara Kesatuan Republik Indonesia', 'icon_class' => 'fi fi-rr-map', 'color' => '#40c4ff'],
-        'bhinneka_tunggal_ika' => ['title' => 'Bhinneka Tunggal Ika', 'desc' => 'Harmoni Keberagaman Semboyan Bangsa', 'icon_class' => 'fi fi-rr-handshake', 'color' => '#69f0ae']
+        'bhinneka_tunggal_ika' => ['title' => 'Bhinneka Tunggal Ika', 'desc' => 'Harmoni Keberagaman Semboyan Bangsa', 'icon_class' => 'fi fi-rr-handshake', 'color' => '#69f0ae'],
+        'twk_kedinasan' => ['title' => 'Simulasi TWK Kedinasan', 'desc' => 'Materi Tes Wawasan Kebangsaan Persiapan Sekolah Kedinasan & Ujian Sekolah', 'icon_class' => 'fi fi-rr-diploma', 'color' => '#8b5cf6']
     ];
 @endphp
 
@@ -37,8 +38,10 @@
                     @foreach($materialsList as $material)
                         <div class="card" style="transition: var(--transition-smooth); border: 1px solid var(--color-gray-200); display: flex; flex-direction: column; justify-content: space-between;">
                             <div class="card-body" style="padding: 24px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                    <span class="badge {{ $material->pillar }}" style="font-size: 0.7rem;"><i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $material->read_time }} Menit Baca</span>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span class="badge {{ $material->pillar }}" style="font-size: 0.7rem;">
+                                        <i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $material->read_time }} Menit Baca
+                                    </span>
                                     @if($material->is_completed)
                                         <span class="badge completed" style="font-size: 0.7rem;">Selesai</span>
                                     @else
@@ -60,7 +63,7 @@
             @else
                 <div style="background-color: var(--color-white); border-radius: var(--border-radius-md); padding: 30px; text-align: center; border: 1px solid var(--color-gray-200); color: var(--color-gray-400);">
                     <p style="font-size: 1.5rem; margin-bottom: 4px;"><i class="fi fi-rr-box-open" style="color: var(--color-gray-400); font-size: 1.5rem;"></i></p>
-                    <p>Materi untuk pilar ini belum ditambahkan oleh Admin.</p>
+                    <p>Materi untuk kategori ini belum ditambahkan oleh Admin.</p>
                 </div>
             @endif
         </div>

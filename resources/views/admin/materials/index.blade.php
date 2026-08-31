@@ -20,7 +20,7 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Pilar Kebangsaan</th>
+                            <th>Kategori / Pilar</th>
                             <th>Judul Materi</th>
                             <th>Estimasi Waktu</th>
                             <th>Tanggal Dibuat</th>
@@ -32,7 +32,7 @@
                             <tr>
                                 <td>
                                     <span class="badge {{ $material->pillar }}">
-                                        {{ str_replace('_', ' ', $material->pillar) }}
+                                        {{ $material->formatted_pillar }}
                                     </span>
                                 </td>
                                 <td style="font-weight: 600; color: var(--color-dark);">

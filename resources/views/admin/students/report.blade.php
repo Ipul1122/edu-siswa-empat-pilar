@@ -198,12 +198,12 @@
                 <tr>
                     <th style="width: 40px; text-align: center;">No</th>
                     <th>Nama Siswa</th>
-                    <th style="width: 80px;">Kelas</th>
                     <th>Sekolah</th>
+                    <th style="width: 130px;">Dapil</th>
                     <th style="text-align: center; width: 100px;">Materi Selesai</th>
-                    <th style="text-align: center; width: 100px;">Kuis Diikuti</th>
-                    <th style="text-align: center; width: 100px;">Rerata Nilai</th>
-                    <th style="text-align: center; width: 80px;">Poin</th>
+                    <th style="text-align: center; width: 90px;">Kuis Diikuti</th>
+                    <th style="text-align: center; width: 90px;">Rerata Nilai</th>
+                    <th style="text-align: center; width: 70px;">Poin</th>
                 </tr>
             </thead>
             <tbody>
@@ -216,8 +216,8 @@
                     <tr>
                         <td style="text-align: center; font-weight: 600;">{{ $index + 1 }}</td>
                         <td style="font-weight: 600;">{{ $student->name }}</td>
-                        <td>Kelas {{ $student->class_name }}</td>
                         <td>{{ $student->school_name }}</td>
+                        <td>{{ $student->dapil ?? '-' }}</td>
                         <td style="text-align: center;">
                             {{ $student->completed_progress_count }} / {{ $totalMaterialsCount }} ({{ $progressPercent }}%)
                         </td>

@@ -15,7 +15,8 @@
         'pancasila' => ['title' => 'Pancasila', 'icon_class' => 'fi fi-rr-shield', 'color' => '#ff5252'],
         'uud_1945' => ['title' => 'UUD NRI 1945', 'icon_class' => 'fi fi-rr-scroll', 'color' => '#ffd740'],
         'nkri' => ['title' => 'NKRI', 'icon_class' => 'fi fi-rr-map', 'color' => '#40c4ff'],
-        'bhinneka_tunggal_ika' => ['title' => 'Bhinneka Tunggal Ika', 'icon_class' => 'fi fi-rr-handshake', 'color' => '#69f0ae']
+        'bhinneka_tunggal_ika' => ['title' => 'Bhinneka Tunggal Ika', 'icon_class' => 'fi fi-rr-handshake', 'color' => '#69f0ae'],
+        'twk_kedinasan' => ['title' => 'Simulasi TWK Kedinasan', 'icon_class' => 'fi fi-rr-diploma', 'color' => '#8b5cf6']
     ];
 @endphp
 
@@ -34,9 +35,13 @@
                     @foreach($quizzesList as $quiz)
                         <div class="card" style="transition: var(--transition-smooth); border: 1px solid var(--color-gray-200); display: flex; flex-direction: column; justify-content: space-between;">
                             <div class="card-body" style="padding: 24px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                    <span class="badge {{ $quiz->pillar }}" style="font-size: 0.7rem;"><i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $quiz->duration_minutes }} Menit</span>
-                                    <span class="badge admin" style="font-size: 0.7rem;"><i class="fi fi-rr-list" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $quiz->questions_count }} Soal</span>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span class="badge {{ $quiz->pillar }}" style="font-size: 0.7rem;">
+                                        <i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $quiz->duration_minutes }} Menit
+                                    </span>
+                                    <span class="badge admin" style="font-size: 0.7rem;">
+                                        <i class="fi fi-rr-list" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $quiz->questions_count }} Soal
+                                    </span>
                                 </div>
                                 
                                 <h3 style="font-size: 1.1rem; color: var(--color-dark); font-weight: 600; line-height: 1.4; margin-top: 4px;">
@@ -77,7 +82,7 @@
             @else
                 <div style="background-color: var(--color-white); border-radius: var(--border-radius-md); padding: 30px; text-align: center; border: 1px solid var(--color-gray-200); color: var(--color-gray-400);">
                     <p style="font-size: 1.5rem; margin-bottom: 4px;"><i class="fi fi-rr-box-open" style="color: var(--color-gray-400); font-size: 1.5rem;"></i></p>
-                    <p>Evaluasi Real Materi untuk pilar ini belum ditambahkan oleh Admin.</p>
+                    <p>Evaluasi Real Materi untuk kategori ini belum ditambahkan oleh Admin.</p>
                 </div>
             @endif
         </div>

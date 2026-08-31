@@ -25,14 +25,15 @@ class VideoMaterialController extends Controller
             ->toArray();
 
         // Get only video materials
-        $materials = Material::query()->where('type', 'video')->get();
+        $materials = Material::query()->where('type', 'video')->latest()->get();
 
         // Group by pillar and append is_completed flag
         $groupedVideos = [
             'pancasila' => [],
             'uud_1945' => [],
             'nkri' => [],
-            'bhinneka_tunggal_ika' => []
+            'bhinneka_tunggal_ika' => [],
+            'twk_kedinasan' => []
         ];
 
         foreach ($materials as $material) {

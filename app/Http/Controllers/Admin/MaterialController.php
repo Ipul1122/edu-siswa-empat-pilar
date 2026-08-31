@@ -13,7 +13,7 @@ class MaterialController extends Controller
      */
     public function index()
     {
-        $materials = Material::query()->where('type', 'text')->latest()->get();
+        $materials = Material::query()->where('type', '=', 'text', 'and')->latest()->get();
         return view('admin.materials.index', compact('materials'));
     }
 
@@ -31,13 +31,13 @@ class MaterialController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika'],
+            'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika,twk_kedinasan'],
             'title' => ['required', 'string', 'max:255', 'unique:materials,title'],
             'content' => ['required', 'string'],
             'read_time' => ['required', 'integer', 'min:1'],
         ], [
-            'pillar.required' => 'Pilar Kebangsaan wajib dipilih.',
-            'pillar.in' => 'Pilar Kebangsaan tidak valid.',
+            'pillar.required' => 'Kategori / Pilar wajib dipilih.',
+            'pillar.in' => 'Kategori / Pilar tidak valid.',
             'title.required' => 'Judul materi wajib diisi.',
             'title.unique' => 'Judul materi sudah digunakan.',
             'content.required' => 'Konten materi wajib diisi.',
@@ -75,13 +75,13 @@ class MaterialController extends Controller
         }
 
         $request->validate([
-            'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika'],
+            'pillar' => ['required', 'string', 'in:pancasila,uud_1945,nkri,bhinneka_tunggal_ika,twk_kedinasan'],
             'title' => ['required', 'string', 'max:255', 'unique:materials,title,' . $material->id],
             'content' => ['required', 'string'],
             'read_time' => ['required', 'integer', 'min:1'],
         ], [
-            'pillar.required' => 'Pilar Kebangsaan wajib dipilih.',
-            'pillar.in' => 'Pilar Kebangsaan tidak valid.',
+            'pillar.required' => 'Kategori / Pilar wajib dipilih.',
+            'pillar.in' => 'Kategori / Pilar tidak valid.',
             'title.required' => 'Judul materi wajib diisi.',
             'title.unique' => 'Judul materi sudah digunakan.',
             'content.required' => 'Konten materi wajib diisi.',

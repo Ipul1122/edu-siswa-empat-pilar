@@ -39,6 +39,13 @@
             'icon_class' => 'fi fi-rr-handshake', 
             'color' => '#69f0ae',
             'gradient' => 'linear-gradient(135deg, #69f0ae, #388e3c)'
+        ],
+        'twk_kedinasan' => [
+            'title' => 'Simulasi TWK Kedinasan', 
+            'desc' => 'Materi video Tes Wawasan Kebangsaan persiapan kedinasan & ujian sekolah', 
+            'icon_class' => 'fi fi-rr-diploma', 
+            'color' => '#8b5cf6',
+            'gradient' => 'linear-gradient(135deg, #8b5cf6, #6d28d9)'
         ]
     ];
 @endphp
@@ -69,15 +76,17 @@
                                         <i class="fi fi-rr-play-alt" style="font-size: 1.5rem; margin-left: 4px; display: inline-block;"></i>
                                     </div>
                                 </div>
-                                <span class="badge {{ $video->pillar }}" style="position: absolute; bottom: 12px; left: 12px; font-size: 0.65rem; background: rgba(255,255,255,0.9); color: var(--color-dark); box-shadow: var(--shadow-sm);">
-                                    <i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $video->read_time }} Menit Durasi
-                                </span>
+                                <div style="position: absolute; bottom: 12px; left: 12px; display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span class="badge {{ $video->pillar }}" style="font-size: 0.65rem; background: rgba(255,255,255,0.9); color: var(--color-dark); box-shadow: var(--shadow-sm);">
+                                        <i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $video->read_time }} Menit Durasi
+                                    </span>
+                                </div>
                             </div>
 
                             <div class="card-body" style="padding: 20px; display: flex; flex-direction: column; gap: 10px; flex: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <span style="font-size: 0.75rem; font-weight: 600; color: var(--color-gray-600); text-transform: uppercase;">
-                                        {{ str_replace('_', ' ', $video->pillar) }}
+                                        {{ $video->formatted_pillar }}
                                     </span>
                                     @if($video->is_completed)
                                         <span class="badge completed" style="font-size: 0.65rem;">Selesai</span>
@@ -103,7 +112,7 @@
             @else
                 <div style="background-color: var(--color-white); border-radius: var(--border-radius-md); padding: 30px; text-align: center; border: 1px solid var(--color-gray-200); color: var(--color-gray-400);">
                     <p style="font-size: 1.5rem; margin-bottom: 4px;"><i class="fi fi-rr-box-open" style="color: var(--color-gray-400); font-size: 1.5rem;"></i></p>
-                    <p>Materi video untuk pilar ini belum ditambahkan oleh Admin.</p>
+                    <p>Materi video untuk kategori ini belum ditambahkan oleh Admin.</p>
                 </div>
             @endif
         </div>

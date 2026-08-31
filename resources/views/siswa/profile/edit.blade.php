@@ -27,7 +27,6 @@
         box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12) !important;
     }
     .ts-dropdown {
-        position: absolute !important;
         background-color: #ffffff !important;
         background: #ffffff !important;
         border: 1px solid var(--color-gray-300) !important;
@@ -47,6 +46,7 @@
         border-bottom: 1px solid #f1f5f9 !important;
         color: #1e293b !important;
         cursor: pointer !important;
+        line-height: 1.4 !important;
     }
     .ts-dropdown .option:last-child {
         border-bottom: none !important;
@@ -61,35 +61,6 @@
         background: rgba(var(--color-primary-rgb), 0.08) !important;
         color: rgb(var(--color-primary-rgb)) !important;
         font-weight: 600 !important;
-    }
-    .dapil-select-option {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-    }
-    .dapil-main-title {
-        font-weight: 700;
-        color: #0f172a;
-        font-size: 0.92rem;
-    }
-    .dapil-subtext {
-        font-size: 0.78rem;
-        color: #64748b;
-        line-height: 1.35;
-    }
-    .dapil-selected-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #0f172a;
-    }
-    .dapil-badge-pill {
-        font-size: 0.75rem;
-        color: #64748b;
-        font-weight: normal;
     }
     .required-star {
         color: var(--color-danger);
@@ -208,17 +179,14 @@
                 @enderror
             </div>
 
-            <!-- Enhanced Searchable Dapil Dropdown with Regencies Coverage Search -->
+            <!-- Searchable Dapil Dropdown -->
             <div class="form-group" style="margin-top: 18px;">
                 <label for="dapil">Daerah Pemilihan (Dapil) DPR-RI <span class="required-star">*</span></label>
-                <div style="font-size: 0.8rem; color: var(--color-gray-600); margin-bottom: 6px;">
-                    Ketik nama kota/kabupaten Anda (contoh: <em>Bandung, Bogor, Surabaya, Medan, Depok</em>) untuk mencari Dapil secara otomatis.
-                </div>
                 <select name="dapil" id="dapil" class="form-control @error('dapil') is-invalid @enderror" required>
-                    <option value="">-- Cari Kota/Kabupaten atau Pilih Dapil --</option>
-                    @foreach($dapilDetails as $dapilName => $coverage)
-                        <option value="{{ $dapilName }}" data-coverage="{{ $coverage }}" {{ old('dapil', $user->dapil) === $dapilName ? 'selected' : '' }}>
-                            {{ $dapilName }}
+                    <option value="">-- Pilih atau Cari Daerah Pemilihan (Dapil) --</option>
+                    @foreach($dapilList as $dapilOption)
+                        <option value="{{ $dapilOption }}" {{ old('dapil', $user->dapil) === $dapilOption ? 'selected' : '' }}>
+                            {{ $dapilOption }}
                         </option>
                     @endforeach
                 </select>
@@ -280,26 +248,9 @@
     document.addEventListener('DOMContentLoaded', function () {
         new TomSelect("#dapil", {
             create: false,
-            sortField: {
-                field: "text",
-                direction: "asc"
-            },
-            searchField: ['text', 'coverage'],
             maxOptions: 100,
-            placeholder: "🔍 Cari kota/kabupaten atau nama Dapil...",
             allowEmptyOption: true,
-            dropdownParent: "body",
-            render: {
-                option: function(data, escape) {
-                    const coverage = data.coverage ? '<div class="dapil-subtext"><i class="fi fi-rr-marker" style="margin-right:3px; vertical-align:middle;"></i> Meliputi: ' + escape(data.coverage) + '</div>' : '';
-                    return '<div class="dapil-select-option">' +
-                           '<div class="dapil-main-title">' + escape(data.text) + '</div>' +
-                           coverage +
-                           '</div>';
-                },
-                item: function(data, escape) {
-                    const coverageBrief = data.coverage ? ' <span class="dapil-badge-pill">(' + escape(data.coverage) + ')</span>' : '';
-                    return '<div class="dapil-selected-item"><strong>' + escape(data.text) + '</strong>' + coverageBrief + '</div>';
+            placeholder: "🔍 Cari kota/kabupaten atau nama Dapil..."
         });
     });
 </script>

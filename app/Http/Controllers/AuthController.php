@@ -118,8 +118,8 @@ class AuthController extends Controller
         if (Auth::guard('web')->check()) {
             return redirect()->route('siswa.dashboard');
         }
-        $dapilDetails = User::DAPIL_DETAILS;
-        return view('auth.register', compact('dapilDetails'));
+        $dapilList = User::DAPIL_LIST;
+        return view('auth.register', compact('dapilList'));
     }
 
     /**

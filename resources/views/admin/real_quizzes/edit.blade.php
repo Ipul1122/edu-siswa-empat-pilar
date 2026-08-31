@@ -74,13 +74,29 @@
                 </div>
             </div>
 
-            <!-- Duration -->
-            <div class="form-group" style="width: 250px;">
-                <label for="duration_minutes">Durasi Pengerjaan (Menit)</label>
-                <input type="number" name="duration_minutes" id="duration_minutes" class="form-control @error('duration_minutes') is-invalid @enderror" value="{{ old('duration_minutes', $quiz->duration_minutes) }}" min="1" required>
-                @error('duration_minutes')
-                    <span class="invalid-feedback">{{ $message }}</span>
-                @enderror
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <!-- Duration -->
+                <div class="form-group">
+                    <label for="duration_minutes">Durasi Pengerjaan (Menit)</label>
+                    <input type="number" name="duration_minutes" id="duration_minutes" class="form-control @error('duration_minutes') is-invalid @enderror" value="{{ old('duration_minutes', $quiz->duration_minutes) }}" min="1" required>
+                    @error('duration_minutes')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Active Status -->
+                <div class="form-group">
+                    <label for="is_active">Status Akses Pengerjaan</label>
+                    <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', $quiz->is_active) ? 'checked' : '' }} style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="is_active" style="margin-bottom: 0; cursor: pointer; font-weight: 500; color: var(--color-dark);">
+                            Buka akses ujian (Siswa dapat mengerjakan)
+                        </label>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--color-gray-500); margin-top: 4px;">
+                        Jika tidak dicentang, Real Materi akan <strong>ditutup</strong> dan siswa tidak dapat mengakses soal ujian.
+                    </div>
+                </div>
             </div>
 
             <!-- Description with Rich Text Toolbar -->

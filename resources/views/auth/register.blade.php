@@ -560,17 +560,14 @@
                     @enderror
                 </div>
 
-                <!-- Enhanced Searchable Dapil Dropdown with Regencies Coverage Search -->
+                <!-- Searchable Dapil Dropdown -->
                 <div class="custom-form-group">
                     <label for="dapil">Daerah Pemilihan (Dapil) DPR-RI <span class="required-star">*</span></label>
-                    <div style="font-size: 0.78rem; color: var(--color-gray-600); margin-bottom: 4px;">
-                        Ketik nama kota/kabupaten Anda (contoh: <em>Bandung, Bogor, Surabaya, Medan, Depok</em>) untuk mencari otomatis.
-                    </div>
                     <select name="dapil" id="dapil" class="@error('dapil') is-invalid @enderror" required>
-                        <option value="">-- Cari Kota/Kabupaten atau Pilih Dapil --</option>
-                        @foreach($dapilDetails as $dapilName => $coverage)
-                            <option value="{{ $dapilName }}" data-coverage="{{ $coverage }}" {{ old('dapil') === $dapilName ? 'selected' : '' }}>
-                                {{ $dapilName }}
+                        <option value="">-- Pilih atau Cari Daerah Pemilihan (Dapil) --</option>
+                        @foreach($dapilList as $dapilOption)
+                            <option value="{{ $dapilOption }}" {{ old('dapil') === $dapilOption ? 'selected' : '' }}>
+                                {{ $dapilOption }}
                             </option>
                         @endforeach
                     </select>
@@ -635,14 +632,9 @@
     document.addEventListener('DOMContentLoaded', function () {
         new TomSelect("#dapil", {
             create: false,
-            sortField: {
-                field: "text",
-                direction: "asc"
-            },
-            searchField: ['text', 'coverage'],
             maxOptions: 100,
             allowEmptyOption: true,
-            dropdownParent: "body"
+            placeholder: "🔍 Cari kota/kabupaten atau nama Dapil..."
         });
     });
 </script>

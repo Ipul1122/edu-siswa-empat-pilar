@@ -72,11 +72,28 @@
                         <i class="fi fi-rr-users-alt"></i> Pemantauan Siswa
                     </a>
                 </li>
+                <li class="sidebar-menu-item {{ Route::is('admin.profile.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.profile.edit') }}">
+                        <i class="fi fi-rr-user"></i> Pengaturan Akun
+                    </a>
+                </li>
             </ul>
             
             <div class="sidebar-footer">
+                @if(Auth::guard('admin')->check())
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px; font-size: 0.85rem; color: var(--color-gray-400);">
+                        <img src="{{ Auth::guard('admin')->user()->image_url }}" alt="{{ Auth::guard('admin')->user()->name }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); flex-shrink: 0; background: #fff;">
+                        <div style="min-width: 0; flex: 1;">
+                            <a href="{{ route('admin.profile.edit') }}" style="color: var(--color-white); font-weight: 600; text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {{ Auth::guard('admin')->user()->name }}
+                            </a>
+                            <span style="font-size: 0.72rem; color: var(--color-secondary);">Administrator</span>
+                        </div>
+                    </div>
+                @endif
                 <form action="{{ route('logout') }}" method="POST" id="logout-form">
                     @csrf
+                    <input type="hidden" name="guard" value="admin">
                     <button type="submit" class="logout-btn-link">
                         <i class="fi fi-rr-sign-out-alt"></i> Keluar (Logout)
                     </button>

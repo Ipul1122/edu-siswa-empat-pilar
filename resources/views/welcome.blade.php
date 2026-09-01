@@ -33,7 +33,7 @@
     <!-- Hero Section -->
     <header class="hero-section">
         <div class="hero-content">
-            <h1>Pahami & Amalkan <br><span>Empat Pilar Kebangsaan</span></h1>
+            <h1><span>Empat Pilar Kebangsaan</span></h1>
             <p>
                 Platform pembelajaran digital interaktif mengenai kewarganegaraan, konstitusi, dan harmoni keberagaman Indonesia. Dirancang khusus untuk siswa/siswi tingkat SMA, SMK, dan MA demi memupuk jiwa nasionalisme yang unggul.
             </p>

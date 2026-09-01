@@ -434,6 +434,24 @@
         to { opacity: 1; transform: translateY(0); }
     }
     
+    .mobile-logo-wrapper {
+        display: none;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .mobile-mpr-logo {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.08));
+        transition: var(--transition-smooth);
+    }
+    
+    .mobile-mpr-logo:hover {
+        transform: scale(1.05);
+    }
+
     @media (max-width: 992px) {
         .brand-panel {
             display: none;
@@ -442,6 +460,11 @@
             flex: 1;
             padding: 30px 20px;
             max-height: none;
+        }
+        .mobile-logo-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     }
     
@@ -507,6 +530,11 @@
     <!-- Right Section: Register Form -->
     <div class="form-panel">
         <div class="form-container">
+            <div class="mobile-logo-wrapper">
+                <a href="{{ route('home') }}" title="Kembali ke Beranda">
+                    <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR RI" class="mobile-mpr-logo">
+                </a>
+            </div>
             <div class="form-header">
                 <h3>Daftar Akun Siswa</h3>
                 <p>Lengkapi formulir biodata diri Anda (bidang bertanda <span class="required-star">*</span> wajib diisi).</p>

@@ -153,11 +153,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         allowOutsideClick: false,
                         allowEscapeKey: false
                     }).then(() => {
-                        quizForm.submit();
+                        if (quizForm.dataset.submitting !== 'true') {
+                            quizForm.dataset.submitting = 'true';
+                            quizForm.dataset.submitted = 'true';
+                            quizForm.submit();
+                        }
                     });
                 } else {
                     alert('Waktu habis! Jawaban Anda akan dikirimkan otomatis.');
-                    quizForm.submit();
+                    if (quizForm.dataset.submitting !== 'true') {
+                        quizForm.dataset.submitting = 'true';
+                        quizForm.dataset.submitted = 'true';
+                        quizForm.submit();
+                    }
                 }
             }
         }, 1000);
@@ -172,8 +180,19 @@ document.addEventListener('DOMContentLoaded', function () {
             e.returnValue = 'Apakah Anda yakin ingin meninggalkan kuis? Progress pengerjaan Anda akan hilang.';
         });
 
-        quizForm.addEventListener('submit', function () {
+        quizForm.addEventListener('submit', function (e) {
+            if (quizForm.dataset.submitting === 'true') {
+                e.preventDefault();
+                return false;
+            }
             quizForm.dataset.submitted = 'true';
+            quizForm.dataset.submitting = 'true';
+
+            const submitBtns = quizForm.querySelectorAll('button[type="submit"]');
+            submitBtns.forEach(btn => {
+                btn.disabled = true;
+                btn.textContent = 'Menyimpan...';
+            });
         });
     }
 

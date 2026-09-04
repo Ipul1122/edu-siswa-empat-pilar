@@ -30,14 +30,37 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Rate Limiter for authentication & login attempts (more strict)
+        // Rate Limiter for authentication & login attempts (friendly for schools/labs sharing one IP)
         RateLimiter::for('auth', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
+            $email = strtolower(trim((string) $request->input('email', '')));
+            $ip = $request->ip();
+
+            if (!empty($email)) {
+                return [
+                    Limit::perMinute(10)->by('auth_' . $email . '|' . $ip),
+                    Limit::perMinute(60)->by('auth_ip_' . $ip),
+                ];
+            }
+
+            return Limit::perMinute(20)->by('auth_ip_' . $ip);
         });
 
-        // Rate Limiter for OTP sending/resending (very strict to prevent email/SMS abuse)
+        // Rate Limiter for OTP sending/resending (per-account limit + generous IP limit)
         RateLimiter::for('otp', function (Request $request) {
-            return Limit::perMinute(3)->by($request->ip());
+            $email = strtolower(trim((string) (
+                $request->input('email')
+                ?: ($request->hasSession() ? $request->session()->get('register_details.email', $request->session()->get('reset_email', '')) : '')
+            )));
+            $ip = $request->ip();
+
+            if (!empty($email)) {
+                return [
+                    Limit::perMinute(3)->by('otp_' . $email),
+                    Limit::perMinute(30)->by('otp_ip_' . $ip),
+                ];
+            }
+
+            return Limit::perMinute(5)->by('otp_ip_' . $ip);
         });
     }
 }

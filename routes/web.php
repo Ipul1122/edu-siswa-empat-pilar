@@ -1,18 +1,23 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 // Public / Guest Routes
 Route::get('/', function () {
-    $siswaCount = \App\Models\User::query()->where('role', '=', 'siswa', 'and')->count('*');
-    $materiCount = \App\Models\Material::query()->where('type', '=', 'text', 'and')->count('*');
-    $videoCount = \App\Models\Material::query()->where('type', '=', 'video', 'and')->count('*');
-    $quizCount = \App\Models\Quiz::query()->count('*');
-    $soalCount = \App\Models\Question::query()->count('*');
+    $stats = Cache::remember('welcome_stats', 600, function () {
+        return [
+            'siswaCount' => \App\Models\User::query()->where('role', '=', 'siswa', 'and')->count('*'),
+            'materiCount' => \App\Models\Material::query()->where('type', '=', 'text', 'and')->count('*'),
+            'videoCount' => \App\Models\Material::query()->where('type', '=', 'video', 'and')->count('*'),
+            'quizCount' => \App\Models\Quiz::query()->count('*'),
+            'soalCount' => \App\Models\Question::query()->count('*'),
+        ];
+    });
 
-    return view('welcome', compact('siswaCount', 'materiCount', 'videoCount', 'quizCount', 'soalCount'));
+    return view('welcome', $stats);
 })->name('home');
 
 Route::middleware('guest:web')->group(function () {

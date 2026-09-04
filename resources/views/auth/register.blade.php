@@ -231,6 +231,29 @@
         background-color: rgba(244, 67, 54, 0.02);
     }
 
+    /* Validation Shake and Highlight */
+    @keyframes shakeInput {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
+    }
+    .input-shake {
+        animation: shakeInput 0.4s ease-in-out !important;
+        border-color: var(--color-danger) !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+        background-color: rgba(244, 67, 54, 0.03) !important;
+    }
+    .avatar-shake .register-avatar-preview {
+        animation: shakeInput 0.4s ease-in-out !important;
+        border-color: var(--color-danger) !important;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3) !important;
+    }
+    .ts-shake .ts-control {
+        animation: shakeInput 0.4s ease-in-out !important;
+        border-color: var(--color-danger) !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+    }
+
     /* Modern Camera Avatar Trigger */
     .register-avatar-container {
         display: flex;
@@ -540,7 +563,7 @@
                 <p>Lengkapi formulir biodata diri Anda (bidang bertanda <span class="required-star">*</span> wajib diisi).</p>
             </div>
             
-            <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data" id="register-form" novalidate>
                 @csrf
                 
                 <!-- Mandatory Profile Photo with Camera Icon Trigger -->
@@ -628,7 +651,7 @@
                     </div>
                 </div>
                 
-                <button type="submit" class="submit-btn">
+                <button type="submit" class="submit-btn" id="btn-register-submit">
                     <span>Daftar Akun Baru</span> ➔
                 </button>
             </form>
@@ -654,16 +677,203 @@
                 document.getElementById('register-avatar-preview').src = e.target.result;
             }
             reader.readAsDataURL(input.files[0]);
+
+            // Clear avatar error highlight if any
+            const avatarWrapper = document.querySelector('.register-avatar-wrapper');
+            if (avatarWrapper) {
+                avatarWrapper.classList.remove('avatar-shake');
+            }
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        new TomSelect("#dapil", {
-            create: false,
-            maxOptions: 100,
-            allowEmptyOption: true,
-            placeholder: "🔍 Cari kota/kabupaten atau nama Dapil..."
-        });
+        // 1. Initialize Tom Select for Dapil
+        let dapilSelectInstance = null;
+        const dapilElement = document.getElementById('dapil');
+        if (dapilElement) {
+            dapilSelectInstance = new TomSelect("#dapil", {
+                create: false,
+                maxOptions: 100,
+                allowEmptyOption: true,
+                placeholder: "🔍 Cari kota/kabupaten atau nama Dapil..."
+            });
+        }
+
+        // 2. Helper: Toast Notification
+        const showToastWarning = (message, targetElement, customFocus) => {
+            if (typeof Swal !== 'undefined') {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer);
+                        toast.addEventListener('mouseleave', Swal.resumeTimer);
+                    }
+                });
+                Toast.fire({
+                    icon: 'warning',
+                    title: message
+                });
+            } else {
+                alert(message);
+            }
+
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (typeof customFocus === 'function') {
+                    customFocus();
+                } else if (typeof targetElement.focus === 'function') {
+                    targetElement.focus();
+                }
+            }
+        };
+
+        // 3. Register Form Validation with Toast on Submit
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', function (e) {
+                // Clear any existing shake effects
+                document.querySelectorAll('.input-shake, .avatar-shake, .ts-shake').forEach(el => {
+                    el.classList.remove('input-shake', 'avatar-shake', 'ts-shake');
+                });
+
+                // A. Validasi Foto Profil
+                const imageInput = document.getElementById('image');
+                const avatarWrapper = document.querySelector('.register-avatar-wrapper');
+                if (!imageInput.files || imageInput.files.length === 0) {
+                    e.preventDefault();
+                    if (avatarWrapper) avatarWrapper.classList.add('avatar-shake');
+                    return showToastWarning('Foto profil siswa wajib diunggah!', avatarWrapper);
+                }
+                if (imageInput.files[0].size > 2 * 1024 * 1024) {
+                    e.preventDefault();
+                    if (avatarWrapper) avatarWrapper.classList.add('avatar-shake');
+                    return showToastWarning('Ukuran foto profil maksimal 2MB!', avatarWrapper);
+                }
+
+                // B. Validasi Nama Lengkap Siswa
+                const nameInput = document.getElementById('name');
+                if (!nameInput.value.trim()) {
+                    e.preventDefault();
+                    nameInput.classList.add('input-shake');
+                    return showToastWarning('Nama lengkap siswa belum diisi!', nameInput);
+                }
+
+                // C. Validasi Alamat Email
+                const emailInput = document.getElementById('email');
+                const emailVal = emailInput.value.trim();
+                if (!emailVal) {
+                    e.preventDefault();
+                    emailInput.classList.add('input-shake');
+                    return showToastWarning('Alamat email belum diisi!', emailInput);
+                }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(emailVal)) {
+                    e.preventDefault();
+                    emailInput.classList.add('input-shake');
+                    return showToastWarning('Format alamat email tidak valid!', emailInput);
+                }
+
+                // D. Validasi Asal Sekolah
+                const schoolInput = document.getElementById('school_name');
+                if (!schoolInput.value.trim()) {
+                    e.preventDefault();
+                    schoolInput.classList.add('input-shake');
+                    return showToastWarning('Asal sekolah (SMA / SMK) belum diisi!', schoolInput);
+                }
+
+                // E. Validasi Dapil
+                const dapilVal = dapilElement ? dapilElement.value.trim() : '';
+                const tsWrapper = document.querySelector('.ts-wrapper');
+                if (!dapilVal) {
+                    e.preventDefault();
+                    if (tsWrapper) tsWrapper.classList.add('ts-shake');
+                    return showToastWarning('Daerah Pemilihan (Dapil) belum dipilih!', tsWrapper || dapilElement, () => {
+                        if (dapilSelectInstance) dapilSelectInstance.focus();
+                    });
+                }
+
+                // F. Validasi Alamat Tempat Tinggal
+                const addressInput = document.getElementById('address');
+                if (!addressInput.value.trim()) {
+                    e.preventDefault();
+                    addressInput.classList.add('input-shake');
+                    return showToastWarning('Alamat rumah tinggal siswa belum diisi!', addressInput);
+                }
+
+                // G. Validasi Kata Sandi
+                const passwordInput = document.getElementById('password');
+                if (!passwordInput.value) {
+                    e.preventDefault();
+                    passwordInput.classList.add('input-shake');
+                    return showToastWarning('Kata sandi belum diisi!', passwordInput);
+                }
+                if (passwordInput.value.length < 8) {
+                    e.preventDefault();
+                    passwordInput.classList.add('input-shake');
+                    return showToastWarning('Kata sandi minimal 8 karakter!', passwordInput);
+                }
+
+                // H. Validasi Konfirmasi Sandi
+                const confirmInput = document.getElementById('password_confirmation');
+                if (!confirmInput.value) {
+                    e.preventDefault();
+                    confirmInput.classList.add('input-shake');
+                    return showToastWarning('Konfirmasi kata sandi belum diisi!', confirmInput);
+                }
+                if (passwordInput.value !== confirmInput.value) {
+                    e.preventDefault();
+                    confirmInput.classList.add('input-shake');
+                    return showToastWarning('Konfirmasi kata sandi tidak cocok!', confirmInput);
+                }
+
+                // If all fields are valid, update button state to prevent accidental multiple submissions
+                const submitBtn = document.getElementById('btn-register-submit');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span>Mengirim Pendaftaran...</span>';
+                }
+            });
+
+            // 4. Clear shake animation on user interaction
+            registerForm.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('input', function () {
+                    this.classList.remove('input-shake', 'is-invalid');
+                });
+                input.addEventListener('change', function () {
+                    this.classList.remove('input-shake', 'is-invalid');
+                    const ts = document.querySelector('.ts-wrapper');
+                    if (ts) ts.classList.remove('ts-shake');
+                });
+            });
+
+            if (dapilSelectInstance) {
+                dapilSelectInstance.on('change', function () {
+                    const ts = document.querySelector('.ts-wrapper');
+                    if (ts) ts.classList.remove('ts-shake');
+                });
+            }
+        }
+
+        // 5. Backend Validation Errors Toast (If page is reloaded with errors)
+        @if ($errors->any())
+            if (typeof Swal !== 'undefined') {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+                Toast.fire({
+                    icon: 'error',
+                    title: "{{ $errors->first() }}"
+                });
+            }
+        @endif
     });
 </script>
 @endsection

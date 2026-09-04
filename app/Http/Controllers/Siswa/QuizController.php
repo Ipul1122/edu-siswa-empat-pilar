@@ -115,9 +115,6 @@ class QuizController extends Controller
             'duration_seconds_taken' => $durationTaken,
         ]);
 
-        // Clear leaderboard cache
-        Cache::forget('leaderboard_data');
-
         // Flash student's detailed choices to the session for review on the next screen
         session()->flash('last_attempt_answers_' . $attempt->id, $submittedAnswers);
 

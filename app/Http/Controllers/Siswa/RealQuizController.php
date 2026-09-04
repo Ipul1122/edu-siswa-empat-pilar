@@ -9,6 +9,7 @@ use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class RealQuizController extends Controller
 {
@@ -122,51 +123,61 @@ class RealQuizController extends Controller
 
         $user = Auth::user();
 
-        // Check if already completed
-        $exists = QuizAttempt::query()->where('user_id', '=', $user->id)->where('quiz_id', '=', $quiz->id)->exists();
-        if ($exists) {
+        // 1. Acquire atomic lock to prevent race condition (double submit)
+        $lock = Cache::lock('submit_real_quiz_' . $user->id . '_' . $quiz->id, 15);
+        if (!$lock->get()) {
             return redirect()->route('siswa.real-materi.index')
-                ->with('error', 'Anda sudah mengerjakan kuis ini.');
+                ->with('error', 'Jawaban Anda sedang diproses. Mohon jangan menekan tombol berulang kali.');
         }
 
-        $questions = $quiz->questions;
-        $submittedAnswers = $request->input('answers', []);
-        
-        $correctAnswersCount = 0;
-        $totalQuestionsCount = $questions->count();
-
-        // Match answers
-        foreach ($questions as $question) {
-            $submitted = $submittedAnswers[$question->id] ?? null;
-            if ($submitted && strtolower($submitted) === strtolower($question->correct_option)) {
-                $correctAnswersCount++;
+        try {
+            // Check if already completed
+            $exists = QuizAttempt::query()->where('user_id', '=', $user->id)->where('quiz_id', '=', $quiz->id)->exists();
+            if ($exists) {
+                return redirect()->route('siswa.real-materi.index')
+                    ->with('error', 'Anda sudah mengerjakan kuis ini.');
             }
+
+            $questions = $quiz->questions;
+            $submittedAnswers = $request->input('answers', []);
+            
+            $correctAnswersCount = 0;
+            $totalQuestionsCount = $questions->count();
+
+            // Match answers
+            foreach ($questions as $question) {
+                $submitted = $submittedAnswers[$question->id] ?? null;
+                if ($submitted && strtolower($submitted) === strtolower($question->correct_option)) {
+                    $correctAnswersCount++;
+                }
+            }
+
+            $score = $totalQuestionsCount > 0 
+                ? round(($correctAnswersCount / $totalQuestionsCount) * 100) 
+                : 0;
+
+            $durationTaken = (int) $request->input('duration_seconds_taken', 0);
+
+            // Save Attempt within database transaction
+            $attempt = DB::transaction(function () use ($user, $quiz, $score, $correctAnswersCount, $totalQuestionsCount, $durationTaken) {
+                return QuizAttempt::create([
+                    'user_id' => $user->id,
+                    'quiz_id' => $quiz->id,
+                    'score' => $score,
+                    'correct_answers' => $correctAnswersCount,
+                    'total_questions' => $totalQuestionsCount,
+                    'duration_seconds_taken' => $durationTaken,
+                ]);
+            });
+
+            // Flash student's detailed choices to the session for review on the next screen
+            session()->flash('last_attempt_answers_' . $attempt->id, $submittedAnswers);
+
+            return redirect()->route('siswa.real-materi.result', $attempt)
+                ->with('success', 'Kuis Real Materi berhasil diselesaikan!');
+        } finally {
+            $lock->release();
         }
-
-        $score = $totalQuestionsCount > 0 
-            ? round(($correctAnswersCount / $totalQuestionsCount) * 100) 
-            : 0;
-
-        $durationTaken = (int) $request->input('duration_seconds_taken', 0);
-
-        // Save Attempt
-        $attempt = QuizAttempt::create([
-            'user_id' => $user->id,
-            'quiz_id' => $quiz->id,
-            'score' => $score,
-            'correct_answers' => $correctAnswersCount,
-            'total_questions' => $totalQuestionsCount,
-            'duration_seconds_taken' => $durationTaken,
-        ]);
-
-        // Clear leaderboard cache
-        Cache::forget('leaderboard_data');
-
-        // Flash student's detailed choices to the session for review on the next screen
-        session()->flash('last_attempt_answers_' . $attempt->id, $submittedAnswers);
-
-        return redirect()->route('siswa.real-materi.result', $attempt)
-            ->with('success', 'Kuis Real Materi berhasil diselesaikan!');
     }
 
     /**

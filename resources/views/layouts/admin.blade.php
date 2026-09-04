@@ -103,11 +103,38 @@
         
         <!-- Main Content Area -->
         <main class="app-content">
-            <!-- Mobile Navigation Toggle -->
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;" class="mobile-only-header">
-                <button id="menu-toggle" class="menu-toggle">☰ Menu</button>
-                <h3 style="font-size: 1.1rem; font-family: var(--font-heading);">Admin Empat Pilar</h3>
-            </div>
+            <!-- Top Navbar for Admin -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Buka Menu">
+                        <i class="fi fi-rr-menu-burger" style="line-height: 1;"></i>
+                    </button>
+                    
+                    <div class="topbar-search">
+                        <i class="fi fi-rr-search search-icon"></i>
+                        <input type="text" id="admin-global-search" placeholder="Cari materi, kuis, soal, atau siswa..." autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="topbar-right">
+                    <a href="{{ route('admin.profile.edit') }}" class="topbar-user-dropdown" title="Pengaturan Akun Admin">
+                        <img src="{{ Auth::guard('admin')->user()->image_url }}" alt="{{ Auth::guard('admin')->user()->name }}" class="topbar-avatar">
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name">{{ Auth::guard('admin')->user()->name }}</span>
+                            <span class="topbar-user-role" style="color: rgb(var(--color-primary-rgb)); font-weight: 600;">Administrator</span>
+                        </div>
+                    </a>
+                    
+                    <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                        @csrf
+                        <input type="hidden" name="guard" value="admin">
+                        <button type="submit" class="topbar-logout-btn" title="Keluar dari Panel Admin">
+                            <i class="fi fi-rr-sign-out-alt"></i>
+                            <span class="logout-text">Keluar</span>
+                        </button>
+                    </form>
+                </div>
+            </header>
             
             @yield('content')
         </main>

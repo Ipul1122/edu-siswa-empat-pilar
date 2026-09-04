@@ -176,4 +176,25 @@ document.addEventListener('DOMContentLoaded', function () {
             quizForm.dataset.submitted = 'true';
         });
     }
+
+    // 6. Topbar Global Live Search Filter
+    const searchInputs = document.querySelectorAll('#global-search-input, #admin-global-search');
+    searchInputs.forEach(searchInput => {
+        searchInput.addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+            
+            // Filter cards on material / video / quiz pages
+            const cards = document.querySelectorAll('.card, .quiz-card, .table tbody tr');
+            if (cards.length > 0) {
+                cards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    if (query === '' || text.includes(query)) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+        });
+    });
 });

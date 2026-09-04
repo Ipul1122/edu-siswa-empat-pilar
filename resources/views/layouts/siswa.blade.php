@@ -98,11 +98,37 @@
         
         <!-- Main Content Area -->
         <main class="app-content">
-            <!-- Mobile Navigation Toggle -->
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;" class="mobile-only-header">
-                <button id="menu-toggle" class="menu-toggle">☰ Menu</button>
-                <h3 style="font-size: 1.1rem; font-family: var(--font-heading);">Belajar PPKN</h3>
-            </div>
+            <!-- Top Navbar for Siswa -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Buka Menu">
+                        <i class="fi fi-rr-menu-burger" style="line-height: 1;"></i>
+                    </button>
+                    
+                    <div class="topbar-search">
+                        <i class="fi fi-rr-search search-icon"></i>
+                        <input type="text" id="global-search-input" placeholder="Cari materi, kuis, atau topik pilar..." autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="topbar-right">
+                    <a href="{{ route('siswa.profile.edit') }}" class="topbar-user-dropdown" title="Lihat & Edit Profil">
+                        <img src="{{ Auth::user()->image_url }}" alt="{{ Auth::user()->name }}" class="topbar-avatar">
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name">{{ Auth::user()->name }}</span>
+                            <span class="topbar-user-role">{{ Auth::user()->school_name ?? 'Siswa SMA/K' }}</span>
+                        </div>
+                    </a>
+                    
+                    <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                        @csrf
+                        <button type="submit" class="topbar-logout-btn" title="Keluar dari Akun Siswa">
+                            <i class="fi fi-rr-sign-out-alt"></i>
+                            <span class="logout-text">Keluar</span>
+                        </button>
+                    </form>
+                </div>
+            </header>
             
             @yield('content')
         </main>

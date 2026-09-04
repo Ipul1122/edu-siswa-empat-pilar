@@ -15,14 +15,29 @@
             <li><a href="#pillars" style="color: var(--color-dark); font-weight: 500;">Pilar Kebangsaan</a></li>
             <li><a href="#about" style="color: var(--color-dark); font-weight: 500;">Tentang Program</a></li>
         </ul>
-        <div class="landing-auth-buttons" style="display: flex; gap: 12px;">
+        <div class="landing-auth-buttons" style="display: flex; align-items: center; gap: 10px;">
             @if(Auth::guard('web')->check() || Auth::guard('admin')->check())
                 @if(Auth::guard('admin')->check())
-                    <a href="{{ route('admin.dashboard') }}" class="btn btn-primary btn-sm">Panel Admin</a>
+                    <a href="{{ route('admin.dashboard') }}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <img src="{{ Auth::guard('admin')->user()->image_url }}" alt="Admin" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1.5px solid #fff; background: #fff;">
+                        <span>Panel Admin</span>
+                    </a>
                 @endif
                 @if(Auth::guard('web')->check())
-                    <a href="{{ route('siswa.dashboard') }}" class="btn btn-primary btn-sm">Dashboard Siswa</a>
+                    <a href="{{ route('siswa.dashboard') }}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <img src="{{ Auth::user()->image_url }}" alt="{{ Auth::user()->name }}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1.5px solid #fff; background: #fff;">
+                        <span>Dashboard Siswa</span>
+                    </a>
                 @endif
+                <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                    @csrf
+                    @if(Auth::guard('admin')->check())
+                        <input type="hidden" name="guard" value="admin">
+                    @endif
+                    <button type="submit" class="btn btn-secondary btn-sm" title="Keluar" style="padding: 6px 10px; display: inline-flex; align-items: center;">
+                        <i class="fi fi-rr-sign-out-alt"></i>
+                    </button>
+                </form>
             @else
                 <a href="{{ route('login') }}" class="btn btn-secondary btn-sm">Masuk</a>
                 <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Daftar</a>

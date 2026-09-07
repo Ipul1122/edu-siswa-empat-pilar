@@ -113,9 +113,10 @@ class QuizController extends Controller
             'correct_answers' => $correctAnswersCount,
             'total_questions' => $totalQuestionsCount,
             'duration_seconds_taken' => $durationTaken,
+            'answers' => $submittedAnswers,
         ]);
 
-        // Flash student's detailed choices to the session for review on the next screen
+        // Flash student's detailed choices to session as backup
         session()->flash('last_attempt_answers_' . $attempt->id, $submittedAnswers);
 
         return redirect()->route('siswa.quizzes.result', $attempt)
@@ -134,8 +135,8 @@ class QuizController extends Controller
 
         $attempt->load(['quiz.questions']);
         
-        // Retrieve student's choices from session
-        $studentAnswers = session('last_attempt_answers_' . $attempt->id) ?? [];
+        // Retrieve student's choices permanently from database (or fallback to session)
+        $studentAnswers = $attempt->answers ?? session('last_attempt_answers_' . $attempt->id) ?? [];
 
         return view('siswa.quizzes.result', compact('attempt', 'studentAnswers'));
     }

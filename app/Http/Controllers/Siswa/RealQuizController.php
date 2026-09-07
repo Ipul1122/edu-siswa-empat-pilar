@@ -159,7 +159,7 @@ class RealQuizController extends Controller
             $durationTaken = (int) $request->input('duration_seconds_taken', 0);
 
             // Save Attempt within database transaction
-            $attempt = DB::transaction(function () use ($user, $quiz, $score, $correctAnswersCount, $totalQuestionsCount, $durationTaken) {
+            $attempt = DB::transaction(function () use ($user, $quiz, $score, $correctAnswersCount, $totalQuestionsCount, $durationTaken, $submittedAnswers) {
                 return QuizAttempt::create([
                     'user_id' => $user->id,
                     'quiz_id' => $quiz->id,
@@ -167,10 +167,11 @@ class RealQuizController extends Controller
                     'correct_answers' => $correctAnswersCount,
                     'total_questions' => $totalQuestionsCount,
                     'duration_seconds_taken' => $durationTaken,
+                    'answers' => $submittedAnswers,
                 ]);
             });
 
-            // Flash student's detailed choices to the session for review on the next screen
+            // Flash student's detailed choices to session as backup
             session()->flash('last_attempt_answers_' . $attempt->id, $submittedAnswers);
 
             return redirect()->route('siswa.real-materi.result', $attempt)
@@ -195,8 +196,8 @@ class RealQuizController extends Controller
             abort(404);
         }
         
-        // Retrieve student's choices from session
-        $studentAnswers = session('last_attempt_answers_' . $attempt->id) ?? [];
+        // Retrieve student's choices permanently from database (or fallback to session)
+        $studentAnswers = $attempt->answers ?? session('last_attempt_answers_' . $attempt->id) ?? [];
 
         return view('siswa.real_quizzes.result', compact('attempt', 'studentAnswers'));
     }

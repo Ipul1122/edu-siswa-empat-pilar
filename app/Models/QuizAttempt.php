@@ -17,6 +17,11 @@ class QuizAttempt extends Model
         'correct_answers',
         'total_questions',
         'duration_seconds_taken',
+        'answers',
+    ];
+
+    protected $casts = [
+        'answers' => 'array',
     ];
 
     /**

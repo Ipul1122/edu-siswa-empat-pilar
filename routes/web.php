@@ -68,6 +68,8 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     Route::resource('real-materi', App\Http\Controllers\Admin\RealQuizController::class)->names('real-materi');
 
     // Questions CRUD (Nest within quiz context)
+    Route::get('/quizzes/{quiz}/questions/template', [App\Http\Controllers\Admin\QuestionController::class, 'template'])->name('questions.template');
+    Route::post('/quizzes/{quiz}/questions/import', [App\Http\Controllers\Admin\QuestionController::class, 'import'])->name('questions.import');
     Route::get('/quizzes/{quiz}/questions/create', [App\Http\Controllers\Admin\QuestionController::class, 'create'])->name('questions.create');
     Route::post('/quizzes/{quiz}/questions', [App\Http\Controllers\Admin\QuestionController::class, 'store'])->name('questions.store');
     Route::get('/questions/{question}/edit', [App\Http\Controllers\Admin\QuestionController::class, 'edit'])->name('questions.edit');

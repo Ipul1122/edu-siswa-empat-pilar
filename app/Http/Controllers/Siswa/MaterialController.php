@@ -84,9 +84,6 @@ class MaterialController extends Controller
             ]
         );
 
-        // Clear leaderboard cache
-        Cache::forget('leaderboard_data');
-
         return redirect()->route('siswa.materials.show', $material)
             ->with('success', 'Selamat! Anda telah menyelesaikan materi ini.');
     }

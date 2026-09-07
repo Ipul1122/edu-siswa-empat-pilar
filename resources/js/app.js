@@ -108,6 +108,78 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // 4.1 CBT Question Palette & Flag Logic
+    const paletteGrid = document.querySelector('.palette-grid');
+    if (paletteGrid) {
+        const updatePaletteProgress = () => {
+            const answeredSet = new Set();
+            document.querySelectorAll('input[type="radio"][name^="answers["]:checked').forEach(radio => {
+                if (radio.value) {
+                    const qId = radio.dataset.questionId;
+                    answeredSet.add(qId);
+                    const pBtn = document.getElementById('palette-btn-' + qId);
+                    if (pBtn) {
+                        pBtn.classList.add('answered');
+                    }
+                }
+            });
+
+            const totalAnswered = answeredSet.size;
+            const totalBtns = document.querySelectorAll('.palette-btn').length;
+            const countBadge = document.getElementById('answered-count-badge');
+            const progressFill = document.getElementById('palette-progress-fill');
+
+            if (countBadge) {
+                countBadge.textContent = `${totalAnswered} / ${totalBtns}`;
+            }
+            if (progressFill && totalBtns > 0) {
+                const percent = Math.round((totalAnswered / totalBtns) * 100);
+                progressFill.style.width = `${percent}%`;
+            }
+        };
+
+        // Palette jump buttons
+        document.querySelectorAll('.palette-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Highlight animation
+                    targetElement.style.transition = 'box-shadow 0.3s ease, border-color 0.3s ease';
+                    targetElement.style.borderColor = 'rgb(var(--color-primary-rgb))';
+                    targetElement.style.boxShadow = '0 0 0 4px rgba(var(--color-primary-rgb), 0.18)';
+                    setTimeout(() => {
+                        targetElement.style.borderColor = '';
+                        targetElement.style.boxShadow = '';
+                    }, 1200);
+                }
+            });
+        });
+
+        // Question flag toggling
+        document.querySelectorAll('.flag-question-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const qId = this.getAttribute('data-question-id');
+                this.classList.toggle('active');
+                const pBtn = document.getElementById('palette-btn-' + qId);
+                if (pBtn) {
+                    pBtn.classList.toggle('flagged');
+                }
+            });
+        });
+
+        // Radio change updates palette state & progress
+        document.querySelectorAll('input[type="radio"][name^="answers["]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                updatePaletteProgress();
+            });
+        });
+
+        // Initial check on load
+        updatePaletteProgress();
+    }
+
     // 5. Quiz Timer Logic
     const timerElement = document.getElementById('quiz-timer');
     const quizForm = document.getElementById('quiz-form');

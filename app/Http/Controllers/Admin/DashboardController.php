@@ -42,14 +42,21 @@ class DashboardController extends Controller
             'bhinneka_tunggal_ika' => round($pillarScores['bhinneka_tunggal_ika'] ?? 0),
         ];
 
-        // 2. Calculate daily quiz attempts over the last 7 days
+        // 2. Calculate daily quiz attempts over the last 7 days in a single optimized query
+        $startDate = Carbon::today()->subDays(6)->startOfDay();
+        $rawCounts = QuizAttempt::query()
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date_str, COUNT(*) as total')
+            ->groupBy('date_str')
+            ->pluck('total', 'date_str')
+            ->toArray();
+
         $activityLast7Days = [];
         for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i)->format('Y-m-d');
-            $formattedDate = Carbon::today()->subDays($i)->format('d M');
-            
-            $count = QuizAttempt::query()->whereDate('created_at', '=', $date, 'and')->count('*');
-            $activityLast7Days[$formattedDate] = $count;
+            $d = Carbon::today()->subDays($i);
+            $dateKey = $d->format('Y-m-d');
+            $formattedDate = $d->format('d M');
+            $activityLast7Days[$formattedDate] = (int)($rawCounts[$dateKey] ?? 0);
         }
 
         return view('admin.dashboard', compact(

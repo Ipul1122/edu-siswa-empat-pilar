@@ -133,5 +133,29 @@
             @yield('content')
         </main>
     </div>
+
+    <!-- Mobile Bottom Navigation Bar (< 768px) -->
+    <nav class="mobile-bottom-nav">
+        <a href="{{ route('siswa.dashboard') }}" class="mobile-bottom-nav-item {{ Route::is('siswa.dashboard') ? 'active' : '' }}">
+            <i class="fi fi-rr-home"></i>
+            <span>Beranda</span>
+        </a>
+        <a href="{{ route('siswa.materials.index') }}" class="mobile-bottom-nav-item {{ Route::is('siswa.materials.*') ? 'active' : '' }}">
+            <i class="fi fi-rr-book-alt"></i>
+            <span>Materi</span>
+        </a>
+        <a href="{{ route('siswa.videos.index') }}" class="mobile-bottom-nav-item {{ Route::is('siswa.videos.*') ? 'active' : '' }}">
+            <i class="fi fi-rr-play-alt"></i>
+            <span>Video</span>
+        </a>
+        <a href="{{ route('siswa.quizzes.index') }}" class="mobile-bottom-nav-item {{ Route::is('siswa.quizzes.*') || Route::is('siswa.real-materi.*') ? 'active' : '' }}">
+            <i class="fi fi-rr-edit"></i>
+            <span>Kuis</span>
+        </a>
+        <a href="{{ route('siswa.leaderboard') }}" class="mobile-bottom-nav-item {{ Route::is('siswa.leaderboard') ? 'active' : '' }}">
+            <i class="fi fi-rr-trophy"></i>
+            <span>Peringkat</span>
+        </a>
+    </nav>
 </body>
 </html>

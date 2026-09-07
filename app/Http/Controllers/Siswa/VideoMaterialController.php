@@ -88,9 +88,6 @@ class VideoMaterialController extends Controller
             ]
         );
 
-        // Clear leaderboard cache
-        Cache::forget('leaderboard_data');
-
         return redirect()->route('siswa.videos.show', $material)
             ->with('success', 'Selamat! Anda telah selesai menonton video ini.');
     }

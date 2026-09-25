@@ -13,14 +13,14 @@ class OtpMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public $otp;
-    public $title;
-    public $body;
+    public string $otp;
+    public string $title;
+    public string $body;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($otp, $title, $body)
+    public function __construct(string $otp, string $title, string $body)
     {
         $this->otp = $otp;
         $this->title = $title;

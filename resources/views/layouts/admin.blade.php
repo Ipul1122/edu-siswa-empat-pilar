@@ -72,6 +72,11 @@
                         <i class="fi fi-rr-users-alt"></i> Pemantauan Siswa
                     </a>
                 </li>
+                <li class="sidebar-menu-item {{ Route::is('admin.leaderboard*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.leaderboard') }}">
+                        <i class="fi fi-rr-trophy"></i> Papan Peringkat
+                    </a>
+                </li>
                 <li class="sidebar-menu-item {{ Route::is('admin.profile.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.profile.edit') }}">
                         <i class="fi fi-rr-user"></i> Pengaturan Akun
@@ -118,9 +123,9 @@
                 
                 <div class="topbar-right">
                     <a href="{{ route('admin.profile.edit') }}" class="topbar-user-dropdown" title="Pengaturan Akun Admin">
-                        <img src="{{ Auth::guard('admin')->user()->image_url }}" alt="{{ Auth::guard('admin')->user()->name }}" class="topbar-avatar">
+                        <img src="{{ Auth::guard('admin')->user()?->image_url ?? asset('img/default-avatar.svg') }}" alt="{{ Auth::guard('admin')->user()?->name ?? 'Admin' }}" class="topbar-avatar">
                         <div class="topbar-user-info">
-                            <span class="topbar-user-name">{{ Auth::guard('admin')->user()->name }}</span>
+                            <span class="topbar-user-name">{{ Auth::guard('admin')->user()?->name ?? 'Administrator' }}</span>
                             <span class="topbar-user-role" style="color: rgb(var(--color-primary-rgb)); font-weight: 600;">Administrator</span>
                         </div>
                     </a>

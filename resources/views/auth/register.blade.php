@@ -611,21 +611,32 @@
                     @enderror
                 </div>
 
-                <!-- Searchable Dapil Dropdown -->
-                <div class="custom-form-group">
-                    <label for="dapil">Daerah Pemilihan (Dapil) DPR-RI <span class="required-star">*</span></label>
-                    <select name="dapil" id="dapil" class="@error('dapil') is-invalid @enderror" required>
-                        <option value="">-- Pilih atau Cari Daerah Pemilihan (Dapil) --</option>
-                        @foreach($dapilList as $dapilOption)
-                            <option value="{{ $dapilOption }}" {{ old('dapil') === $dapilOption ? 'selected' : '' }}>
-                                {{ $dapilOption }}
-                            </option>
-                        @endforeach
-                    </select>
+                <!-- Cascading Regional Dropdowns (Provinsi & Kabupaten/Kota) -->
+                <div class="input-row">
+                    <div class="custom-form-group">
+                        <label for="province_id">Provinsi Asal Sekolah <span class="required-star">*</span></label>
+                        <select name="province_id" id="province_id" class="@error('province_id') is-invalid @enderror" required>
+                            <option value="">-- Pilih Provinsi --</option>
+                            @foreach($provinces as $province)
+                                <option value="{{ $province->id }}" {{ (string)old('province_id') === (string)$province->id ? 'selected' : '' }}>
+                                    {{ $province->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('province_id')
+                            <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-                    @error('dapil')
-                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
-                    @enderror
+                    <div class="custom-form-group">
+                        <label for="regency_id">Kabupaten / Kota <span class="required-star">*</span></label>
+                        <select name="regency_id" id="regency_id" class="@error('regency_id') is-invalid @enderror" required>
+                            <option value="">-- Pilih Provinsi Dahulu --</option>
+                        </select>
+                        @error('regency_id')
+                            <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Address (Mandatory) -->
@@ -687,16 +698,86 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // 1. Initialize Tom Select for Dapil
-        let dapilSelectInstance = null;
-        const dapilElement = document.getElementById('dapil');
-        if (dapilElement) {
-            dapilSelectInstance = new TomSelect("#dapil", {
+        // 1. Initialize Tom Select for Province & Regency
+        const allRegencies = @json($regencies);
+        const oldProvinceId = "{{ old('province_id') }}";
+        const oldRegencyId = "{{ old('regency_id') }}";
+
+        let provinceSelectInstance = null;
+        let regencySelectInstance = null;
+
+        const provElement = document.getElementById('province_id');
+        const regElement = document.getElementById('regency_id');
+
+        if (provElement) {
+            provinceSelectInstance = new TomSelect("#province_id", {
+                create: false,
+                maxOptions: 50,
+                allowEmptyOption: true,
+                placeholder: "🔍 Pilih Provinsi..."
+            });
+        }
+
+        if (regElement) {
+            regencySelectInstance = new TomSelect("#regency_id", {
                 create: false,
                 maxOptions: 100,
                 allowEmptyOption: true,
-                placeholder: "🔍 Cari kota/kabupaten atau nama Dapil..."
+                placeholder: "🔍 Pilih Provinsi dahulu..."
             });
+            regencySelectInstance.disable();
+        }
+
+        function populateRegencies(provId, selectedRegId = null) {
+            if (!regencySelectInstance) return;
+
+            regencySelectInstance.clear();
+            regencySelectInstance.clearOptions();
+
+            if (!provId) {
+                regencySelectInstance.disable();
+                regencySelectInstance.settings.placeholder = "🔍 Pilih Provinsi dahulu...";
+                regencySelectInstance.inputState();
+                return;
+            }
+
+            const filtered = allRegencies.filter(r => String(r.province_id) === String(provId));
+            regencySelectInstance.enable();
+            regencySelectInstance.settings.placeholder = `🔍 Pilih Kab/Kota (${filtered.length} wilayah)...`;
+
+            filtered.forEach(r => {
+                const badge = r.type === 'kota' ? 'Kota' : 'Kab.';
+                regencySelectInstance.addOption({
+                    value: r.id,
+                    text: `${r.name} (${badge})`
+                });
+            });
+
+            regencySelectInstance.refreshOptions(false);
+
+            if (selectedRegId) {
+                regencySelectInstance.setValue(selectedRegId);
+            }
+        }
+
+        if (provinceSelectInstance) {
+            provinceSelectInstance.on('change', function (val) {
+                populateRegencies(val);
+                const tsWrapper = provElement.closest('.custom-form-group').querySelector('.ts-wrapper');
+                if (tsWrapper) tsWrapper.classList.remove('ts-shake');
+            });
+        }
+
+        if (regencySelectInstance) {
+            regencySelectInstance.on('change', function () {
+                const tsWrapper = regElement.closest('.custom-form-group').querySelector('.ts-wrapper');
+                if (tsWrapper) tsWrapper.classList.remove('ts-shake');
+            });
+        }
+
+        // Restore values if validation error occurred
+        if (oldProvinceId) {
+            populateRegencies(oldProvinceId, oldRegencyId);
         }
 
         // 2. Helper: Toast Notification
@@ -785,18 +866,29 @@
                     return showToastWarning('Asal sekolah (SMA / SMK) belum diisi!', schoolInput);
                 }
 
-                // E. Validasi Dapil
-                const dapilVal = dapilElement ? dapilElement.value.trim() : '';
-                const tsWrapper = document.querySelector('.ts-wrapper');
-                if (!dapilVal) {
+                // E. Validasi Provinsi
+                const provVal = provinceSelectInstance ? provinceSelectInstance.getValue() : (provElement ? provElement.value : '');
+                const provTs = provElement ? provElement.closest('.custom-form-group').querySelector('.ts-wrapper') : null;
+                if (!provVal) {
                     e.preventDefault();
-                    if (tsWrapper) tsWrapper.classList.add('ts-shake');
-                    return showToastWarning('Daerah Pemilihan (Dapil) belum dipilih!', tsWrapper || dapilElement, () => {
-                        if (dapilSelectInstance) dapilSelectInstance.focus();
+                    if (provTs) provTs.classList.add('ts-shake');
+                    return showToastWarning('Provinsi asal sekolah belum dipilih!', provTs || provElement, () => {
+                        if (provinceSelectInstance) provinceSelectInstance.focus();
                     });
                 }
 
-                // F. Validasi Alamat Tempat Tinggal
+                // F. Validasi Kabupaten / Kota
+                const regVal = regencySelectInstance ? regencySelectInstance.getValue() : (regElement ? regElement.value : '');
+                const regTs = regElement ? regElement.closest('.custom-form-group').querySelector('.ts-wrapper') : null;
+                if (!regVal) {
+                    e.preventDefault();
+                    if (regTs) regTs.classList.add('ts-shake');
+                    return showToastWarning('Kabupaten / Kota asal sekolah belum dipilih!', regTs || regElement, () => {
+                        if (regencySelectInstance) regencySelectInstance.focus();
+                    });
+                }
+
+                // G. Validasi Alamat Tempat Tinggal
                 const addressInput = document.getElementById('address');
                 if (!addressInput.value.trim()) {
                     e.preventDefault();
@@ -804,7 +896,7 @@
                     return showToastWarning('Alamat rumah tinggal siswa belum diisi!', addressInput);
                 }
 
-                // G. Validasi Kata Sandi
+                // H. Validasi Kata Sandi
                 const passwordInput = document.getElementById('password');
                 if (!passwordInput.value) {
                     e.preventDefault();
@@ -817,7 +909,7 @@
                     return showToastWarning('Kata sandi minimal 8 karakter!', passwordInput);
                 }
 
-                // H. Validasi Konfirmasi Sandi
+                // I. Validasi Konfirmasi Sandi
                 const confirmInput = document.getElementById('password_confirmation');
                 if (!confirmInput.value) {
                     e.preventDefault();
@@ -845,17 +937,8 @@
                 });
                 input.addEventListener('change', function () {
                     this.classList.remove('input-shake', 'is-invalid');
-                    const ts = document.querySelector('.ts-wrapper');
-                    if (ts) ts.classList.remove('ts-shake');
                 });
             });
-
-            if (dapilSelectInstance) {
-                dapilSelectInstance.on('change', function () {
-                    const ts = document.querySelector('.ts-wrapper');
-                    if (ts) ts.classList.remove('ts-shake');
-                });
-            }
         }
 
         // 5. Backend Validation Errors Toast (If page is reloaded with errors)

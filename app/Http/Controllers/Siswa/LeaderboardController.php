@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Province;
+use App\Models\Regency;
 use App\Models\Material;
 use App\Models\StudentProgress;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -13,14 +16,25 @@ use Illuminate\Support\Facades\DB;
 class LeaderboardController extends Controller
 {
     /**
-     * Display the student leaderboard.
+     * Display the student leaderboard with Province and Regency filters.
      */
-    public function index()
+    public function index(Request $request)
     {
         $currentUserId = Auth::id();
 
-        // Fetch student leaderboard using optimized database query and caching
-        $leaderboard = Cache::remember('leaderboard_data', 300, function () {
+        $selectedProvinceId = $request->input('province_id');
+        $selectedRegencyId = $request->input('regency_id');
+
+        $provinces = Province::orderBy('name')->get();
+        $regencies = $selectedProvinceId 
+            ? Regency::where('province_id', $selectedProvinceId)->orderBy('name')->get()
+            : collect();
+
+        $allRegencies = Regency::orderBy('name')->get(['id', 'province_id', 'name', 'type']);
+
+        $cacheKey = 'leaderboard_data_p_' . ($selectedProvinceId ?: 'all') . '_r_' . ($selectedRegencyId ?: 'all');
+
+        $leaderboard = Cache::remember($cacheKey, 120, function () use ($selectedProvinceId, $selectedRegencyId) {
             $progressSub = DB::table('student_progress')
                 ->select('user_id')
                 ->selectRaw('COUNT(*) as completed_count')
@@ -47,7 +61,7 @@ class LeaderboardController extends Controller
                 ->selectRaw('COUNT(*) as attempts_count')
                 ->groupBy('quiz_attempts.user_id');
 
-            return User::query()
+            $query = User::query()
                 ->select('users.*')
                 ->selectRaw('COALESCE(progress_counts.completed_count, 0) as materials_read')
                 ->selectRaw('COALESCE(quiz_scores.total_score, 0) as total_quiz_score')
@@ -57,7 +71,18 @@ class LeaderboardController extends Controller
                 ->leftJoinSub($progressSub, 'progress_counts', 'progress_counts.user_id', '=', 'users.id')
                 ->leftJoinSub($quizScoresSub, 'quiz_scores', 'quiz_scores.user_id', '=', 'users.id')
                 ->leftJoinSub($attemptsStatsSub, 'attempts_stats', 'attempts_stats.user_id', '=', 'users.id')
-                ->where('users.role', 'siswa')
+                ->with(['province', 'regency'])
+                ->where('users.role', 'siswa');
+
+            if ($selectedProvinceId) {
+                $query->where('users.province_id', $selectedProvinceId);
+            }
+
+            if ($selectedRegencyId) {
+                $query->where('users.regency_id', $selectedRegencyId);
+            }
+
+            return $query
                 ->orderByDesc('points')
                 ->orderByDesc('average_score')
                 ->orderBy('users.name')
@@ -75,6 +100,15 @@ class LeaderboardController extends Controller
             }
         }
 
-        return view('siswa.leaderboard.index', compact('leaderboard', 'currentUserRank', 'currentUserData'));
+        return view('siswa.leaderboard.index', compact(
+            'leaderboard',
+            'currentUserRank',
+            'currentUserData',
+            'provinces',
+            'regencies',
+            'allRegencies',
+            'selectedProvinceId',
+            'selectedRegencyId'
+        ));
     }
 }

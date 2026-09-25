@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Province;
+use App\Models\Regency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -18,8 +21,10 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
+        $provinces = Province::orderBy('name')->get();
+        $regencies = Regency::orderBy('name')->get(['id', 'province_id', 'name', 'type']);
         $dapilList = User::DAPIL_LIST;
-        return view('siswa.profile.edit', compact('user', 'dapilList'));
+        return view('siswa.profile.edit', compact('user', 'provinces', 'regencies', 'dapilList'));
     }
 
     /**
@@ -34,7 +39,15 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'school_name' => ['required', 'string', 'max:100'],
             'address' => ['required', 'string', 'max:500'],
-            'dapil' => ['required', 'string', 'in:' . implode(',', User::DAPIL_LIST)],
+            'province_id' => ['required', 'integer', 'exists:provinces,id'],
+            'regency_id' => [
+                'required',
+                'integer',
+                Rule::exists('regencies', 'id')->where(function ($query) use ($request) {
+                    return $query->where('province_id', $request->province_id);
+                }),
+            ],
+            'dapil' => ['nullable', 'string'],
             'image' => [$user->image ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ];
@@ -43,8 +56,10 @@ class ProfileController extends Controller
             'name.required' => 'Nama lengkap wajib diisi.',
             'school_name.required' => 'Nama sekolah wajib diisi.',
             'address.required' => 'Alamat rumah tinggal wajib diisi.',
-            'dapil.required' => 'Daerah Pemilihan (Dapil) wajib dipilih.',
-            'dapil.in' => 'Pilihan Daerah Pemilihan (Dapil) tidak valid.',
+            'province_id.required' => 'Provinsi wajib dipilih.',
+            'province_id.exists' => 'Pilihan Provinsi tidak valid.',
+            'regency_id.required' => 'Kabupaten/Kota wajib dipilih.',
+            'regency_id.exists' => 'Kabupaten/Kota tidak sesuai dengan Provinsi terpilih.',
             'image.required' => 'Foto profil siswa wajib diunggah.',
             'image.image' => 'File foto harus berupa gambar.',
             'image.mimes' => 'Format foto harus berupa JPG, JPEG, PNG, atau WEBP.',
@@ -57,7 +72,11 @@ class ProfileController extends Controller
         $user->name = $request->input('name');
         $user->school_name = $request->input('school_name');
         $user->address = $request->input('address');
-        $user->dapil = $request->input('dapil');
+        $user->province_id = $request->input('province_id');
+        $user->regency_id = $request->input('regency_id');
+        if ($request->filled('dapil')) {
+            $user->dapil = $request->input('dapil');
+        }
 
         // Handle Image Upload
         if ($request->hasFile('image')) {

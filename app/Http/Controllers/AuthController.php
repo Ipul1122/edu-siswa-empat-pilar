@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Province;
+use App\Models\Regency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rule;
 use App\Mail\OtpMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
@@ -118,8 +121,19 @@ class AuthController extends Controller
         if (Auth::guard('web')->check()) {
             return redirect()->route('siswa.dashboard');
         }
+        $provinces = Province::orderBy('name')->get();
+        $regencies = Regency::orderBy('name')->get(['id', 'province_id', 'name', 'type']);
         $dapilList = User::DAPIL_LIST;
-        return view('auth.register', compact('dapilList'));
+        return view('auth.register', compact('provinces', 'regencies', 'dapilList'));
+    }
+
+    /**
+     * Get regencies list for a specific province (AJAX API).
+     */
+    public function getRegencies(Province $province)
+    {
+        $regencies = $province->regencies()->get(['id', 'province_id', 'name', 'type']);
+        return response()->json($regencies);
     }
 
     /**
@@ -132,7 +146,15 @@ class AuthController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'school_name' => ['required', 'string', 'max:100'],
-            'dapil' => ['required', 'string', 'in:' . implode(',', User::DAPIL_LIST)],
+            'province_id' => ['required', 'integer', 'exists:provinces,id'],
+            'regency_id' => [
+                'required',
+                'integer',
+                Rule::exists('regencies', 'id')->where(function ($query) use ($request) {
+                    return $query->where('province_id', $request->province_id);
+                }),
+            ],
+            'dapil' => ['nullable', 'string'],
             'address' => ['required', 'string', 'max:500'],
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
@@ -142,8 +164,10 @@ class AuthController extends Controller
             'password.required' => 'Kata sandi wajib diisi.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             'school_name.required' => 'Nama sekolah wajib diisi.',
-            'dapil.required' => 'Daerah Pemilihan (Dapil) wajib dipilih.',
-            'dapil.in' => 'Pilihan Daerah Pemilihan (Dapil) tidak valid.',
+            'province_id.required' => 'Provinsi asal sekolah wajib dipilih.',
+            'province_id.exists' => 'Pilihan Provinsi tidak valid.',
+            'regency_id.required' => 'Kabupaten/Kota asal sekolah wajib dipilih.',
+            'regency_id.exists' => 'Kabupaten/Kota yang dipilih tidak sesuai dengan Provinsi yang dipilih.',
             'address.required' => 'Alamat rumah tinggal wajib diisi.',
             'image.required' => 'Foto profil siswa wajib diunggah.',
             'image.image' => 'File foto harus berupa gambar.',
@@ -167,6 +191,8 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'class_name' => 'SMA/SMK',
             'school_name' => $request->school_name,
+            'province_id' => $request->province_id,
+            'regency_id' => $request->regency_id,
             'dapil' => $request->dapil,
             'address' => $request->address,
             'image' => $imagePath,
@@ -243,6 +269,8 @@ class AuthController extends Controller
             'role' => 'siswa',
             'class_name' => $details['class_name'] ?? 'SMA/SMK',
             'school_name' => $details['school_name'],
+            'province_id' => $details['province_id'] ?? null,
+            'regency_id' => $details['regency_id'] ?? null,
             'dapil' => $details['dapil'] ?? null,
             'address' => $details['address'] ?? null,
             'image' => $details['image'] ?? null,

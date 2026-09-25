@@ -179,25 +179,36 @@
                 @enderror
             </div>
 
-            <!-- Searchable Dapil Dropdown -->
-            <div class="form-group" style="margin-top: 18px;">
-                <label for="dapil">Daerah Pemilihan (Dapil) DPR-RI <span class="required-star">*</span></label>
-                <select name="dapil" id="dapil" class="form-control @error('dapil') is-invalid @enderror" required>
-                    <option value="">-- Pilih atau Cari Daerah Pemilihan (Dapil) --</option>
-                    @foreach($dapilList as $dapilOption)
-                        <option value="{{ $dapilOption }}" {{ old('dapil', $user->dapil) === $dapilOption ? 'selected' : '' }}>
-                            {{ $dapilOption }}
-                        </option>
-                    @endforeach
-                </select>
+            <!-- Cascading Regional Dropdowns (Provinsi & Kabupaten/Kota) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px;">
+                <div class="form-group">
+                    <label for="province_id">Provinsi Asal Sekolah <span class="required-star">*</span></label>
+                    <select name="province_id" id="province_id" class="form-control @error('province_id') is-invalid @enderror" required>
+                        <option value="">-- Pilih Provinsi --</option>
+                        @foreach($provinces as $province)
+                            <option value="{{ $province->id }}" {{ (string)old('province_id', $user->province_id) === (string)$province->id ? 'selected' : '' }}>
+                                {{ $province->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('province_id')
+                        <span class="invalid-feedback" style="display: block; margin-top: 6px;">{{ $message }}</span>
+                    @enderror
+                </div>
 
-                @error('dapil')
-                    <span class="invalid-feedback" style="display: block; margin-top: 6px;">{{ $message }}</span>
-                @enderror
+                <div class="form-group">
+                    <label for="regency_id">Kabupaten / Kota <span class="required-star">*</span></label>
+                    <select name="regency_id" id="regency_id" class="form-control @error('regency_id') is-invalid @enderror" required>
+                        <option value="">-- Pilih Provinsi Dahulu --</option>
+                    </select>
+                    @error('regency_id')
+                        <span class="invalid-feedback" style="display: block; margin-top: 6px;">{{ $message }}</span>
+                    @enderror
+                </div>
             </div>
 
             <!-- Alamat Rumah -->
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 18px;">
                 <label for="address">Alamat Rumah Tinggal Lengkap <span class="required-star">*</span></label>
                 <textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" style="height: 90px;" placeholder="Masukkan alamat lengkap domisili tempat tinggal siswa (Jalan, RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten)..." required>{{ old('address', $user->address) }}</textarea>
                 @error('address')
@@ -246,12 +257,61 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        new TomSelect("#dapil", {
+        const allRegencies = @json($regencies);
+        const currentProvId = "{{ old('province_id', $user->province_id) }}";
+        const currentRegId = "{{ old('regency_id', $user->regency_id) }}";
+
+        const provSelect = new TomSelect("#province_id", {
+            create: false,
+            maxOptions: 50,
+            allowEmptyOption: true,
+            placeholder: "🔍 Pilih Provinsi..."
+        });
+
+        const regSelect = new TomSelect("#regency_id", {
             create: false,
             maxOptions: 100,
             allowEmptyOption: true,
-            placeholder: "🔍 Cari kota/kabupaten atau nama Dapil..."
+            placeholder: "🔍 Pilih Provinsi dahulu..."
         });
+
+        function populateRegencies(provId, selectedId = null) {
+            regSelect.clear();
+            regSelect.clearOptions();
+
+            if (!provId) {
+                regSelect.disable();
+                regSelect.settings.placeholder = "🔍 Pilih Provinsi dahulu...";
+                regSelect.inputState();
+                return;
+            }
+
+            const filtered = allRegencies.filter(r => String(r.province_id) === String(provId));
+            regSelect.enable();
+            regSelect.settings.placeholder = `🔍 Pilih Kab/Kota (${filtered.length} wilayah)...`;
+
+            filtered.forEach(r => {
+                const badge = r.type === 'kota' ? 'Kota' : 'Kab.';
+                regSelect.addOption({
+                    value: r.id,
+                    text: `${r.name} (${badge})`
+                });
+            });
+
+            regSelect.refreshOptions(false);
+
+            if (selectedId) {
+                regSelect.setValue(selectedId);
+            }
+        }
+
+        provSelect.on('change', function(val) {
+            populateRegencies(val);
+        });
+
+        if (currentProvId) {
+            populateRegencies(currentProvId, currentRegId);
+        }
     });
 </script>
 @endsection

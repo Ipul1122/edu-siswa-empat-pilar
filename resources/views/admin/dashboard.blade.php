@@ -144,6 +144,9 @@
             <a href="{{ route('admin.quizzes.create') }}" class="btn btn-secondary" style="width: 100%; text-align: left; justify-content: flex-start; background: #f8fafc;">
                 <i class="fi fi-rr-plus"></i> Buat Kuis Baru
             </a>
+            <a href="{{ route('admin.leaderboard') }}" class="btn btn-secondary" style="width: 100%; text-align: left; justify-content: flex-start; background: #fffbeb; border-color: #fde68a; color: #b45309;">
+                <i class="fi fi-rr-trophy" style="color: #d97706;"></i> Lihat Papan Peringkat Siswa
+            </a>
             <hr style="border: 0; border-top: 1px solid var(--color-gray-200);">
             <div style="background-color: var(--color-gray-100); padding: 16px; border-radius: var(--border-radius-sm); font-size: 0.85rem; color: var(--color-gray-600);">
                 <p style="font-weight: 600; color: var(--color-dark); margin-bottom: 4px;"><i class="fi fi-rr-info" style="margin-right: 4px; vertical-align: middle;"></i> Informasi Guru/Admin:</p>

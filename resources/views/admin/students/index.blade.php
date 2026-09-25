@@ -143,6 +143,9 @@
         <p>Pantau data kependudukan (Dapil & Asal Sekolah), kemajuan materi, dan capaian skor evaluasi siswa.</p>
     </div>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{{ route('admin.leaderboard') }}" class="btn btn-secondary" style="background-color: #fffbeb; border: 1px solid #fde68a; color: #b45309; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fi fi-rr-trophy" style="color: #d97706;"></i> Papan Peringkat
+        </a>
         <a href="{{ route('admin.students.export') }}" class="btn btn-secondary" style="background-color: var(--color-white); border: 1px solid var(--color-gray-300); color: var(--color-gray-700);">
             <i class="fi fi-rr-download" style="margin-right: 4px; vertical-align: middle;"></i> Ekspor CSV
         </a>
@@ -169,14 +172,27 @@
                 </div>
             </div>
 
-            <!-- Filter by Dapil -->
+            <!-- Filter by Province -->
             <div class="filter-group">
-                <label for="dapil" class="filter-label"><i class="fi fi-rr-map-marker"></i> Filter Daerah Pemilihan (Dapil)</label>
-                <select name="dapil" id="dapil" class="filter-select" onchange="document.getElementById('filter-form').submit()">
-                    <option value="">-- Semua Dapil (84 Dapil) --</option>
-                    @foreach($dapilList as $dapilOption)
-                        <option value="{{ $dapilOption }}" {{ request('dapil') === $dapilOption ? 'selected' : '' }}>
-                            {{ $dapilOption }}
+                <label for="admin_province_id" class="filter-label"><i class="fi fi-rr-map-marker"></i> Filter Provinsi</label>
+                <select name="province_id" id="admin_province_id" class="filter-select" onchange="onAdminProvinceChange(this.value)">
+                    <option value="">-- Semua Provinsi (38) --</option>
+                    @foreach($provinces as $prov)
+                        <option value="{{ $prov->id }}" {{ (string)request('province_id') === (string)$prov->id ? 'selected' : '' }}>
+                            {{ $prov->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Filter by Regency / City -->
+            <div class="filter-group">
+                <label for="admin_regency_id" class="filter-label"><i class="fi fi-rr-building"></i> Filter Kab / Kota</label>
+                <select name="regency_id" id="admin_regency_id" class="filter-select" {{ request('province_id') ? '' : 'disabled' }} onchange="document.getElementById('filter-form').submit()">
+                    <option value="">-- Semua Kab / Kota --</option>
+                    @foreach($regencies as $reg)
+                        <option value="{{ $reg->id }}" {{ (string)request('regency_id') === (string)$reg->id ? 'selected' : '' }}>
+                            {{ $reg->name }}
                         </option>
                     @endforeach
                 </select>
@@ -188,7 +204,6 @@
                 <select name="sort_by" id="sort_by" class="filter-select" onchange="document.getElementById('filter-form').submit()">
                     <option value="name" {{ ($sortBy ?? '') === 'name' ? 'selected' : '' }}>Nama Siswa</option>
                     <option value="school_name" {{ ($sortBy ?? '') === 'school_name' ? 'selected' : '' }}>Asal Sekolah</option>
-                    <option value="dapil" {{ ($sortBy ?? '') === 'dapil' ? 'selected' : '' }}>Daerah Pemilihan (Dapil)</option>
                     <option value="average_score" {{ ($sortBy ?? '') === 'average_score' ? 'selected' : '' }}>Rerata Skor</option>
                     <option value="total_quizzes_taken" {{ ($sortBy ?? '') === 'total_quizzes_taken' ? 'selected' : '' }}>Total Kuis</option>
                     <option value="completed_progress_count" {{ ($sortBy ?? '') === 'completed_progress_count' ? 'selected' : '' }}>Real Materi Selesai</option>
@@ -213,7 +228,7 @@
                 </div>
             </div>
 
-            @if(request()->hasAny(['search', 'dapil', 'sort_by', 'order', 'per_page']))
+            @if(request()->hasAny(['search', 'province_id', 'regency_id', 'dapil', 'sort_by', 'order', 'per_page']))
                 <!-- Reset Button if filtered -->
                 <div class="filter-actions" style="margin-bottom: 0;">
                     <a href="{{ route('admin.students.index') }}" class="btn btn-secondary" style="height: 40px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;" title="Reset Filter ke Default">
@@ -230,9 +245,14 @@
     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <h3 class="card-title">
             Daftar Siswa (Total {{ $students->total() }} Siswa)
-            @if(request('dapil'))
+            @if(request('province_id') && $provinces->firstWhere('id', request('province_id')))
                 <span class="badge" style="background-color: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 600; font-size: 0.78rem; margin-left: 6px;">
-                    Dapil: {{ request('dapil') }}
+                    Provinsi: {{ $provinces->firstWhere('id', request('province_id'))->name }}
+                </span>
+            @endif
+            @if(request('regency_id') && $regencies->firstWhere('id', request('regency_id')))
+                <span class="badge" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 600; font-size: 0.78rem; margin-left: 6px;">
+                    Kab/Kota: {{ $regencies->firstWhere('id', request('regency_id'))->name }}
                 </span>
             @endif
         </h3>
@@ -246,7 +266,7 @@
                             <th style="width: 50px; text-align: center;">No</th>
                             <th>Siswa</th>
                             <th>Sekolah</th>
-                            <th>(Dapil)</th>
+                            <th>Wilayah (Prov / Kota)</th>
                             <th style="width: 200px;">Progres</th>
                             <th style="text-align: center;">Kuis</th>
                             <th style="text-align: center;">Skor</th>
@@ -274,7 +294,14 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if($student->dapil)
+                                    @if($student->regency || $student->province)
+                                        <div style="font-weight: 600; font-size: 0.82rem; color: var(--color-dark);">
+                                            {{ $student->regency->name ?? '-' }}
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: var(--color-gray-500); text-transform: uppercase;">
+                                            {{ $student->province->name ?? '-' }}
+                                        </div>
+                                    @elseif($student->dapil)
                                         <span class="badge" style="background-color: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 600; font-size: 0.78rem; padding: 4px 10px; border-radius: 20px;">
                                             <i class="fi fi-rr-map-marker" style="margin-right: 3px; font-size: 0.75rem;"></i> {{ $student->dapil }}
                                         </span>
@@ -383,4 +410,30 @@
         @endif
     </div>
 </div>
+
+<script>
+    const adminRegenciesData = @json($allRegencies);
+
+    function onAdminProvinceChange(provId) {
+        const regSelect = document.getElementById('admin_regency_id');
+        regSelect.innerHTML = '<option value="">-- Semua Kab / Kota --</option>';
+
+        if (!provId) {
+            regSelect.disabled = true;
+            document.getElementById('filter-form').submit();
+            return;
+        }
+
+        const filtered = adminRegenciesData.filter(r => String(r.province_id) === String(provId));
+        filtered.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id;
+            opt.textContent = r.name;
+            regSelect.appendChild(opt);
+        });
+
+        regSelect.disabled = false;
+        document.getElementById('filter-form').submit();
+    }
+</script>
 @endsection

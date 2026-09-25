@@ -42,7 +42,33 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+@php
+    $isFullpageMode = Route::is('siswa.materials.show', 'siswa.videos.show', 'siswa.quizzes.start', 'siswa.real-materi.start');
+@endphp
+<body class="{{ $isFullpageMode ? 'fullpage-mode has-fullpage-support' : '' }}" data-fullpage-enabled="{{ $isFullpageMode ? 'true' : 'false' }}">
+    @if($isFullpageMode)
+        <!-- Full Page Overlay Controls -->
+        <div id="fullpage-controls" class="fullpage-controls">
+            <!-- Mobile Pull-down Hint Pill -->
+            <div class="fullpage-mobile-pill" id="fullpage-mobile-pill">
+                <span class="pull-bar"></span>
+                <span class="pill-text">Swipe ke bawah atau klik ✕ untuk keluar layar penuh</span>
+            </div>
+
+            <!-- Floating Exit "X" Button -->
+            <button type="button" class="fullpage-exit-btn" id="fullpage-exit-btn" title="Keluar Layar Penuh (Esc)">
+                <span class="btn-text">Keluar Layar Penuh</span>
+                <span class="btn-key-badge">Esc</span>
+                <i class="fi fi-rr-cross"></i>
+            </button>
+
+            <!-- Floating Re-enter Button (Visible when exited fullpage) -->
+            <button type="button" class="fullpage-reenter-btn" id="fullpage-reenter-btn" title="Kembali ke Mode Layar Penuh">
+                <i class="fi fi-rr-expand"></i>
+                <span>Layar Penuh</span>
+            </button>
+        </div>
+    @endif
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="app-sidebar">

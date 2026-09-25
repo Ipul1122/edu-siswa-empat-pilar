@@ -431,4 +431,134 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // 7. Full Page Focus Mode Controller (Real Materi, Kuis, Baca Materi, Tonton Video)
+    const fullpageEnabled = document.body.dataset.fullpageEnabled === 'true';
+
+    if (fullpageEnabled) {
+        const exitBtn = document.getElementById('fullpage-exit-btn');
+        const reenterBtn = document.getElementById('fullpage-reenter-btn');
+        const mobilePill = document.getElementById('fullpage-mobile-pill');
+
+        const exitFullPage = (showToast = true) => {
+            if (!document.body.classList.contains('fullpage-mode')) return;
+            document.body.classList.remove('fullpage-mode');
+
+            // Exit browser native fullscreen if active
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+
+            if (showToast && typeof window.showToast === 'function') {
+                window.showToast('info', 'Keluar dari mode layar penuh', 2500);
+            }
+        };
+
+        const enterFullPage = (requestBrowserFullscreen = true) => {
+            document.body.classList.add('fullpage-mode');
+
+            if (requestBrowserFullscreen && !document.fullscreenElement) {
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen().catch(() => {});
+                } else if (docEl.webkitRequestFullscreen) {
+                    docEl.webkitRequestFullscreen();
+                }
+            }
+
+            if (mobilePill) {
+                mobilePill.classList.remove('fade-out');
+                setTimeout(() => {
+                    mobilePill.classList.add('fade-out');
+                }, 4000);
+            }
+
+            if (typeof window.showToast === 'function') {
+                window.showToast('success', 'Mode layar penuh aktif', 2000);
+            }
+        };
+
+        // 1. Click "X" button to exit
+        if (exitBtn) {
+            exitBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                exitFullPage(true);
+            });
+        }
+
+        // 2. Click re-enter button to return to full page
+        if (reenterBtn) {
+            reenterBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                enterFullPage(true);
+            });
+        }
+
+        // 3. Keyboard 'Esc' key listener
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                if (document.body.classList.contains('fullpage-mode')) {
+                    exitFullPage(true);
+                }
+            }
+        });
+
+        // 4. Mobile Swipe Down Gesture Listener
+        let touchStartY = 0;
+        let touchStartX = 0;
+        let touchStartTime = 0;
+
+        window.addEventListener('touchstart', function (e) {
+            if (!document.body.classList.contains('fullpage-mode')) return;
+            if (e.touches && e.touches.length === 1) {
+                touchStartY = e.touches[0].clientY;
+                touchStartX = e.touches[0].clientX;
+                touchStartTime = Date.now();
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', function (e) {
+            if (!document.body.classList.contains('fullpage-mode')) return;
+            if (e.touches && e.touches.length === 1) {
+                const currentY = e.touches[0].clientY;
+                const deltaY = currentY - touchStartY;
+                // If near top of page and dragging down
+                if (window.scrollY <= 15 && deltaY > 30 && mobilePill) {
+                    mobilePill.classList.remove('fade-out');
+                    mobilePill.classList.add('active');
+                }
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', function (e) {
+            if (!document.body.classList.contains('fullpage-mode')) return;
+            if (e.changedTouches && e.changedTouches.length === 1) {
+                const endY = e.changedTouches[0].clientY;
+                const endX = e.changedTouches[0].clientX;
+                const deltaY = endY - touchStartY;
+                const deltaX = Math.abs(endX - touchStartX);
+                const duration = Date.now() - touchStartTime;
+
+                // Swipe down condition:
+                // Scrolled near top (window.scrollY <= 25), dragged down > 70px, more vertical than horizontal
+                if (window.scrollY <= 25 && deltaY > 70 && deltaY > deltaX * 1.4 && (duration < 800 || touchStartY < 120)) {
+                    exitFullPage(true);
+                } else if (mobilePill) {
+                    mobilePill.classList.remove('active');
+                    mobilePill.classList.add('fade-out');
+                }
+            }
+        }, { passive: true });
+
+        // Auto-fade mobile pill initially after 4s
+        if (mobilePill) {
+            setTimeout(() => {
+                mobilePill.classList.add('fade-out');
+            }, 4000);
+        }
+    }
 });

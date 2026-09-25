@@ -38,7 +38,16 @@ class StudentController extends Controller
             ->selectRaw('COALESCE(attempts_stats.attempts_count, 0) as total_quizzes_taken')
             ->leftJoinSub($realProgressSub, 'real_progress', 'real_progress.user_id', '=', 'users.id')
             ->leftJoinSub($attemptsStatsSub, 'attempts_stats', 'attempts_stats.user_id', '=', 'users.id')
+            ->with(['province', 'regency'])
             ->where('users.role', 'siswa');
+
+        // Filter by Province & Regency
+        if ($request->filled('province_id')) {
+            $query->where('users.province_id', $request->province_id);
+        }
+        if ($request->filled('regency_id')) {
+            $query->where('users.regency_id', $request->regency_id);
+        }
 
         // Filter by Dapil
         if ($request->filled('dapil')) {
@@ -84,8 +93,23 @@ class StudentController extends Controller
         // Total count based on Real Materi quizzes in database
         $totalRealMateriCount = Quiz::query()->where('type', '=', 'real')->count('*');
         $dapilList = User::DAPIL_LIST;
+        $provinces = \App\Models\Province::orderBy('name')->get();
+        $regencies = $request->filled('province_id')
+            ? \App\Models\Regency::where('province_id', $request->province_id)->orderBy('name')->get()
+            : collect();
+        $allRegencies = \App\Models\Regency::orderBy('name')->get(['id', 'province_id', 'name', 'type']);
 
-        return view('admin.students.index', compact('students', 'totalRealMateriCount', 'dapilList', 'sortBy', 'order', 'perPage'));
+        return view('admin.students.index', compact(
+            'students',
+            'totalRealMateriCount',
+            'dapilList',
+            'provinces',
+            'regencies',
+            'allRegencies',
+            'sortBy',
+            'order',
+            'perPage'
+        ));
     }
 
     /**

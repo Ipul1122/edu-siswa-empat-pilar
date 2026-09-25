@@ -30,6 +30,7 @@ Route::middleware('guest:web')->group(function () {
     Route::get('/register/verify-otp', [AuthController::class, 'showRegisterVerifyOtp'])->name('register.verify_otp');
     Route::post('/register/verify-otp', [AuthController::class, 'registerVerifyOtp'])->middleware('throttle:auth');
     Route::post('/register/resend-otp', [AuthController::class, 'registerResendOtp'])->name('register.resend_otp')->middleware('throttle:otp');
+    Route::get('/regions/provinces/{province}/regencies', [AuthController::class, 'getRegencies'])->name('regions.regencies');
 
     // Siswa Lupa Password OTP
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
@@ -76,11 +77,12 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     Route::put('/questions/{question}', [App\Http\Controllers\Admin\QuestionController::class, 'update'])->name('questions.update');
     Route::delete('/questions/{question}', [App\Http\Controllers\Admin\QuestionController::class, 'destroy'])->name('questions.destroy');
 
-    // Student Monitoring
+    // Student Monitoring & Leaderboard
     Route::get('/students', [App\Http\Controllers\Admin\StudentController::class, 'index'])->name('students.index');
     Route::get('/students/export', [App\Http\Controllers\Admin\StudentController::class, 'export'])->name('students.export');
     Route::get('/students/report', [App\Http\Controllers\Admin\StudentController::class, 'report'])->name('students.report');
     Route::get('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'show'])->name('students.show');
+    Route::get('/leaderboard', [App\Http\Controllers\Admin\LeaderboardController::class, 'index'])->name('leaderboard');
 
     // Admin Profile Settings
     Route::get('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');

@@ -116,6 +116,8 @@ class User extends Authenticatable
         'image',
         'address',
         'dapil',
+        'province_id',
+        'regency_id',
     ];
 
     /**
@@ -155,6 +157,22 @@ class User extends Authenticatable
 
         // Fallback default avatar generator using initials
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=dc2626&color=ffffff&size=200&bold=true';
+    }
+
+    /**
+     * Relationship to Province.
+     */
+    public function province(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Province::class);
+    }
+
+    /**
+     * Relationship to Regency (Kabupaten / Kota).
+     */
+    public function regency(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Regency::class);
     }
 
     /**

@@ -41,10 +41,67 @@
     </div>
 @endif
 
+<!-- Regional Filter Bar (Provinsi & Kabupaten/Kota) -->
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card-body" style="padding: 18px 24px;">
+        <form action="{{ route('siswa.leaderboard') }}" method="GET" id="leaderboard-filter-form" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 220px;">
+                <label for="filter_province_id" style="font-size: 0.82rem; font-weight: 600; color: var(--color-dark); margin-bottom: 6px; display: block;">
+                    <i class="fi fi-rr-map-marker" style="color: rgb(var(--color-primary-rgb));"></i> Filter Provinsi
+                </label>
+                <select name="province_id" id="filter_province_id" class="form-control" onchange="onProvinceFilterChange(this.value)">
+                    <option value="">🇮🇩 Seluruh Indonesia (Nasional)</option>
+                    @foreach($provinces as $prov)
+                        <option value="{{ $prov->id }}" {{ (string)$selectedProvinceId === (string)$prov->id ? 'selected' : '' }}>
+                            {{ $prov->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div style="flex: 1; min-width: 220px;">
+                <label for="filter_regency_id" style="font-size: 0.82rem; font-weight: 600; color: var(--color-dark); margin-bottom: 6px; display: block;">
+                    <i class="fi fi-rr-building" style="color: rgb(var(--color-primary-rgb));"></i> Filter Kabupaten / Kota
+                </label>
+                <select name="regency_id" id="filter_regency_id" class="form-control" {{ $selectedProvinceId ? '' : 'disabled' }}>
+                    <option value="">Semua Kabupaten / Kota</option>
+                    @foreach($regencies as $reg)
+                        <option value="{{ $reg->id }}" {{ (string)$selectedRegencyId === (string)$reg->id ? 'selected' : '' }}>
+                            {{ $reg->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">
+                    <i class="fi fi-rr-filter"></i> Terapkan
+                </button>
+                @if($selectedProvinceId || $selectedRegencyId)
+                    <a href="{{ route('siswa.leaderboard') }}" class="btn btn-secondary" style="padding: 10px 16px;" title="Reset Filter">
+                        <i class="fi fi-rr-refresh"></i> Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Leaderboard List -->
 <div class="card">
-    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Daftar Peringkat Belajar</h3>
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+            <h3 style="margin-bottom: 2px;">Daftar Peringkat Belajar</h3>
+            <div style="font-size: 0.8rem; color: var(--color-gray-500);">
+                @if($selectedRegencyId && $regencies->firstWhere('id', $selectedRegencyId))
+                    Menampilkan peringkat untuk wilayah: <strong style="color: rgb(var(--color-primary-rgb));">{{ $regencies->firstWhere('id', $selectedRegencyId)->name }}</strong>
+                @elseif($selectedProvinceId && $provinces->firstWhere('id', $selectedProvinceId))
+                    Menampilkan peringkat untuk Provinsi: <strong style="color: rgb(var(--color-primary-rgb));">{{ $provinces->firstWhere('id', $selectedProvinceId)->name }}</strong>
+                @else
+                    Menampilkan peringkat: <strong style="color: rgb(var(--color-primary-rgb));">Nasional (Seluruh Indonesia)</strong>
+                @endif
+            </div>
+        </div>
         <span style="font-size: 0.8rem; color: var(--color-gray-500); font-weight: 500;">Sistem poin: (Materi Dibaca x 10 Poin) + Total Nilai Kuis</span>
     </div>
     <div class="card-body" style="padding: 0;">
@@ -54,6 +111,7 @@
                     <tr style="background-color: var(--color-gray-100);">
                         <th style="width: 80px; text-align: center;">Peringkat</th>
                         <th>Siswa</th>
+                        <th>Asal Wilayah</th>
                         <th>Kelas & Sekolah</th>
                         <th style="text-align: center;">Materi Dibaca</th>
                         <th style="text-align: center;">Rerata Nilai</th>
@@ -61,7 +119,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($leaderboard as $index => $student)
+                    @forelse($leaderboard as $index => $student)
                         @php $rank = $index + 1; @endphp
                         <tr style="{{ $student->id === Auth::id() ? 'background-color: rgba(239, 68, 68, 0.04); font-weight: 600;' : '' }}">
                             <td style="text-align: center;">
@@ -91,7 +149,15 @@
                                 </div>
                             </td>
                             <td>
-                                <div style="font-size: 0.9rem; color: var(--color-gray-700);">Kelas {{ $student->class_name }}</div>
+                                <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-dark);">
+                                    {{ $student->regency->name ?? '-' }}
+                                </div>
+                                <div style="font-size: 0.72rem; color: var(--color-gray-500); text-transform: uppercase;">
+                                    {{ $student->province->name ?? ($student->dapil ?? '-') }}
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-size: 0.88rem; color: var(--color-gray-700);">Kelas {{ $student->class_name }}</div>
                                 <div style="font-size: 0.75rem; color: var(--color-gray-500);">{{ $student->school_name }}</div>
                             </td>
                             <td style="text-align: center; font-size: 0.95rem; color: var(--color-gray-700);">
@@ -108,10 +174,42 @@
                                 </span>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px 20px; color: var(--color-gray-500);">
+                                <div style="font-size: 2rem; margin-bottom: 8px;">📍</div>
+                                <p style="font-size: 0.95rem; font-weight: 500;">Belum ada peserta di wilayah yang dipilih.</p>
+                                <a href="{{ route('siswa.leaderboard') }}" class="btn btn-secondary btn-sm" style="margin-top: 10px;">Lihat Peringkat Nasional</a>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<script>
+    const allRegenciesData = @json($allRegencies);
+
+    function onProvinceFilterChange(provId) {
+        const regSelect = document.getElementById('filter_regency_id');
+        regSelect.innerHTML = '<option value="">Semua Kabupaten / Kota</option>';
+
+        if (!provId) {
+            regSelect.disabled = true;
+            return;
+        }
+
+        const filtered = allRegenciesData.filter(r => String(r.province_id) === String(provId));
+        filtered.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id;
+            opt.textContent = r.name;
+            regSelect.appendChild(opt);
+        });
+
+        regSelect.disabled = false;
+    }
+</script>
 @endsection

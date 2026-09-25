@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quiz;
+use App\Models\Province;
 use Illuminate\Http\Request;
 
 class RealQuizController extends Controller
@@ -13,7 +14,7 @@ class RealQuizController extends Controller
      */
     public function index()
     {
-        $quizzes = Quiz::query()->where('type', '=', 'real')->withCount('questions')->latest()->get();
+        $quizzes = Quiz::query()->where('type', '=', 'real')->with(['province'])->withCount('questions')->latest()->get();
         
         $totalRealCount = $quizzes->count();
         $activeRealCount = $quizzes->where('is_active', true)->count();
@@ -28,7 +29,8 @@ class RealQuizController extends Controller
      */
     public function create()
     {
-        return view('admin.real_quizzes.create');
+        $provinces = Province::orderBy('name')->get();
+        return view('admin.real_quizzes.create', compact('provinces'));
     }
 
     /**
@@ -41,6 +43,8 @@ class RealQuizController extends Controller
             'title' => ['required', 'string', 'max:255', 'unique:quizzes,title'],
             'description' => ['nullable', 'string'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
+            'package_code' => ['nullable', 'string', 'max:50'],
+            'province_id' => ['nullable', 'exists:provinces,id'],
         ], [
             'pillar.required' => 'Kategori / Pilar wajib dipilih.',
             'pillar.in' => 'Kategori / Pilar tidak valid.',
@@ -49,11 +53,17 @@ class RealQuizController extends Controller
             'duration_minutes.required' => 'Durasi kuis wajib diisi.',
             'duration_minutes.integer' => 'Durasi kuis harus berupa angka.',
             'duration_minutes.min' => 'Durasi kuis minimal 1 menit.',
+            'province_id.exists' => 'Provinsi yang dipilih tidak terdaftar.',
         ]);
 
         $data = $request->all();
         $data['type'] = 'real';
+        $data['package_code'] = $request->input('package_code') ?: 'Paket Utama';
+        $data['province_id'] = $request->input('province_id') ?: null;
+        $data['randomize_questions'] = $request->has('randomize_questions');
+        $data['randomize_options'] = $request->has('randomize_options');
         $data['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
+
         Quiz::create($data);
 
         return redirect()->route('admin.real-materi.index')
@@ -66,7 +76,7 @@ class RealQuizController extends Controller
     public function show(Quiz $real_materi)
     {
         $quiz = $real_materi;
-        $quiz->load('questions');
+        $quiz->load(['questions', 'province']);
         return view('admin.quizzes.show', compact('quiz'));
     }
 
@@ -79,7 +89,8 @@ class RealQuizController extends Controller
         if ($quiz->type !== 'real') {
             return redirect()->route('admin.quizzes.edit', $quiz);
         }
-        return view('admin.real_quizzes.edit', compact('quiz'));
+        $provinces = Province::orderBy('name')->get();
+        return view('admin.real_quizzes.edit', compact('quiz', 'provinces'));
     }
 
     /**
@@ -93,6 +104,8 @@ class RealQuizController extends Controller
             'title' => ['required', 'string', 'max:255', 'unique:quizzes,title,' . $quiz->id],
             'description' => ['nullable', 'string'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
+            'package_code' => ['nullable', 'string', 'max:50'],
+            'province_id' => ['nullable', 'exists:provinces,id'],
         ], [
             'pillar.required' => 'Kategori / Pilar wajib dipilih.',
             'pillar.in' => 'Kategori / Pilar tidak valid.',
@@ -101,11 +114,17 @@ class RealQuizController extends Controller
             'duration_minutes.required' => 'Durasi kuis wajib diisi.',
             'duration_minutes.integer' => 'Durasi kuis harus berupa angka.',
             'duration_minutes.min' => 'Durasi kuis minimal 1 menit.',
+            'province_id.exists' => 'Provinsi yang dipilih tidak terdaftar.',
         ]);
 
         $data = $request->all();
         $data['type'] = 'real';
+        $data['package_code'] = $request->input('package_code') ?: 'Paket Utama';
+        $data['province_id'] = $request->input('province_id') ?: null;
+        $data['randomize_questions'] = $request->has('randomize_questions');
+        $data['randomize_options'] = $request->has('randomize_options');
         $data['is_active'] = $request->boolean('is_active');
+
         $quiz->update($data);
 
         return redirect()->route('admin.real-materi.index')

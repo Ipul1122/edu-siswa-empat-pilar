@@ -16,6 +16,10 @@ class Quiz extends Model
         'description',
         'duration_minutes',
         'type',
+        'package_code',
+        'province_id',
+        'randomize_questions',
+        'randomize_options',
         'is_active',
     ];
 
@@ -23,7 +27,17 @@ class Quiz extends Model
     {
         return [
             'is_active' => 'boolean',
+            'randomize_questions' => 'boolean',
+            'randomize_options' => 'boolean',
         ];
+    }
+
+    /**
+     * Relationship to target Province (if region-specific).
+     */
+    public function province(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Province::class);
     }
 
     /**
@@ -55,5 +69,16 @@ class Quiz extends Model
             'twk_kedinasan' => 'Simulasi TWK Kedinasan',
             default => ucfirst(str_replace('_', ' ', $this->pillar)),
         };
+    }
+
+    /**
+     * Helper to get formatted region target label.
+     */
+    public function getRegionLabelAttribute(): string
+    {
+        if ($this->province) {
+            return 'Khusus: ' . $this->province->name;
+        }
+        return 'Nasional (Seluruh Indonesia)';
     }
 }

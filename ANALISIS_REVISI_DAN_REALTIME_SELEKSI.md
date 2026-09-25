@@ -54,11 +54,16 @@ Platform ini dikembangkan sebagai portal seleksi nasional **Empat Pilar MPR RI**
 
 ---
 
-### 2.2 Pengacakan Soal per Wilayah/Provinsi
+### 2.2 Pengacakan Soal per Wilayah/Provinsi `[✓ SELESAI & TERVALIDASI I/O]`
 * **Kebutuhan:** Soal seleksi dapat diacak untuk setiap provinsi agar tidak terjadi kebocoran kunci jawaban antar peserta/sekolah.
 * **Solusi Teknis:**
-  * **Level 1 (Shuffling Algorithm):** Sistem mengacak urutan nomor soal (1–50) dan opsi jawaban (A, B, C, D, E) untuk setiap peserta menggunakan algoritma *Deterministic Seed Shuffling* berbasis kombinasi `user_id` + `province_id`. Dengan demikian, soal nomor 1 siswa A berbeda dengan siswa B.
-  * **Level 2 (Question Pool / Paket Soal Wilayah):** Admin MPR dapat membuat beberapa varian paket soal (Paket A, B, C) dan menetapkan paket tersebut ke provinsi tertentu (misal: Wilayah Barat = Paket A, Wilayah Tengah = Paket B, Wilayah Timur = Paket C).
+  * **Level 1 (Shuffling Algorithm):** Sistem mengacak urutan nomor soal (1–50) dan opsi jawaban (A, B, C, D, E) untuk setiap peserta menggunakan algoritma *Deterministic Seed Shuffling* berbasis kombinasi `user_id` + `province_id` via [ExamShufflerService.php](file:///c:/xampp/htdocs/edu-siswa-empat-pilar/app/Services/ExamShufflerService.php). Dengan demikian:
+    * Soal nomor 1 siswa A berbeda dengan siswa B.
+    * Urutan opsi A–E siswa A berbeda dengan siswa B.
+    * Siswa yang me-refresh halaman tetap memperoleh urutan soal & opsi yang sama (100% konsisten/deterministik).
+  * **Level 2 (Question Pool / Paket Soal Wilayah):** Admin MPR dapat membuat varian paket soal (`package_code`: Paket A, Paket B, dll) dan menetapkan paket tersebut ke provinsi tertentu (`province_id`). Siswa dari provinsi tersebut otomatis disajikan paket khusus provinsinya, sementara siswa lain fallback ke paket Nasional.
+* **Hasil Pengujian I/O ([validate_shuffling_io.php](file:///c:/xampp/htdocs/edu-siswa-empat-pilar/scripts/validate_shuffling_io.php)):**
+  * `11/11 Uji PASS (100%)`: Konsistensi deterministik, anti-cheat scrambling antar-siswa, validasi 100% benar, 0% salah, payload kosong, struktur data terproteksi, serta resolusi paket regional.
 
 ---
 

@@ -72,10 +72,22 @@
 
     <!-- Question list review -->
     <div style="display: flex; flex-direction: column; gap: 28px;">
-        @foreach($attempt->quiz->questions as $index => $question)
+        @php
+            $displayQuestions = $shuffledQuestions ?? $attempt->quiz->questions;
+        @endphp
+        @foreach($displayQuestions as $index => $question)
             @php
                 $studentChoice = $studentAnswers[$question->id] ?? null;
-                $isCorrect = $studentChoice && strtolower($studentChoice) === strtolower($question->correct_option);
+                $studentChoiceKey = is_array($studentChoice) ? ($studentChoice['key'] ?? null) : $studentChoice;
+                $isCorrect = $studentChoiceKey && strtolower((string)$studentChoiceKey) === strtolower((string)$question->correct_option);
+
+                $optionsToRender = $question->shuffled_options ?? [
+                    ['key' => 'a', 'text' => $question->option_a, 'display_label' => 'A'],
+                    ['key' => 'b', 'text' => $question->option_b, 'display_label' => 'B'],
+                    ['key' => 'c', 'text' => $question->option_c, 'display_label' => 'C'],
+                    ['key' => 'd', 'text' => $question->option_d, 'display_label' => 'D'],
+                    ['key' => 'e', 'text' => $question->option_e, 'display_label' => 'E'],
+                ];
             @endphp
             <div class="question-card" style="border: 1px solid var(--color-gray-200); border-radius: var(--border-radius-md); padding: 24px; background: var(--color-white); {{ $isCorrect ? 'border-left: 5px solid var(--color-success);' : 'border-left: 5px solid var(--color-danger);' }}">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -98,10 +110,14 @@
                 </div>
 
                 <div class="options-list" style="display: flex; flex-direction: column; gap: 10px;">
-                    @foreach(['a' => $question->option_a, 'b' => $question->option_b, 'c' => $question->option_c, 'd' => $question->option_d, 'e' => $question->option_e] as $optKey => $optVal)
+                    @foreach($optionsToRender as $opt)
                         @php
-                            $isThisCorrect = ($question->correct_option === $optKey);
-                            $isThisStudentChoice = ($studentChoice === $optKey);
+                            $optKey = $opt['key'];
+                            $optText = $opt['text'];
+                            $optLabel = $opt['display_label'] ?? strtoupper($optKey);
+
+                            $isThisCorrect = (strtolower((string)$question->correct_option) === strtolower((string)$optKey));
+                            $isThisStudentChoice = ($studentChoiceKey !== null && strtolower((string)$studentChoiceKey) === strtolower((string)$optKey));
                             $bgStyle = 'background-color: var(--color-white); border: 1px solid var(--color-gray-200);';
                             if ($isThisCorrect) {
                                 $bgStyle = 'background-color: rgba(16, 185, 129, 0.06); border: 2px solid var(--color-success); font-weight: 600;';
@@ -111,8 +127,8 @@
                         @endphp
                         <div style="padding: 12px 16px; border-radius: var(--border-radius-sm); {{ $bgStyle }} display: flex; align-items: center; justify-content: space-between; gap: 12px;">
                             <div>
-                                <span style="font-weight: 700; margin-right: 6px; text-transform: uppercase;">{{ $optKey }}.</span>
-                                <span>{{ $optVal }}</span>
+                                <span style="font-weight: 700; margin-right: 6px;">{{ $optLabel }}.</span>
+                                <span>{{ $optText }}</span>
                             </div>
                             <div style="display: flex; gap: 6px; flex-shrink: 0;">
                                 @if($isThisStudentChoice)

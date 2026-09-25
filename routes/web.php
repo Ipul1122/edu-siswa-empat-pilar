@@ -32,12 +32,18 @@ Route::middleware('guest:web')->group(function () {
     Route::post('/register/resend-otp', [AuthController::class, 'registerResendOtp'])->name('register.resend_otp')->middleware('throttle:otp');
     Route::get('/regions/provinces/{province}/regencies', [AuthController::class, 'getRegencies'])->name('regions.regencies');
 
-    // Siswa Lupa Password OTP
+    // Siswa Lupa Password OTP (2 Langkah: Verifikasi OTP -> Buat Kata Sandi Baru)
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetOtp'])->name('password.email')->middleware('throttle:otp');
+    
+    // Langkah 1: Verifikasi Kode OTP
     Route::get('/forgot-password/verify-otp', [AuthController::class, 'showResetVerifyOtp'])->name('password.verify_otp');
-    Route::post('/forgot-password/verify-otp', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:auth');
+    Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyResetOtp'])->name('password.verify_otp.submit')->middleware('throttle:auth');
     Route::post('/forgot-password/resend-otp', [AuthController::class, 'resetResendOtp'])->name('password.resend_otp')->middleware('throttle:otp');
+
+    // Langkah 2: Buat Kata Sandi Baru di Halaman Berbeda
+    Route::get('/forgot-password/reset', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/forgot-password/reset', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:auth');
 });
 
 Route::middleware('guest:admin')->group(function () {

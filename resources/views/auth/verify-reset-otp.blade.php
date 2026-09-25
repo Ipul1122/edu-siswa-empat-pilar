@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Verifikasi OTP & Reset Sandi - Empat Pilar')
+@section('title', 'Verifikasi Kode OTP - Pemulihan Akun - Empat Pilar')
 
 @section('content')
 <style>
@@ -85,17 +85,46 @@
     
     .brand-subtitle {
         font-size: 1.1rem;
-        color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 40px;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 32px;
         font-weight: 400;
+        line-height: 1.6;
+    }
+
+    .step-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .step-badge .step-num {
+        background: var(--color-secondary);
+        color: var(--color-dark);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
     }
     
     .form-panel {
         flex: 0.8;
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: center;
-        padding: 140px 60px 80px 60px;
+        padding: 100px 60px;
         background-color: var(--color-white);
         position: relative;
         overflow-y: auto;
@@ -103,12 +132,27 @@
     
     .form-container {
         width: 100%;
-        max-width: 400px;
+        max-width: 420px;
         animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
     .form-header {
-        margin-bottom: 24px;
+        margin-bottom: 28px;
+    }
+
+    .form-step-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: rgb(var(--color-primary-rgb));
+        background: rgba(var(--color-primary-rgb), 0.08);
+        padding: 4px 10px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .form-header h3 {
@@ -121,20 +165,23 @@
     .form-header p {
         font-size: 0.95rem;
         color: var(--color-gray-600);
+        margin-bottom: 4px;
     }
     
     .email-highlight {
         font-weight: 600;
         color: rgb(var(--color-primary-rgb));
-        background-color: rgba(var(--color-primary-rgb), 0.05);
-        padding: 4px 8px;
+        background-color: rgba(var(--color-primary-rgb), 0.06);
+        border: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        padding: 6px 12px;
         border-radius: var(--border-radius-sm);
         display: inline-block;
         margin-top: 6px;
+        word-break: break-all;
     }
     
     .custom-form-group {
-        margin-bottom: 16px;
+        margin-bottom: 24px;
     }
     
     .custom-form-group label {
@@ -142,25 +189,26 @@
         font-size: 0.85rem;
         font-weight: 600;
         color: var(--color-dark);
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        text-align: center;
     }
     
     .otp-input-container {
         display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 10px;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 12px;
     }
     
     .otp-field {
-        width: 50px;
-        height: 54px;
-        font-size: 1.5rem;
+        width: 52px;
+        height: 58px;
+        font-size: 1.6rem;
         font-weight: 700;
         text-align: center;
         border: 2px solid var(--color-gray-200);
         background-color: var(--color-gray-100);
-        border-radius: var(--border-radius-sm);
+        border-radius: var(--border-radius-md);
         outline: none;
         transition: var(--transition-smooth);
         font-family: var(--font-heading);
@@ -169,37 +217,8 @@
     .otp-field:focus {
         border-color: rgb(var(--color-primary-rgb));
         background-color: var(--color-white);
-        box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
-    }
-    
-    .custom-input {
-        width: 100%;
-        height: 50px;
-        padding: 12px 16px;
-        font-size: 0.95rem;
-        font-family: var(--font-body);
-        color: var(--color-dark);
-        background-color: var(--color-gray-100);
-        border: 2px solid transparent;
-        border-radius: var(--border-radius-md);
-        transition: var(--transition-smooth);
-        outline: none;
-        box-sizing: border-box;
-    }
-    
-    .custom-input:focus {
-        background-color: var(--color-white);
-        border-color: rgb(var(--color-primary-rgb));
-        box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.1);
-    }
-    
-    .custom-input.is-invalid {
-        border-color: var(--color-danger);
-        background-color: rgba(244, 67, 54, 0.02);
-    }
-    
-    .custom-input.is-invalid:focus {
-        box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.1);
+        box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.12);
+        transform: translateY(-2px);
     }
     
     .submit-btn {
@@ -237,6 +256,8 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--color-gray-200);
         font-size: 0.9rem;
     }
     
@@ -260,6 +281,7 @@
     .cancel-link {
         color: var(--color-gray-600);
         font-weight: 500;
+        text-decoration: none;
     }
     
     .cancel-link:hover {
@@ -318,12 +340,16 @@
             <div class="brand-logo">
                 <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR">
             </div>
-            <h1 class="brand-title">Atur Ulang <br><span>Kata Sandi Anda</span></h1>
-            <p class="brand-subtitle">Masukkan kode OTP yang dikirim ke email Anda, lalu tentukan kata sandi baru Anda yang aman untuk dapat masuk kembali ke sistem.</p>
+            <div class="step-badge">
+                <span class="step-num">1</span>
+                <span>Langkah 1 dari 2: Verifikasi Identitas</span>
+            </div>
+            <h1 class="brand-title">Verifikasi <br><span>Kode OTP</span></h1>
+            <p class="brand-subtitle">Masukkan 6 digit kode OTP yang kami kirimkan ke email Anda untuk memvalidasi kepemilikan akun sebelum mengatur kata sandi baru Anda.</p>
         </div>
     </div>
     
-    <!-- Right Section: OTP & Password Form -->
+    <!-- Right Section: OTP Form Only -->
     <div class="form-panel">
         <div class="form-container">
             <div class="mobile-logo-wrapper">
@@ -332,48 +358,38 @@
                 </a>
             </div>
             <div class="form-header">
-                <h3>Pulihkan Akun</h3>
-                <p>Masukkan kode OTP yang dikirim ke:</p>
-                <div class="email-highlight">{{ session('reset_email', 'Email Anda') }}</div>
+                <div class="form-step-pill">Langkah 1 dari 2</div>
+                <h3>Verifikasi OTP</h3>
+                <p>Masukkan 6 digit kode keamanan yang dikirim ke:</p>
+                <div class="email-highlight">{{ $email ?? session('reset_email', 'Email Anda') }}</div>
             </div>
             
-            <form action="{{ route('password.update') }}" method="POST" id="resetForm">
+            <form action="{{ route('password.verify_otp.submit') }}" method="POST" id="otpForm">
                 @csrf
                 
                 <div class="custom-form-group">
-                    <label>Kode OTP</label>
+                    <label>Masukkan 6 Digit Angka</label>
                     <div class="otp-input-container">
-                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]">
-                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]">
-                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]">
-                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]">
-                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]">
-                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]">
+                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]" inputmode="numeric" autofocus>
+                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]" inputmode="numeric">
+                        <input type="text" class="otp-field" maxlength="1" required pattern="[0-9]" inputmode="numeric">
                     </div>
                     
                     <!-- Hidden field to combine the values -->
                     <input type="hidden" name="otp" id="fullOtp">
                     
                     @error('otp')
-                        <span class="invalid-feedback" style="display: block; margin-top: 6px; text-align: center;">{{ $message }}</span>
+                        <span class="invalid-feedback" style="display: block; margin-top: 10px; text-align: center; color: var(--color-danger); font-size: 0.9rem;">
+                            {{ $message }}
+                        </span>
                     @enderror
                 </div>
                 
-                <div class="custom-form-group">
-                    <label for="password">Kata Sandi Baru</label>
-                    <input type="password" name="password" id="password" class="custom-input @error('password') is-invalid @enderror" placeholder="Minimal 8 karakter" required autocomplete="new-password">
-                    @error('password')
-                        <span class="invalid-feedback" style="display: block; margin-top: 6px;">{{ $message }}</span>
-                    @enderror
-                </div>
-                
-                <div class="custom-form-group">
-                    <label for="password_confirmation">Konfirmasi Kata Sandi</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" class="custom-input" placeholder="Ulangi kata sandi baru" required autocomplete="new-password">
-                </div>
-                
-                <button type="submit" class="submit-btn">
-                    <span>Atur Ulang Sandi</span> ➔
+                <button type="submit" class="submit-btn" id="btnSubmit">
+                    <span>Verifikasi & Lanjutkan</span> ➔
                 </button>
             </form>
             
@@ -393,9 +409,11 @@
     document.addEventListener('DOMContentLoaded', function() {
         const fields = document.querySelectorAll('.otp-field');
         const hiddenField = document.getElementById('fullOtp');
-        const form = document.getElementById('resetForm');
+        const form = document.getElementById('otpForm');
         
-        fields[0].focus();
+        if (fields.length > 0) {
+            fields[0].focus();
+        }
         
         fields.forEach((field, index) => {
             field.addEventListener('input', function(e) {
@@ -438,24 +456,31 @@
             combineOtp();
             if (hiddenField.value.length !== 6) {
                 e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Kesalahan',
-                    text: 'Silakan isi semua 6 digit kode OTP.'
-                });
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Kode OTP Belum Lengkap',
+                        text: 'Silakan isi seluruh 6 digit kode OTP terlebih dahulu.',
+                        confirmButtonColor: '#e53935'
+                    });
+                } else {
+                    alert('Silakan isi semua 6 digit kode OTP.');
+                }
             }
         });
         
-        // Cooldown resend button
+        // Resend Button Cooldown Handling
         const btnResend = document.getElementById('btnResend');
         const resendForm = document.getElementById('resendForm');
         
-        resendForm.addEventListener('submit', function() {
-            btnResend.disabled = true;
-            btnResend.style.opacity = '0.5';
-            btnResend.style.cursor = 'not-allowed';
-            btnResend.innerText = 'Mengirim...';
-        });
+        if (resendForm && btnResend) {
+            resendForm.addEventListener('submit', function() {
+                btnResend.disabled = true;
+                btnResend.style.opacity = '0.5';
+                btnResend.style.cursor = 'not-allowed';
+                btnResend.innerText = 'Mengirim...';
+            });
+        }
     });
 </script>
 @endsection

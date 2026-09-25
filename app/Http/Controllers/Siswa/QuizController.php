@@ -6,21 +6,45 @@ use App\Http\Controllers\Controller;
 use App\Models\Quiz;
 use App\Models\Question;
 use App\Models\QuizAttempt;
+use App\Services\ExamShufflerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 class QuizController extends Controller
 {
+    protected ExamShufflerService $shuffler;
+
+    public function __construct(ExamShufflerService $shuffler)
+    {
+        $this->shuffler = $shuffler;
+    }
+
     /**
-     * Display a listing of quizzes grouped by pillar.
+     * Display a listing of quizzes grouped by pillar,
+     * prioritizing province-specific packages if available for the student.
      */
     public function index()
     {
         $user = Auth::user();
+        $provinceId = $user->province_id;
 
-        // Get quizzes with questions count
-        $quizzes = Quiz::query()->where('type', '=', 'practice')->withCount('questions')->latest()->get();
+        // Get practice quizzes with questions count & province
+        $allQuizzes = Quiz::query()
+            ->where('type', '=', 'practice')
+            ->with(['province'])
+            ->withCount('questions')
+            ->latest()
+            ->get();
+
+        // Level 2: Pick province-specific quiz package first, then national package
+        $chosenQuizzes = collect();
+        foreach ($allQuizzes->groupBy('pillar') as $pillar => $pillarQuizzes) {
+            $provQuiz = $provinceId ? $pillarQuizzes->firstWhere('province_id', $provinceId) : null;
+            $chosen = $provQuiz ?? $pillarQuizzes->firstWhere('province_id', null) ?? $pillarQuizzes->first();
+            if ($chosen) {
+                $chosenQuizzes->push($chosen);
+            }
+        }
 
         // Get highest attempt score for each quiz by this user
         $highestScores = QuizAttempt::query()->where('user_id', $user->id)
@@ -37,7 +61,7 @@ class QuizController extends Controller
             'twk_kedinasan' => []
         ];
 
-        foreach ($quizzes as $quiz) {
+        foreach ($chosenQuizzes as $quiz) {
             $quiz->highest_score = $highestScores[$quiz->id] ?? null;
             if (array_key_exists($quiz->pillar, $groupedQuizzes)) {
                 $groupedQuizzes[$quiz->pillar][] = $quiz;
@@ -56,28 +80,39 @@ class QuizController extends Controller
             abort(404);
         }
         $quiz->loadCount('questions');
+        $quiz->load('province');
         return view('siswa.quizzes.show', compact('quiz'));
     }
 
     /**
-     * Start the quiz (renders the questions with timer).
+     * Start the quiz (renders the questions with deterministic seed shuffling).
      */
     public function start(Quiz $quiz)
     {
         if ($quiz->type !== 'practice') {
             abort(404);
         }
-        $quiz->load('questions');
+        $quiz->load(['questions', 'province']);
         if ($quiz->questions->count() === 0) {
             return redirect()->route('siswa.quizzes.show', $quiz)
                 ->with('error', 'Kuis ini belum memiliki soal. Silakan hubungi Admin.');
         }
 
-        return view('siswa.quizzes.start', compact('quiz'));
+        $user = Auth::user();
+
+        // Level 1: Deterministic Seed Shuffling based on user_id and province_id
+        $shuffledQuestions = $this->shuffler->getShuffledQuestionsForUser(
+            $quiz, 
+            $user, 
+            $quiz->randomize_questions ?? true, 
+            $quiz->randomize_options ?? true
+        );
+
+        return view('siswa.quizzes.start', compact('quiz', 'shuffledQuestions'));
     }
 
     /**
-     * Submit quiz answers and calculate results.
+     * Submit quiz answers and calculate results with validated I/O matching.
      */
     public function submit(Request $request, Quiz $quiz)
     {
@@ -85,33 +120,19 @@ class QuizController extends Controller
             abort(404);
         }
         $user = Auth::user();
-        $questions = $quiz->questions;
+        $quiz->load('questions');
         $submittedAnswers = $request->input('answers', []);
         
-        $correctAnswersCount = 0;
-        $totalQuestionsCount = $questions->count();
-
-        // Match answers
-        foreach ($questions as $question) {
-            $submitted = $submittedAnswers[$question->id] ?? null;
-            if ($submitted && strtolower($submitted) === strtolower($question->correct_option)) {
-                $correctAnswersCount++;
-            }
-        }
-
-        $score = $totalQuestionsCount > 0 
-            ? round(($correctAnswersCount / $totalQuestionsCount) * 100) 
-            : 0;
-
+        $evaluation = $this->shuffler->evaluateAnswers($quiz, $submittedAnswers);
         $durationTaken = (int) $request->input('duration_seconds_taken', 0);
 
         // Save Attempt
         $attempt = QuizAttempt::create([
             'user_id' => $user->id,
             'quiz_id' => $quiz->id,
-            'score' => $score,
-            'correct_answers' => $correctAnswersCount,
-            'total_questions' => $totalQuestionsCount,
+            'score' => $evaluation['score'],
+            'correct_answers' => $evaluation['correct_count'],
+            'total_questions' => $evaluation['total_count'],
             'duration_seconds_taken' => $durationTaken,
             'answers' => $submittedAnswers,
         ]);
@@ -124,7 +145,7 @@ class QuizController extends Controller
     }
 
     /**
-     * Display the result of a quiz attempt.
+     * Display the result of a quiz attempt with deterministic shuffled sequence review.
      */
     public function result(QuizAttempt $attempt)
     {
@@ -133,11 +154,19 @@ class QuizController extends Controller
             abort(403, 'Akses ditolak.');
         }
 
-        $attempt->load(['quiz.questions']);
+        $attempt->load(['quiz.questions', 'quiz.province']);
         
         // Retrieve student's choices permanently from database (or fallback to session)
         $studentAnswers = $attempt->answers ?? session('last_attempt_answers_' . $attempt->id) ?? [];
 
-        return view('siswa.quizzes.result', compact('attempt', 'studentAnswers'));
+        // Reproduce the exact deterministic shuffled questions & options sequence seen during exam
+        $shuffledQuestions = $this->shuffler->getShuffledQuestionsForUser(
+            $attempt->quiz, 
+            $user, 
+            $attempt->quiz->randomize_questions ?? true, 
+            $attempt->quiz->randomize_options ?? true
+        );
+
+        return view('siswa.quizzes.result', compact('attempt', 'studentAnswers', 'shuffledQuestions'));
     }
 }

@@ -15,6 +15,20 @@
     @if(session('error'))
         <meta name="flash-error" content="{{ session('error') }}">
     @endif
+    @if(session('warning'))
+        <meta name="flash-warning" content="{{ session('warning') }}">
+    @endif
+    @if(session('info'))
+        <meta name="flash-info" content="{{ session('info') }}">
+    @endif
+    @if(session('status'))
+        <meta name="flash-status" content="{{ session('status') }}">
+    @endif
+    @if(session('swal_title'))
+        <meta name="flash-swal-title" content="{{ session('swal_title') }}">
+        <meta name="flash-swal-text" content="{{ session('swal_text') }}">
+        <meta name="flash-swal-icon" content="{{ session('swal_icon', 'info') }}">
+    @endif
     
     <!-- Styles & Fonts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -121,6 +121,15 @@ class StudentController extends Controller
         $totalVideoCount = $videoMaterials->count();
         $completedVideoCount = $videoMaterials->where('is_completed_by_student', true)->count();
 
+        // Real Materi Counts
+        $totalRealMateriCount = Quiz::query()->where('type', 'real')->count();
+        $completedRealMateriCount = $student->attempts()
+            ->whereHas('quiz', function($q) {
+                $q->where('type', 'real');
+            })
+            ->distinct('quiz_id')
+            ->count('quiz_id');
+
         // Fetch all quiz attempts by this student
         $attempts = $student->attempts()->with('quiz')->latest()->get();
 

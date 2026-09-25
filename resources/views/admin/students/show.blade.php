@@ -125,20 +125,16 @@
             <tbody>
                 @forelse($attempts as $attempt)
                     <tr>
-                        <td style="font-weight: 600;">{{ $attempt->quiz->title }}</td>
+                        <td style="font-weight: 600;">{{ $attempt->quiz->title ?? '-' }}</td>
                         <td>
-                            <span class="badge badge-info">{{ $attempt->quiz->pillar_name }}</span>
+                            <span class="badge {{ $attempt->quiz->pillar ?? 'pancasila' }}">{{ $attempt->quiz->formatted_pillar ?? '-' }}</span>
                         </td>
-                        <td>{{ $attempt->started_at->format('d M Y, H:i') }} WIB</td>
+                        <td>{{ $attempt->created_at ? $attempt->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i') : '-' }} WIB</td>
                         <td>
-                            @if($attempt->completed_at)
-                                {{ $attempt->started_at->diffInMinutes($attempt->completed_at) }} Menit
-                            @else
-                                -
-                            @endif
+                            {{ $attempt->duration_seconds_taken ? ceil($attempt->duration_seconds_taken / 60) . ' Menit' : '-' }}
                         </td>
                         <td>
-                            {{ $attempt->score / 10 }} / {{ $attempt->quiz->questions_count ?? 10 }} Soal
+                            {{ $attempt->correct_answers }} / {{ $attempt->total_questions }} Soal
                         </td>
                         <td>
                             <span style="font-weight: 700; font-size: 1.05rem; color: {{ $attempt->score >= 75 ? 'var(--color-success)' : 'var(--color-danger)' }};">

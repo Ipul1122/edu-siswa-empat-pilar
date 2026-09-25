@@ -75,10 +75,11 @@
                     <thead>
                         <tr>
                             <th>Kategori / Pilar</th>
-                            <th>Judul Real Materi</th>
+                            <th>Judul Real Materi & Paket</th>
+                            <th>Sasaran Wilayah</th>
+                            <th style="text-align: center;">Pengacakan</th>
                             <th>Status Akses</th>
-                            <th>Jumlah Soal</th>
-                            <th>Durasi</th>
+                            <th style="text-align: center;">Soal / Durasi</th>
                             <th style="width: 220px; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
@@ -90,8 +91,36 @@
                                         {{ $quiz->formatted_pillar }}
                                     </span>
                                 </td>
-                                <td style="font-weight: 600; color: var(--color-dark);">
-                                    {{ $quiz->title }}
+                                <td>
+                                    <div style="font-weight: 700; color: var(--color-dark); font-size: 0.95rem;">
+                                        {{ $quiz->title }}
+                                    </div>
+                                    <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+                                        <span class="badge" style="background-color: rgba(37, 99, 235, 0.1); color: #2563eb; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
+                                            📦 {{ $quiz->package_code ?? 'Paket Utama' }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($quiz->province)
+                                        <span class="badge" style="background-color: rgba(245, 158, 11, 0.12); color: #b45309; font-weight: 600; font-size: 0.78rem; padding: 4px 10px; border-radius: 20px;">
+                                            📍 Khusus: {{ $quiz->province->name }}
+                                        </span>
+                                    @else
+                                        <span class="badge" style="background-color: rgba(16, 185, 129, 0.1); color: #059669; font-weight: 600; font-size: 0.78rem; padding: 4px 10px; border-radius: 20px;">
+                                            🇮🇩 Nasional (Seluruh Indonesia)
+                                        </span>
+                                    @endif
+                                </td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; flex-direction: column; gap: 2px; align-items: center;">
+                                        <span style="font-size: 0.75rem; font-weight: 600; color: {{ $quiz->randomize_questions ? 'var(--color-success)' : 'var(--color-gray-400)' }};">
+                                            <i class="fi fi-rr-shuffle" style="font-size: 0.7rem;"></i> Soal: {{ $quiz->randomize_questions ? 'Acak' : 'Urut' }}
+                                        </span>
+                                        <span style="font-size: 0.72rem; font-weight: 600; color: {{ $quiz->randomize_options ? 'var(--color-success)' : 'var(--color-gray-400)' }};">
+                                            <i class="fi fi-rr-list" style="font-size: 0.7rem;"></i> Opsi: {{ $quiz->randomize_options ? 'Acak' : 'Urut' }}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td>
                                     @if($quiz->is_active)
@@ -104,10 +133,10 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td>
-                                    <span style="font-weight: 600;">{{ $quiz->questions_count }}</span> Soal
+                                <td style="text-align: center;">
+                                    <div style="font-weight: 700; color: var(--color-dark);">{{ $quiz->questions_count }} Soal</div>
+                                    <div style="font-size: 0.75rem; color: var(--color-gray-500);"><i class="fi fi-rr-clock" style="font-size: 0.72rem;"></i> {{ $quiz->duration_minutes }} Mnt</div>
                                 </td>
-                                <td><i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.85rem; vertical-align: middle;"></i>{{ $quiz->duration_minutes }} Menit</td>
                                 <td>
                                     <div style="display: flex; gap: 8px; justify-content: center;">
                                         <a href="{{ route('admin.real-materi.show', $quiz) }}" class="btn btn-primary btn-sm" style="padding: 6px 12px; background-color: var(--color-info);" title="Kelola Butir Soal">

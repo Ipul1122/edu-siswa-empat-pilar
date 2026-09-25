@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quiz;
+use App\Models\Province;
 use Illuminate\Http\Request;
 
 class QuizController extends Controller
@@ -13,7 +14,7 @@ class QuizController extends Controller
      */
     public function index()
     {
-        $quizzes = Quiz::query()->where('type', '=', 'practice', 'and')->withCount('questions')->latest()->get();
+        $quizzes = Quiz::query()->where('type', '=', 'practice', 'and')->with(['province'])->withCount('questions')->latest()->get();
         return view('admin.quizzes.index', compact('quizzes'));
     }
 
@@ -22,7 +23,8 @@ class QuizController extends Controller
      */
     public function create()
     {
-        return view('admin.quizzes.create');
+        $provinces = Province::orderBy('name')->get();
+        return view('admin.quizzes.create', compact('provinces'));
     }
 
     /**
@@ -35,6 +37,8 @@ class QuizController extends Controller
             'title' => ['required', 'string', 'max:255', 'unique:quizzes,title'],
             'description' => ['nullable', 'string'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
+            'package_code' => ['nullable', 'string', 'max:50'],
+            'province_id' => ['nullable', 'exists:provinces,id'],
         ], [
             'pillar.required' => 'Kategori / Pilar wajib dipilih.',
             'pillar.in' => 'Kategori / Pilar tidak valid.',
@@ -43,10 +47,17 @@ class QuizController extends Controller
             'duration_minutes.required' => 'Durasi kuis wajib diisi.',
             'duration_minutes.integer' => 'Durasi kuis harus berupa angka.',
             'duration_minutes.min' => 'Durasi kuis minimal 1 menit.',
+            'province_id.exists' => 'Provinsi yang dipilih tidak terdaftar.',
         ]);
 
         $data = $request->all();
         $data['type'] = 'practice';
+        $data['package_code'] = $request->input('package_code') ?: 'Paket Utama';
+        $data['province_id'] = $request->input('province_id') ?: null;
+        $data['randomize_questions'] = $request->has('randomize_questions');
+        $data['randomize_options'] = $request->has('randomize_options');
+        $data['is_active'] = true;
+
         Quiz::create($data);
 
         return redirect()->route('admin.quizzes.index')
@@ -58,7 +69,7 @@ class QuizController extends Controller
      */
     public function show(Quiz $quiz)
     {
-        $quiz->load('questions');
+        $quiz->load(['questions', 'province']);
         return view('admin.quizzes.show', compact('quiz'));
     }
 
@@ -70,7 +81,8 @@ class QuizController extends Controller
         if ($quiz->type !== 'practice') {
             return redirect()->route('admin.real-materi.edit', $quiz);
         }
-        return view('admin.quizzes.edit', compact('quiz'));
+        $provinces = Province::orderBy('name')->get();
+        return view('admin.quizzes.edit', compact('quiz', 'provinces'));
     }
 
     /**
@@ -83,6 +95,8 @@ class QuizController extends Controller
             'title' => ['required', 'string', 'max:255', 'unique:quizzes,title,' . $quiz->id],
             'description' => ['nullable', 'string'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
+            'package_code' => ['nullable', 'string', 'max:50'],
+            'province_id' => ['nullable', 'exists:provinces,id'],
         ], [
             'pillar.required' => 'Kategori / Pilar wajib dipilih.',
             'pillar.in' => 'Kategori / Pilar tidak valid.',
@@ -91,10 +105,16 @@ class QuizController extends Controller
             'duration_minutes.required' => 'Durasi kuis wajib diisi.',
             'duration_minutes.integer' => 'Durasi kuis harus berupa angka.',
             'duration_minutes.min' => 'Durasi kuis minimal 1 menit.',
+            'province_id.exists' => 'Provinsi yang dipilih tidak terdaftar.',
         ]);
 
         $data = $request->all();
         $data['type'] = 'practice';
+        $data['package_code'] = $request->input('package_code') ?: 'Paket Utama';
+        $data['province_id'] = $request->input('province_id') ?: null;
+        $data['randomize_questions'] = $request->has('randomize_questions');
+        $data['randomize_options'] = $request->has('randomize_options');
+
         $quiz->update($data);
 
         return redirect()->route('admin.quizzes.index')

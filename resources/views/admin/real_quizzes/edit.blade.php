@@ -99,6 +99,57 @@
                 </div>
             </div>
 
+            <!-- Regional Targeting & Package (Level 2) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="package_code">Kode / Nama Paket Soal</label>
+                    <input type="text" name="package_code" id="package_code" class="form-control @error('package_code') is-invalid @enderror" value="{{ old('package_code', $quiz->package_code ?? 'Paket Utama') }}" placeholder="Contoh: Paket A / Wilayah Barat">
+                    <div style="font-size: 0.75rem; color: var(--color-gray-500); margin-top: 4px;">
+                        Contoh varian: Paket A, Paket B, atau Paket C.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="province_id">Wilayah Sasaran Soal (Provinsi)</label>
+                    <select name="province_id" id="province_id" class="form-control @error('province_id') is-invalid @enderror">
+                        <option value="">🇮🇩 Nasional (Seluruh Indonesia)</option>
+                        @foreach($provinces as $prov)
+                            <option value="{{ $prov->id }}" {{ old('province_id', $quiz->province_id) == $prov->id ? 'selected' : '' }}>
+                                Khusus: {{ $prov->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div style="font-size: 0.75rem; color: var(--color-gray-500); margin-top: 4px;">
+                        Pilih Nasional untuk seluruh provinsi, atau tentukan provinsi tertentu.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shuffling Configurations (Level 1) -->
+            <div class="card" style="margin-bottom: 20px; background: rgba(37, 99, 235, 0.04); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: var(--border-radius-sm);">
+                <div class="card-body" style="padding: 16px 20px;">
+                    <div style="font-weight: 700; color: #1e40af; font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fi fi-rr-shuffle"></i> Pengaturan Pengacakan Soal & Opsi (Anti-Kebocoran)
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <input type="checkbox" name="randomize_questions" id="randomize_questions" value="1" {{ old('randomize_questions', $quiz->randomize_questions ?? true) ? 'checked' : '' }} style="width: 18px; height: 18px; margin-top: 2px; cursor: pointer;">
+                            <label for="randomize_questions" style="margin-bottom: 0; cursor: pointer; font-size: 0.85rem; color: var(--color-dark);">
+                                <strong>Acak Nomor Soal</strong><br>
+                                <span style="font-size: 0.75rem; color: var(--color-gray-500);">Urutan nomor soal diacak unik per siswa & provinsi.</span>
+                            </label>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <input type="checkbox" name="randomize_options" id="randomize_options" value="1" {{ old('randomize_options', $quiz->randomize_options ?? true) ? 'checked' : '' }} style="width: 18px; height: 18px; margin-top: 2px; cursor: pointer;">
+                            <label for="randomize_options" style="margin-bottom: 0; cursor: pointer; font-size: 0.85rem; color: var(--color-dark);">
+                                <strong>Acak Opsi Pilihan Jawaban</strong><br>
+                                <span style="font-size: 0.75rem; color: var(--color-gray-500);">Pilihan A–E diacak unik per soal untuk tiap siswa.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Description with Rich Text Toolbar -->
             <div class="form-group">
                 <label for="editor_description">Deskripsi / Petunjuk Ujian</label>

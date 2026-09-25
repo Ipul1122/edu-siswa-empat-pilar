@@ -1743,3 +1743,74 @@ textarea.form-control {
         padding-bottom: 84px !important;
     }
 }
+
+/* ==========================================================================
+   SWEETALERT2 CUSTOM PREMIUM STYLING
+   ========================================================================== */
+.swal2-container {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 10000 !important;
+}
+
+.swal2-popup {
+    border-radius: 20px !important;
+    padding: 24px 28px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    font-family: var(--font-body) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+.swal2-title {
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    font-size: 1.35rem !important;
+    color: var(--color-dark) !important;
+    margin-bottom: 10px !important;
+}
+
+.swal2-html-container {
+    font-size: 0.95rem !important;
+    color: var(--color-gray-600) !important;
+    line-height: 1.6 !important;
+    margin: 8px 0 20px 0 !important;
+}
+
+.swal2-actions {
+    gap: 12px !important;
+    margin-top: 16px !important;
+}
+
+.swal2-confirm, .swal2-cancel {
+    border-radius: var(--border-radius-md) !important;
+    padding: 12px 24px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    font-family: var(--font-heading) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: var(--transition-smooth) !important;
+}
+
+.swal2-confirm:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.swal2-cancel:hover {
+    transform: translateY(-1px) !important;
+}
+
+/* Toast Customization */
+.swal2-toast {
+    border-radius: 14px !important;
+    padding: 12px 18px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.swal2-toast .swal2-title {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+

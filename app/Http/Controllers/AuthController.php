@@ -359,12 +359,13 @@ class AuthController extends Controller
         ]);
 
         session()->put('reset_email', $request->email);
+        session()->forget('reset_otp_verified');
 
         try {
             Mail::to($request->email)->send(new OtpMail(
                 $otp,
                 'Kode OTP Pemulihan Kata Sandi - Empat Pilar',
-                'Kami menerima permintaan untuk menyetel ulang kata sandi akun Siswa Anda. Gunakan kode OTP di bawah ini untuk menyetel ulang sandi Anda:'
+                'Kami menerima permintaan untuk menyetel ulang kata sandi akun Siswa Anda. Gunakan kode OTP di bawah ini untuk memverifikasi identitas Anda:'
             ));
         } catch (\Exception $e) {
             logger()->error('Mail error: ' . $e->getMessage());
@@ -376,33 +377,33 @@ class AuthController extends Controller
     }
 
     /**
-     * Show reset password OTP verification form.
+     * Show reset password OTP verification form (Step 1).
      */
     public function showResetVerifyOtp()
     {
         if (!session()->has('reset_email')) {
             return redirect()->route('password.request');
         }
-        return view('auth.verify-reset-otp');
+        return view('auth.verify-reset-otp', [
+            'email' => session()->get('reset_email'),
+        ]);
     }
 
     /**
-     * Handle password reset.
+     * Handle verification of the reset password OTP (Step 1 submit).
      */
-    public function resetPassword(Request $request)
+    public function verifyResetOtp(Request $request)
     {
         $request->validate([
             'otp' => ['required', 'string', 'size:6'],
-            'password' => ['required', 'confirmed', Password::defaults()],
         ], [
             'otp.required' => 'Kode OTP wajib diisi.',
-            'otp.size' => 'Kode OTP harus berjumlah 6 digit.',
-            'password.required' => 'Kata sandi baru wajib diisi.',
-            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+            'otp.size' => 'Kode OTP harus berjumlah 6 digit angka.',
         ]);
 
         if (!session()->has('reset_email')) {
-            return redirect()->route('password.request')->with('error', 'Sesi pemulihan Anda telah berakhir. Silakan ulangi.');
+            return redirect()->route('password.request')
+                ->with('error', 'Sesi pemulihan Anda telah berakhir. Silakan ulangi proses lupa kata sandi.');
         }
 
         $email = session()->get('reset_email');
@@ -419,6 +420,48 @@ class AuthController extends Controller
             return back()->withErrors(['otp' => 'Kode OTP telah kedaluwarsa. Silakan kirim ulang kode.']);
         }
 
+        // Mark OTP as verified in session
+        session()->put('reset_otp_verified', true);
+        session()->put('reset_verified_email', $email);
+
+        return redirect()->route('password.reset')
+            ->with('success', 'Kode OTP berhasil diverifikasi! Silakan tentukan kata sandi baru Anda.');
+    }
+
+    /**
+     * Show reset password new credentials form (Step 2).
+     */
+    public function showResetPassword()
+    {
+        if (!session()->has('reset_email') || !session()->has('reset_otp_verified')) {
+            return redirect()->route('password.request')
+                ->with('error', 'Silakan masukkan dan verifikasi kode OTP terlebih dahulu sebelum membuat kata sandi baru.');
+        }
+
+        return view('auth.reset-password', [
+            'email' => session()->get('reset_email'),
+        ]);
+    }
+
+    /**
+     * Handle password reset (Step 2 submit).
+     */
+    public function resetPassword(Request $request)
+    {
+        if (!session()->has('reset_email') || !session()->has('reset_otp_verified')) {
+            return redirect()->route('password.request')
+                ->with('error', 'Sesi pemulihan Anda telah berakhir. Silakan ulangi proses lupa kata sandi.');
+        }
+
+        $request->validate([
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ], [
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+        ]);
+
+        $email = session()->get('reset_email');
+
         // Update password
         $user = User::query()->where('email', '=', $email)->first();
         if ($user) {
@@ -428,10 +471,10 @@ class AuthController extends Controller
 
         // Clean up
         DB::table('password_reset_tokens')->where('email', $email)->delete();
-        session()->forget('reset_email');
+        session()->forget(['reset_email', 'reset_otp_verified', 'reset_verified_email']);
 
         return redirect()->route('login')
-            ->with('success', 'Kata sandi Anda berhasil disetel ulang. Silakan masuk dengan sandi baru.');
+            ->with('success', 'Kata sandi Anda berhasil diperbarui. Silakan masuk dengan kata sandi baru.');
     }
 
     /**
@@ -442,6 +485,8 @@ class AuthController extends Controller
         if (!session()->has('reset_email')) {
             return redirect()->route('password.request');
         }
+
+        session()->forget('reset_otp_verified');
 
         $email = session()->get('reset_email');
         $otp = rand(100000, 999999);

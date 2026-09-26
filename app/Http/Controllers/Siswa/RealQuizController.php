@@ -181,9 +181,10 @@ class RealQuizController extends Controller
             // Evaluate answers deterministically
             $evaluation = $this->shuffler->evaluateAnswers($quiz, $submittedAnswers);
             $durationTaken = (int) $request->input('duration_seconds_taken', 0);
+            $violationsCount = min(99, max(0, (int) $request->input('violations_count', 0)));
 
             // Save Attempt within database transaction
-            $attempt = DB::transaction(function () use ($user, $quiz, $evaluation, $durationTaken, $submittedAnswers) {
+            $attempt = DB::transaction(function () use ($user, $quiz, $evaluation, $durationTaken, $violationsCount, $submittedAnswers) {
                 return QuizAttempt::create([
                     'user_id' => $user->id,
                     'quiz_id' => $quiz->id,
@@ -191,6 +192,7 @@ class RealQuizController extends Controller
                     'correct_answers' => $evaluation['correct_count'],
                     'total_questions' => $evaluation['total_count'],
                     'duration_seconds_taken' => $durationTaken,
+                    'violations_count' => $violationsCount,
                     'answers' => $submittedAnswers,
                 ]);
             });

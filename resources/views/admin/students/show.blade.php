@@ -119,6 +119,7 @@
                     <th>Durasi</th>
                     <th>Jawaban Benar</th>
                     <th>Skor Akhir</th>
+                    <th>Integritas Layar</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -142,6 +143,21 @@
                             </span>
                         </td>
                         <td>
+                            @if(($attempt->violations_count ?? 0) === 0)
+                                <span class="badge badge-success" title="Pengerjaan bersih tanpa beralih layar">
+                                    <i class="fi fi-rr-shield-check"></i> 0 Pelanggaran
+                                </span>
+                            @elseif(($attempt->violations_count ?? 0) < 3)
+                                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid #fde68a;" title="Terdeteksi beralih jendela/tab {{ $attempt->violations_count }} kali">
+                                    ⚠️ {{ $attempt->violations_count }}x Beralih
+                                </span>
+                            @else
+                                <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid #fecaca;" title="Diskualifikasi / Auto-Submit mencapai 3 kali pelanggaran">
+                                    ⛔ {{ $attempt->violations_count }}x Auto-Submit
+                                </span>
+                            @endif
+                        </td>
+                        <td>
                             @if($attempt->score >= 75)
                                 <span class="badge badge-success">Lulus</span>
                             @else
@@ -151,7 +167,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="empty-state">
+                        <td colspan="8" class="empty-state">
                             <i class="fi fi-rr-document" style="font-size: 2rem; color: var(--color-gray-400);"></i>
                             <p style="margin-top: 8px;">Siswa ini belum pernah mengerjakan kuis evaluasi.</p>
                         </td>

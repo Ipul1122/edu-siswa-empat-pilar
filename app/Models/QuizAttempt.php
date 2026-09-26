@@ -17,6 +17,7 @@ class QuizAttempt extends Model
         'correct_answers',
         'total_questions',
         'duration_seconds_taken',
+        'violations_count',
         'answers',
     ];
 

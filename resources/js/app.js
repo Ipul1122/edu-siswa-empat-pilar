@@ -409,6 +409,214 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
+
+        // 5.1 Exam Anti-Cheat & Anti-Screenshot Suite (Section 2.6)
+        // A. Dynamic Forensic Watermark Live Clock Updater
+        const updateWatermarkClock = () => {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} WIB`;
+            document.querySelectorAll('.watermark-live-clock').forEach(el => {
+                el.textContent = timeStr;
+            });
+        };
+        updateWatermarkClock();
+        setInterval(updateWatermarkClock, 1000);
+
+        // B. Disable Context Menu (Right Click)
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            if (typeof window.showToast === 'function') {
+                window.showToast('warning', 'Klik kanan dinonaktifkan demi integritas ujian seleksi.', 2500);
+            }
+        });
+
+        // C. Disable Dragging Text / Images
+        document.addEventListener('dragstart', function (e) {
+            e.preventDefault();
+        });
+
+        // D. Disable Copy & Cut
+        document.addEventListener('copy', function (e) {
+            e.preventDefault();
+        });
+        document.addEventListener('cut', function (e) {
+            e.preventDefault();
+        });
+
+        // E. Block Print, Save, DevTools & Clear Clipboard on PrintScreen
+        window.addEventListener('keydown', function (e) {
+            const isCtrlOrMeta = e.ctrlKey || e.metaKey;
+
+            // 1. PrintScreen Handler (Clear system clipboard immediately)
+            if (e.key === 'PrintScreen' || e.code === 'PrintScreen') {
+                e.preventDefault();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText('').catch(() => {});
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Tangkapan Layar Dilarang!',
+                        text: 'Pengambilan tangkapan layar (PrintScreen) dilarang selama ujian berlangsung. Clipboard sistem telah dikosongkan.',
+                        icon: 'warning',
+                        confirmButtonColor: 'rgb(var(--color-primary-rgb, 229, 57, 53))',
+                        confirmButtonText: 'Saya Mengerti',
+                        customClass: { popup: 'swal2-glass-card' }
+                    });
+                }
+                return;
+            }
+
+            // 2. Block Ctrl+P (Print), Ctrl+S (Save), Ctrl+U (View Source)
+            if (isCtrlOrMeta && (e.key === 'p' || e.key === 'P' || e.key === 's' || e.key === 'S' || e.key === 'u' || e.key === 'U')) {
+                e.preventDefault();
+                if (typeof window.showToast === 'function') {
+                    window.showToast('warning', 'Fitur cetak, simpan, dan inspeksi kode dilarang selama ujian.', 2500);
+                }
+                return;
+            }
+
+            // 3. Block F12 and DevTools shortcuts (Ctrl+Shift+I / J / C)
+            if (e.key === 'F12' || (isCtrlOrMeta && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c'))) {
+                e.preventDefault();
+                if (typeof window.showToast === 'function') {
+                    window.showToast('warning', 'Fitur Developer Tools dinonaktifkan.', 2500);
+                }
+                return;
+            }
+        });
+
+        // F. Tab Switch & Focus Blur Detection (Anti-Joki / Perekam)
+        let violationsCount = 0;
+        const MAX_VIOLATIONS = 3;
+        const violationsInput = document.getElementById('violations_count');
+        const blackoutOverlay = document.getElementById('exam-security-blackout');
+        const refocusBtn = document.getElementById('blackout-refocus-btn');
+        const violationPill = document.getElementById('exam-violation-pill');
+        const violationLabel = document.getElementById('violation-label');
+        let isAway = false;
+
+        const updateViolationUI = () => {
+            if (violationsInput) {
+                violationsInput.value = violationsCount;
+            }
+            if (violationLabel) {
+                if (violationsCount === 0) {
+                    violationLabel.textContent = 'Integritas 0/3';
+                } else {
+                    violationLabel.textContent = `Pelanggaran ${violationsCount}/3`;
+                }
+            }
+            if (violationPill) {
+                violationPill.classList.remove('warning-1', 'warning-2');
+                if (violationsCount === 1) violationPill.classList.add('warning-1');
+                if (violationsCount >= 2) violationPill.classList.add('warning-2');
+            }
+        };
+
+        const handleUserLeft = () => {
+            if (quizForm.dataset.submitted === 'true' || quizForm.dataset.submitting === 'true' || isAway) return;
+            isAway = true;
+            if (blackoutOverlay) {
+                blackoutOverlay.style.display = 'flex';
+            }
+        };
+
+        const handleUserReturned = () => {
+            if (!isAway || quizForm.dataset.submitted === 'true' || quizForm.dataset.submitting === 'true') return;
+            isAway = false;
+            if (blackoutOverlay) {
+                blackoutOverlay.style.display = 'none';
+            }
+
+            violationsCount++;
+            updateViolationUI();
+
+            if (violationsCount < MAX_VIOLATIONS) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '⚠️ Peringatan Integritas Ujian',
+                        html: `
+                            <div style="text-align: left; font-size: 0.95rem; line-height: 1.6;">
+                                <p>Anda terdeteksi beralih dari jendela / tab ujian. Seluruh aktivitas perpindahan layar terekam oleh server pengawas.</p>
+                                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-top: 10px; color: #b91c1c;">
+                                    <strong>Pelanggaran Ke-${violationsCount} dari ${MAX_VIOLATIONS}</strong>
+                                </div>
+                                <p style="margin-top: 10px; font-size: 0.85rem; color: #64748b;">
+                                    ⚠️ Batas toleransi adalah <strong>${MAX_VIOLATIONS} kali</strong>. Jika mencapai 3 kali pelanggaran, ujian akan <strong>otomatis dihentikan dan dikumpulkan</strong>.
+                                </p>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        confirmButtonColor: '#b91c1c',
+                        confirmButtonText: 'Kembali Mengerjakan Ujian',
+                        allowOutsideClick: false,
+                        customClass: { popup: 'swal2-glass-card' }
+                    });
+                }
+            } else {
+                // Violations reached limit -> Auto Submit!
+                quizForm.dataset.confirmed = 'true';
+                quizForm.dataset.submitted = 'true';
+                quizForm.dataset.submitting = 'true';
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '⛔ Batas Pelanggaran Terlampaui!',
+                        html: `
+                            <div style="text-align: center; font-size: 0.95rem;">
+                                <p>Anda telah mencapai <strong>${MAX_VIOLATIONS} kali pelanggaran</strong> pergantian layar/tab.</p>
+                                <div style="background: #fee2e2; border: 1px solid #ef4444; border-radius: 8px; padding: 12px; margin: 12px 0; color: #991b1b; font-weight: 700;">
+                                    Status: Diskualifikasi Otomatis (Auto-Submit)
+                                </div>
+                                <p style="color: #64748b; font-size: 0.85rem;">Lembar jawaban Anda sedang dikumpulkan otomatis ke server pengawas.</p>
+                            </div>
+                        `,
+                        icon: 'error',
+                        confirmButtonText: 'Mengerti & Kumpulkan',
+                        confirmButtonColor: '#dc2626',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        customClass: { popup: 'swal2-glass-card' }
+                    }).then(() => {
+                        const submitBtns = quizForm.querySelectorAll('button[type="submit"]');
+                        submitBtns.forEach(btn => {
+                            btn.disabled = true;
+                            btn.textContent = 'Mengumpulkan...';
+                        });
+                        quizForm.submit();
+                    });
+                } else {
+                    alert(`Batas pelanggaran terlampaui (${MAX_VIOLATIONS}/${MAX_VIOLATIONS})! Lembar jawaban Anda dikumpulkan otomatis.`);
+                    quizForm.submit();
+                }
+            }
+        };
+
+        // Visibility & blur listeners
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                handleUserLeft();
+            } else {
+                handleUserReturned();
+            }
+        });
+
+        window.addEventListener('blur', function () {
+            handleUserLeft();
+        });
+
+        window.addEventListener('focus', function () {
+            if (isAway) {
+                handleUserReturned();
+            }
+        });
+
+        if (refocusBtn) {
+            refocusBtn.addEventListener('click', function () {
+                handleUserReturned();
+            });
+        }
     }
 
     // 6. Topbar Global Live Search Filter

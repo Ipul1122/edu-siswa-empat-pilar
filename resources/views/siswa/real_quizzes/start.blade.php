@@ -20,10 +20,16 @@
             </div>
             <p style="font-size: 0.75rem; color: var(--color-gray-300); margin: 0;">Pilar: {{ $quiz->formatted_pillar }} (Real Materi Evaluasi Resmi)</p>
         </div>
-        <div style="text-align: right;">
-            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-gray-300); font-weight: 600;">Sisa Waktu</div>
-            <div class="timer-display" id="quiz-timer" data-duration="{{ $quiz->duration_minutes }}">
-                --:--
+        <div style="text-align: right; display: flex; align-items: center; gap: 14px;">
+            <div class="exam-violation-pill" id="exam-violation-pill" title="Indikator Pelanggaran Layar">
+                <i class="fi fi-rr-shield-check" id="violation-icon"></i>
+                <span id="violation-label">Integritas 0/3</span>
+            </div>
+            <div>
+                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-gray-300); font-weight: 600;">Sisa Waktu</div>
+                <div class="timer-display" id="quiz-timer" data-duration="{{ $quiz->duration_minutes }}">
+                    --:--
+                </div>
             </div>
         </div>
     </div>
@@ -31,6 +37,7 @@
     <!-- Questions Form -->
     <form action="{{ route('siswa.real-materi.submit', $quiz) }}" method="POST" id="quiz-form">
         @csrf
+        @include('siswa.partials.exam_security')
         <!-- Field to store seconds taken -->
         <input type="hidden" name="duration_seconds_taken" id="duration_seconds_taken" value="0">
 

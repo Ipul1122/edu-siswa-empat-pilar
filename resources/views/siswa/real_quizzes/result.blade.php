@@ -45,6 +45,17 @@
                     <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--color-gray-600); font-weight: 500;">
                         <i class="fi fi-rr-calendar" style="font-size: 1rem; line-height: 1; color: var(--color-gray-600);"></i> Waktu Ujian: <strong style="color: var(--color-dark);">{{ $attempt->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</strong>
                     </div>
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--color-gray-600); font-weight: 500;">
+                        <i class="fi fi-rr-shield-check" style="font-size: 1rem; line-height: 1; color: {{ ($attempt->violations_count ?? 0) === 0 ? 'var(--color-success)' : (($attempt->violations_count ?? 0) >= 3 ? 'var(--color-danger)' : 'var(--color-warning)') }};"></i>
+                        Integritas Layar: 
+                        @if(($attempt->violations_count ?? 0) === 0)
+                            <strong style="color: var(--color-success);">Sempurna (0 Pelanggaran)</strong>
+                        @elseif(($attempt->violations_count ?? 0) < 3)
+                            <strong style="color: var(--color-warning);">Catatan {{ $attempt->violations_count }}x Beralih</strong>
+                        @else
+                            <strong style="color: var(--color-danger);">Auto-Submit ({{ $attempt->violations_count }}x Beralih)</strong>
+                        @endif
+                    </div>
                 </div>
             </div>
             

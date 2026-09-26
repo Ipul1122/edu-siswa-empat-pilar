@@ -2043,4 +2043,271 @@ body.fullpage-mode .fullpage-mobile-pill {
     }
 }
 
+/* ==========================================================================
+   2.6 SISTEM KEAMANAN ANTI-SCREENSHOT & ANTI-CHEAT LAYAR UJIAN
+   ========================================================================== */
+
+/* 1. Exam Restrictions (Anti-Select, Anti-Drag, Anti-Copy) */
+.quiz-wrapper,
+#quiz-form,
+.question-card,
+.quiz-palette-sidebar {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+}
+
+.question-text,
+.option-item label,
+.question-number {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+}
+
+/* Ensure radio buttons and palette links remain interactive */
+.option-item label,
+.palette-btn,
+.flag-question-btn,
+.btn {
+    cursor: pointer;
+}
+
+/* 2. Dynamic Forensic Watermark Overlay (Anti-Foto HP & Anti-Bocor) */
+.exam-watermark-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none !important;
+    user-select: none !important;
+    z-index: 998;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exam-watermark-overlay .watermark-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(260px, 1fr));
+    gap: 36px 28px;
+    width: 140vw;
+    height: 140vh;
+    transform: rotate(-18deg);
+    opacity: 0.085;
+}
+
+.exam-watermark-overlay .watermark-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: monospace, system-ui, sans-serif;
+    line-height: 1.35;
+    padding: 10px 14px;
+    border: 1px dashed rgba(0, 0, 0, 0.45);
+    border-radius: 8px;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.exam-watermark-overlay .wm-title {
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    color: #dc2626;
+    text-transform: uppercase;
+}
+
+.exam-watermark-overlay .wm-user {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.exam-watermark-overlay .wm-school {
+    font-size: 0.7rem;
+    color: #334155;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.exam-watermark-overlay .wm-meta {
+    font-size: 0.68rem;
+    color: #475569;
+}
+
+/* 3. Violation Counter Pill in Timer Header */
+.exam-violation-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.exam-violation-pill.warning-1 {
+    background: rgba(245, 158, 11, 0.3);
+    border-color: #f59e0b;
+    color: #fef3c7;
+}
+
+.exam-violation-pill.warning-2 {
+    background: rgba(239, 68, 68, 0.35);
+    border-color: #ef4444;
+    color: #fee2e2;
+    animation: pulseWarning 1.5s infinite;
+}
+
+/* 4. Exam Security Blackout Overlay (Tab Switch / Window Blur) */
+.exam-security-blackout {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 15, 29, 0.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    animation: fadeInDown 0.25s ease-out;
+}
+
+.exam-security-blackout .blackout-card {
+    background: #1e293b;
+    border: 2px solid #ef4444;
+    border-radius: 20px;
+    padding: 36px 32px;
+    max-width: 520px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.35), 0 0 40px rgba(0, 0, 0, 0.8);
+    position: relative;
+    color: #f8fafc;
+}
+
+.exam-security-blackout .blackout-icon-pulse {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px auto;
+    background: rgba(239, 68, 68, 0.18);
+    border: 2px solid #ef4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    font-size: 2.2rem;
+    animation: pulseWarning 1.2s infinite;
+}
+
+.exam-security-blackout .blackout-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.12);
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+
+.exam-security-blackout .blackout-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 12px 0;
+    font-family: var(--font-heading);
+}
+
+.exam-security-blackout .blackout-desc {
+    font-size: 0.92rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.exam-security-blackout .blackout-desc strong {
+    color: #ef4444;
+}
+
+.exam-security-blackout .blackout-status-box {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 24px;
+    text-align: left;
+    font-size: 0.82rem;
+}
+
+.exam-security-blackout .blackout-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+
+.exam-security-blackout .status-dot-pulse {
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ef4444;
+    animation: pulseWarning 1s infinite;
+}
+
+.exam-security-blackout .blackout-counter-preview {
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+.exam-security-blackout .blackout-action-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.exam-security-blackout .blackout-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(239, 68, 68, 0.5);
+}
+
+@media (max-width: 640px) {
+    .exam-watermark-overlay .watermark-grid {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+        gap: 24px 16px;
+    }
+    .exam-security-blackout .blackout-card {
+        padding: 24px 18px;
+    }
+    .exam-security-blackout .blackout-title {
+        font-size: 1.15rem;
+    }
+}
+
 

@@ -53,7 +53,7 @@ Platform ini dikembangkan sebagai portal seleksi nasional **Empat Pilar MPR RI**
   * **Kriteria Perangkingan:** Nilai Ujian Tertinggi $\rightarrow$ Waktu Pengerjaan Tercepat (*tie-breaker*) $\rightarrow$ Waktu Submit Terdahulu.
 
 ---
-
+ 
 ### 2.2 Pengacakan Soal per Wilayah/Provinsi `[✓ SELESAI & TERVALIDASI I/O]`
 * **Kebutuhan:** Soal seleksi dapat diacak untuk setiap provinsi agar tidak terjadi kebocoran kunci jawaban antar peserta/sekolah.
 * **Solusi Teknis:**
@@ -104,25 +104,30 @@ Platform ini dikembangkan sebagai portal seleksi nasional **Empat Pilar MPR RI**
 
 ---
 
-### 2.6 Sistem Keamanan Anti-Screenshot Layar Gadget
+### 2.6 Sistem Keamanan Anti-Screenshot Layar Gadget [✓ SELESAI & TERVALIDASI I/O]
 * **Kebutuhan:** Mencegah soal ujian discreenshot atau dibocorkan melalui gadget/komputer peserta.
-* **Solusi Teknis (Multi-Layer Protection):**
+* **Solusi Teknis (Multi-Layer Protection Terimplementasi & Tervalidasi 29/29 Uji):**
 
 > [!IMPORTANT]
 > Pada peramban web (browser murni), penekanan tombol fisik hardware (misal *Power + Vol Down* di HP atau tombol *PrintScreen* di OS) berada di level sistem operasi. Oleh karena itu, kita menerapkan **4 Lapisan Keamanan Web Maksimal**:
 
 1. **Disable User Input Actions:**
-   * Blokir klik kanan (`contextmenu`).
-   * Blokir seleksi teks (`user-select: none`).
-   * Blokir shortcut cetak/inspeksi: `Ctrl+P`, `Ctrl+S`, `Ctrl+Shift+I`, `F12`.
+   * Blokir klik kanan (`contextmenu`) dengan toast notifikasi peringatan.
+   * Blokir seleksi teks (`user-select: none !important; -webkit-touch-callout: none !important;`).
+   * Blokir drag teks / gambar (`dragstart preventDefault`).
+   * Blokir shortcut cetak/inspeksi: `Ctrl+P`, `Ctrl+S`, `Ctrl+U`, `Ctrl+Shift+I/J/C`, dan `F12`.
 2. **Auto Clear Clipboard:**
-   * Setiap kali tombol *PrintScreen* dideteksi, JavaScript otomatis mengosongkan clipboard sistem (`navigator.clipboard.writeText('')`).
+   * Setiap kali tombol *PrintScreen* dideteksi, JavaScript otomatis mengosongkan clipboard sistem (`navigator.clipboard.writeText('')`) dan memunculkan modal peringatan SweetAlert2.
 3. **Tab Switch & Focus Blur Detection (Anti-Joki / Perekam):**
-   * Jika peserta beralih ke tab/aplikasi lain, layar ujian langsung ditutup overlay hitam dengan peringatan pelanggaran.
-   * Dilengkapi penghitung pelanggaran (*Violation Counter*): jika melebihi toleransi (misal 3x), ujian otomatis ter-*submit*.
+   * Jika peserta beralih ke tab/aplikasi lain (`visibilitychange` & `blur`), layar ujian langsung ditutup overlay hitam pekat blur (`#exam-security-blackout`) dengan status peringatan tercatat server.
+   * Dilengkapi penghitung pelanggaran (*Violation Counter*): toleransi 3 kali pelanggaran.
+   * Setiap kembali ke tab: muncul modal peringatan SweetAlert2 menghitung pelanggaran (`Pelanggaran Ke-N dari 3`).
+   * Pada pelanggaran ke-3: Form ujian otomatis ter-*submit* (*Auto-Submit Disqualification*) dan tersimpan ke kolom `violations_count` pada tabel `quiz_attempts`.
+   * Kolom Integritas Layar tampil pada Hasil Siswa dan Panel Pengawas Admin ([admin/students/show.blade.php](file:///c:/xampp/htdocs/edu-siswa-empat-pilar/resources/views/admin/students/show.blade.php)).
 4. **Dynamic Watermark Forensik (Paling Efektif):**
-   * Seluruh bidang soal dilapisi watermark transparan dinamis yang menyatu dengan latar belakang, memuat: **Nama Siswa, NIK/NISN, Alamat IP, dan Jam Real-Time**.
-   * Jika peserta nekat memfoto layar menggunakan HP lain, identitas pembocor langsung terlihat jelas di hasil foto, memudahkan panitia mendiskualifikasi peserta.
+   * Seluruh bidang soal dilapisi watermark transparan dinamis yang menyatu dengan layar: **Nama Siswa, NIK/NISN/Sekolah/Dapil, Alamat IP Peserta, dan Jam Real-Time WIB yang berdetik setiap detik**.
+   * Dibuat `pointer-events: none !important; user-select: none !important;` sehingga pengerjaan soal tetap lancar dan responsif.
+   * Jika peserta memfoto layar dengan HP fisik, identitas pembocor tertera jelas di setiap inci foto.
 
 ---
 

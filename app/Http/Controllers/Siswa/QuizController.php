@@ -125,6 +125,7 @@ class QuizController extends Controller
         
         $evaluation = $this->shuffler->evaluateAnswers($quiz, $submittedAnswers);
         $durationTaken = (int) $request->input('duration_seconds_taken', 0);
+        $violationsCount = min(99, max(0, (int) $request->input('violations_count', 0)));
 
         // Save Attempt
         $attempt = QuizAttempt::create([
@@ -134,6 +135,7 @@ class QuizController extends Controller
             'correct_answers' => $evaluation['correct_count'],
             'total_questions' => $evaluation['total_count'],
             'duration_seconds_taken' => $durationTaken,
+            'violations_count' => $violationsCount,
             'answers' => $submittedAnswers,
         ]);
 

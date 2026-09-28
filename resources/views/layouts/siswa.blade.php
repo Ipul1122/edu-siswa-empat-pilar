@@ -41,6 +41,17 @@
 
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Sidebar Minimized Anti-FOUC State Handler -->
+    <script>
+        (function() {
+            try {
+                if (localStorage.getItem('sidebar_minimized') === 'true' && window.innerWidth > 768) {
+                    document.documentElement.classList.add('sidebar-minimized');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 @php
     $isFullpageMode = Route::is('siswa.materials.show', 'siswa.videos.show', 'siswa.quizzes.start', 'siswa.real-materi.start');
@@ -72,8 +83,13 @@
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="app-sidebar">
+            <!-- Collapse Toggle Button (Tengah Sidebar Edge) -->
+            <button type="button" class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Kecilkan Sidebar (Ctrl+B)" aria-label="Kecilkan Sidebar">
+                <i class="fi fi-rr-angle-small-left"></i>
+            </button>
+
             <div class="sidebar-header">
-                <div class="sidebar-logo-icon">
+                <div class="sidebar-logo-icon" title="Empat Pilar Kebangsaan">
                     <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <div class="sidebar-logo-text">
@@ -83,54 +99,54 @@
             
             <ul class="sidebar-menu">
                 <li class="sidebar-menu-item {{ Route::is('siswa.dashboard') ? 'active' : '' }}">
-                    <a href="{{ route('siswa.dashboard') }}">
-                        <i class="fi fi-rr-home"></i> Dashboard
+                    <a href="{{ route('siswa.dashboard') }}" data-title="Dashboard">
+                        <i class="fi fi-rr-home"></i> <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.materials.*') ? 'active' : '' }}">
-                    <a href="{{ route('siswa.materials.index') }}">
-                        <i class="fi fi-rr-book-alt"></i> Materi Belajar
+                    <a href="{{ route('siswa.materials.index') }}" data-title="Materi Belajar">
+                        <i class="fi fi-rr-book-alt"></i> <span>Materi Belajar</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.videos.*') ? 'active' : '' }}">
-                    <a href="{{ route('siswa.videos.index') }}">
-                        <i class="fi fi-rr-play-alt"></i> Video Pembelajaran
+                    <a href="{{ route('siswa.videos.index') }}" data-title="Video Pembelajaran">
+                        <i class="fi fi-rr-play-alt"></i> <span>Video Pembelajaran</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.quizzes.*') ? 'active' : '' }}">
-                    <a href="{{ route('siswa.quizzes.index') }}">
-                        <i class="fi fi-rr-edit"></i> Latihan Kuis
+                    <a href="{{ route('siswa.quizzes.index') }}" data-title="Latihan Kuis">
+                        <i class="fi fi-rr-edit"></i> <span>Latihan Kuis</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.real-materi.*') ? 'active' : '' }}">
-                    <a href="{{ route('siswa.real-materi.index') }}">
-                        <i class="fi fi-rr-document-signed"></i> Real Materi
+                    <a href="{{ route('siswa.real-materi.index') }}" data-title="Real Materi">
+                        <i class="fi fi-rr-document-signed"></i> <span>Real Materi</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.leaderboard') ? 'active' : '' }}">
-                    <a href="{{ route('siswa.leaderboard') }}">
-                        <i class="fi fi-rr-trophy"></i> Papan Peringkat
+                    <a href="{{ route('siswa.leaderboard') }}" data-title="Papan Peringkat">
+                        <i class="fi fi-rr-trophy"></i> <span>Papan Peringkat</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.profile.*') ? 'active' : '' }}">
-                    <a href="{{ route('siswa.profile.edit') }}">
-                        <i class="fi fi-rr-user"></i> Edit Profil
+                    <a href="{{ route('siswa.profile.edit') }}" data-title="Edit Profil">
+                        <i class="fi fi-rr-user"></i> <span>Edit Profil</span>
                     </a>
                 </li>
             </ul>
             
             <div class="sidebar-footer">
-                <div class="user-brief-info" style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px; font-size: 0.85rem; color: var(--color-gray-400);">
+                <div class="user-brief-info" title="{{ Auth::user()->name }} ({{ Auth::user()->dapil ?? Auth::user()->school_name }})">
                     <img src="{{ Auth::user()->image_url }}" alt="{{ Auth::user()->name }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); flex-shrink: 0; background: #fff;">
-                    <div style="min-width: 0; flex: 1;">
+                    <div class="user-brief-text" style="min-width: 0; flex: 1;">
                         <p style="font-weight: 600; color: var(--color-white); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">{{ Auth::user()->name }}</p>
                         <p style="font-size: 0.72rem; color: var(--color-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ Auth::user()->dapil ?? Auth::user()->school_name }}</p>
                     </div>
                 </div>
                 <form action="{{ route('logout') }}" method="POST" id="logout-form">
                     @csrf
-                    <button type="submit" class="logout-btn-link">
-                        <i class="fi fi-rr-sign-out-alt"></i> Keluar
+                    <button type="submit" class="logout-btn-link" title="Keluar">
+                        <i class="fi fi-rr-sign-out-alt"></i> <span class="logout-label">Keluar</span>
                     </button>
                 </form>
             </div>
@@ -141,13 +157,20 @@
             <!-- Top Navbar for Siswa -->
             <header class="app-topbar">
                 <div class="topbar-left">
-                    <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Buka Menu">
+                    <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Buka / Kecilkan Menu" title="Kecilkan / Perlebar Menu">
                         <i class="fi fi-rr-menu-burger" style="line-height: 1;"></i>
                     </button>
                     
                     <div class="topbar-search">
                         <i class="fi fi-rr-search search-icon"></i>
-                        <input type="text" id="global-search-input" placeholder="Cari materi, kuis, atau topik pilar..." autocomplete="off">
+                        <input type="text" 
+                               id="global-search-input" 
+                               placeholder="Cari materi, kuis, atau topik pilar..." 
+                               autocomplete="off"
+                               data-search-url="{{ route('siswa.search') }}"
+                               aria-expanded="false"
+                               aria-haspopup="listbox">
+                        <div id="global-search-dropdown" class="global-search-dropdown" style="display: none;" role="listbox"></div>
                     </div>
                 </div>
                 

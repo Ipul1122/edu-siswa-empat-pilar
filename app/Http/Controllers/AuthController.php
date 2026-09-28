@@ -42,16 +42,19 @@ class AuthController extends Controller
             'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
+        $credentials['email'] = strtolower(trim((string) $credentials['email']));
+
         if (Auth::guard('web')->attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::guard('web')->user();
             
-            // Check if user is Siswa
-            if ($user->role !== 'siswa') {
+            // Check if user is Admin logging in via /login
+            if ($user->role === 'admin') {
                 Auth::guard('web')->logout();
-                
-                return back()->withErrors([
-                    'email' => 'Akses ditolak. Halaman login ini khusus untuk Siswa.',
-                ])->onlyInput('email');
+                Auth::guard('admin')->login($user, $request->boolean('remember'));
+                $request->session()->regenerate();
+
+                return redirect()->intended(route('admin.dashboard'))
+                    ->with('success', 'Selamat datang kembali di Panel Admin!');
             }
 
             $request->session()->regenerate();
@@ -90,16 +93,19 @@ class AuthController extends Controller
             'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
+        $credentials['email'] = strtolower(trim((string) $credentials['email']));
+
         if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::guard('admin')->user();
             
-            // Check if user is Admin
-            if ($user->role !== 'admin') {
+            // Check if user is Siswa logging in via /admin/login
+            if ($user->role === 'siswa') {
                 Auth::guard('admin')->logout();
-                
-                return back()->withErrors([
-                    'email' => 'Akses ditolak. Halaman login ini khusus untuk Admin.',
-                ])->onlyInput('email');
+                Auth::guard('web')->login($user, $request->boolean('remember'));
+                $request->session()->regenerate();
+
+                return redirect()->intended(route('siswa.dashboard'))
+                    ->with('success', 'Selamat datang di Ruang Belajar Empat Pilar!');
             }
 
             $request->session()->regenerate();
@@ -518,15 +524,23 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        if ($request->input('guard') === 'admin' || str_contains($request->headers->get('referer'), '/admin')) {
-            Auth::guard('admin')->logout();
-        } else {
-            Auth::guard('web')->logout();
-        }
+        $referer = (string) $request->headers->get('referer', '');
+        $isAdmin = Auth::guard('admin')->check() 
+            || $request->input('guard') === 'admin' 
+            || str_contains($referer, '/admin');
 
+        Auth::guard('admin')->logout();
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        if ($isAdmin) {
+            return redirect()->route('admin.login')
+                ->with('success', 'Anda telah berhasil keluar dari akun Admin.');
+        }
+
         return redirect()->route('login')
-            ->with('success', 'Anda telah berhasil logout.');
+            ->with('success', 'Anda telah berhasil keluar dari akun Siswa.');
     }
 }

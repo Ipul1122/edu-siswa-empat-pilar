@@ -3,20 +3,99 @@
 // we will check if Swal is defined globally (CDN) or use a fallback.
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Mobile Sidebar Toggle
+    // 1. Unified Sidebar Controller (Desktop Minimize & Mobile Drawer)
     const menuToggle = document.getElementById('menu-toggle');
+    const sidebarCollapseBtn = document.getElementById('sidebar-collapse-btn');
     const appSidebar = document.querySelector('.app-sidebar');
     
-    if (menuToggle && appSidebar) {
-        menuToggle.addEventListener('click', function () {
-            appSidebar.classList.toggle('open');
-        });
-        
-        // Close sidebar when clicking outside of it on mobile
+    if (appSidebar) {
+        const isDesktop = () => window.innerWidth > 768;
+
+        const updateSidebarCollapseBtnState = (isMinimized) => {
+            if (sidebarCollapseBtn) {
+                sidebarCollapseBtn.setAttribute('title', isMinimized ? 'Perbesar Sidebar (Ctrl+B)' : 'Kecilkan Sidebar (Ctrl+B)');
+                sidebarCollapseBtn.setAttribute('aria-label', isMinimized ? 'Perbesar Sidebar' : 'Kecilkan Sidebar');
+            }
+        };
+
+        const toggleSidebarMinimize = () => {
+            const isMinimized = document.body.classList.toggle('sidebar-minimized');
+            document.documentElement.classList.toggle('sidebar-minimized', isMinimized);
+            try {
+                localStorage.setItem('sidebar_minimized', isMinimized ? 'true' : 'false');
+            } catch (e) {}
+            updateSidebarCollapseBtnState(isMinimized);
+        };
+
+        // Initialize state from localStorage on desktop
+        if (isDesktop() && localStorage.getItem('sidebar_minimized') === 'true') {
+            document.body.classList.add('sidebar-minimized');
+            document.documentElement.classList.add('sidebar-minimized');
+            updateSidebarCollapseBtnState(true);
+        }
+
+        // Toggle via topbar #menu-toggle (desktop minimize / mobile drawer)
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (isDesktop()) {
+                    toggleSidebarMinimize();
+                } else {
+                    appSidebar.classList.toggle('open');
+                }
+            });
+        }
+
+        // Toggle via sidebar header collapse button (#sidebar-collapse-btn)
+        if (sidebarCollapseBtn) {
+            sidebarCollapseBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                toggleSidebarMinimize();
+            });
+        }
+
+        // Click logo icon in minimized state to restore sidebar
+        const logoIcon = appSidebar.querySelector('.sidebar-logo-icon');
+        if (logoIcon) {
+            logoIcon.addEventListener('click', function (e) {
+                if (isDesktop() && document.body.classList.contains('sidebar-minimized')) {
+                    e.stopPropagation();
+                    toggleSidebarMinimize();
+                }
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function (event) {
-            const isClickInside = appSidebar.contains(event.target) || menuToggle.contains(event.target);
-            if (!isClickInside && appSidebar.classList.contains('open')) {
+            if (!isDesktop() && appSidebar.classList.contains('open')) {
+                const isClickInside = appSidebar.contains(event.target) || (menuToggle && menuToggle.contains(event.target));
+                if (!isClickInside) {
+                    appSidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // Window resize listener
+        window.addEventListener('resize', function () {
+            if (isDesktop()) {
                 appSidebar.classList.remove('open');
+                if (localStorage.getItem('sidebar_minimized') === 'true') {
+                    document.body.classList.add('sidebar-minimized');
+                    document.documentElement.classList.add('sidebar-minimized');
+                }
+            } else {
+                document.body.classList.remove('sidebar-minimized');
+                document.documentElement.classList.remove('sidebar-minimized');
+            }
+        });
+
+        // Keyboard shortcut: Ctrl+B to toggle sidebar on desktop
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey && e.key.toLowerCase() === 'b') && !e.target.matches('input, textarea, [contenteditable]')) {
+                if (isDesktop()) {
+                    e.preventDefault();
+                    toggleSidebarMinimize();
+                }
             }
         });
     }
@@ -29,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
             showConfirmButton: false,
             timer: 4000,
             timerProgressBar: true,
+            backdrop: false,
             didOpen: (toast) => {
                 toast.addEventListener('mouseenter', Swal.stopTimer);
                 toast.addEventListener('mouseleave', Swal.resumeTimer);
@@ -619,26 +699,220 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 6. Topbar Global Live Search Filter
-    const searchInputs = document.querySelectorAll('#global-search-input, #admin-global-search');
-    searchInputs.forEach(searchInput => {
-        searchInput.addEventListener('input', function () {
-            const query = this.value.toLowerCase().trim();
-            
-            // Filter cards on material / video / quiz pages
-            const cards = document.querySelectorAll('.card, .quiz-card, .table tbody tr');
-            if (cards.length > 0) {
-                cards.forEach(card => {
-                    const text = card.textContent.toLowerCase();
-                    if (query === '' || text.includes(query)) {
-                        card.style.display = '';
-                    } else {
-                        card.style.display = 'none';
+    // 6. Cross-Page Universal Live Search (Debounced) for Siswa & Table Filter for Admin
+    // A. Helper: Debounce Technique
+    function debounce(callback, delay = 300) {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => callback.apply(this, args), delay);
+        };
+    }
+
+    // B. Universal Cross-Page Global Search for Siswa (#global-search-input)
+    const globalSearchInput = document.getElementById('global-search-input');
+    const searchDropdown = document.getElementById('global-search-dropdown');
+
+    if (globalSearchInput && searchDropdown) {
+        const searchUrl = globalSearchInput.dataset.searchUrl || '/siswa/search';
+        let activeIndex = -1;
+        let currentQuery = '';
+
+        // Security: Client-side XSS and script injection sanitization
+        const sanitizeInput = (str) => {
+            if (!str) return '';
+            return str
+                .replace(/<[^>]*>/g, '') // remove HTML & script tags
+                .replace(/(javascript|vbscript|data):/gi, '')
+                .replace(/(onload|onerror|onclick|onmouseover|onfocus|onblur)\s*=/gi, '')
+                .substring(0, 80);
+        };
+
+        const escapeHtml = (text) => {
+            if (text == null) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+
+        const closeDropdown = () => {
+            searchDropdown.style.display = 'none';
+            searchDropdown.innerHTML = '';
+            globalSearchInput.setAttribute('aria-expanded', 'false');
+            activeIndex = -1;
+        };
+
+        const performSearch = async (query) => {
+            if (query !== currentQuery) return; // Stale query check
+
+            try {
+                const res = await fetch(`${searchUrl}?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
+
+                if (!res.ok) throw new Error('Search request failed');
+                const data = await res.json();
+
+                if (query !== currentQuery) return; // Discard stale responses
+
+                if (!data.results || data.results.length === 0) {
+                    searchDropdown.innerHTML = `
+                        <div class="search-state-message">
+                            <i class="fi fi-rr-search-alt" style="font-size: 1.5rem; color: #94a3b8;"></i>
+                            <div>Tidak ditemukan hasil untuk "<strong>${escapeHtml(query)}</strong>"</div>
+                            <span style="font-size: 0.76rem; color: #94a3b8;">Coba kata kunci halaman (Dashboard, Peringkat, Profil) atau materi & kuis.</span>
+                        </div>
+                    `;
+                    searchDropdown.style.display = 'block';
+                    globalSearchInput.setAttribute('aria-expanded', 'true');
+                    return;
+                }
+
+                let html = `
+                    <div class="search-results-header">
+                        <span>Hasil Pencarian Global (${data.total} item)</span>
+                        <span style="font-size: 0.7rem; font-weight: 500; text-transform: none; color: #94a3b8;">Navigasi <strong>↑↓</strong>, Tekan <strong>Enter</strong></span>
+                    </div>
+                    <div class="global-search-dropdown-content">
+                `;
+
+                data.results.forEach((item, idx) => {
+                    html += `
+                        <a href="${item.url}" class="search-result-item" data-index="${idx}" tabindex="-1">
+                            <div class="search-item-icon ${item.badge_class}">
+                                <i class="${item.icon}"></i>
+                            </div>
+                            <div class="search-item-info">
+                                <div class="search-item-top">
+                                    <span class="search-item-category ${item.badge_class}">${escapeHtml(item.category)}</span>
+                                    <span class="search-item-pillar">• ${escapeHtml(item.pillar)}</span>
+                                </div>
+                                <div class="search-item-title">${escapeHtml(item.title)}</div>
+                                <div class="search-item-meta">${escapeHtml(item.meta)}</div>
+                            </div>
+                            <i class="fi fi-rr-arrow-right search-item-arrow"></i>
+                        </a>
+                    `;
+                });
+
+                html += `</div>`;
+                searchDropdown.innerHTML = html;
+                searchDropdown.style.display = 'block';
+                globalSearchInput.setAttribute('aria-expanded', 'true');
+                activeIndex = -1;
+
+            } catch (err) {
+                if (query === currentQuery) {
+                    searchDropdown.innerHTML = `
+                        <div class="search-state-message" style="color: #ef4444;">
+                            <i class="fi fi-rr-cross-circle" style="font-size: 1.3rem;"></i>
+                            <span>Gagal memuat hasil pencarian. Silakan coba lagi.</span>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        // 300ms Debounce Implementation
+        const debouncedSearch = debounce((query) => {
+            performSearch(query);
+        }, 300);
+
+        globalSearchInput.addEventListener('input', function () {
+            const raw = this.value;
+            const query = sanitizeInput(raw.trim());
+            currentQuery = query;
+
+            if (query.length < 2) {
+                closeDropdown();
+                return;
+            }
+
+            // Instant feedback while waiting for debounced network call
+            searchDropdown.innerHTML = `
+                <div class="search-state-message">
+                    <i class="fi fi-rr-spinner search-spinner"></i>
+                    <span>Mencari modul & navigasi aplikasi...</span>
+                </div>
+            `;
+            searchDropdown.style.display = 'block';
+            globalSearchInput.setAttribute('aria-expanded', 'true');
+
+            debouncedSearch(query);
+        });
+
+        // Keyboard Navigation (ArrowDown, ArrowUp, Enter, Escape)
+        globalSearchInput.addEventListener('keydown', function (e) {
+            const items = searchDropdown.querySelectorAll('.search-result-item');
+            if (!items.length || searchDropdown.style.display === 'none') {
+                if (e.key === 'Escape') closeDropdown();
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex = (activeIndex + 1) % items.length;
+                updateActiveItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex = (activeIndex - 1 + items.length) % items.length;
+                updateActiveItem(items);
+            } else if (e.key === 'Enter') {
+                if (activeIndex >= 0 && items[activeIndex]) {
+                    e.preventDefault();
+                    items[activeIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                closeDropdown();
             }
         });
-    });
+
+        const updateActiveItem = (items) => {
+            items.forEach((item, idx) => {
+                if (idx === activeIndex) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        };
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!globalSearchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+
+        // Re-open if user clicks back into input with text
+        globalSearchInput.addEventListener('focus', function () {
+            if (this.value.trim().length >= 2 && searchDropdown.innerHTML.trim() !== '') {
+                searchDropdown.style.display = 'block';
+                this.setAttribute('aria-expanded', 'true');
+            }
+        });
+    }
+
+    // C. Admin In-Page Table Filter (#admin-global-search)
+    const adminSearchInput = document.getElementById('admin-global-search');
+    if (adminSearchInput) {
+        adminSearchInput.addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.table tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = (query === '' || text.includes(query)) ? '' : 'none';
+            });
+        });
+    }
 
     // 7. Full Page Focus Mode Controller (Real Materi, Kuis, Baca Materi, Tonton Video)
     const fullpageEnabled = document.body.dataset.fullpageEnabled === 'true';

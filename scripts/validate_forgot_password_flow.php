@@ -46,6 +46,7 @@ if (!$student) {
     die("Error: Siswa tidak ditemukan di database.\n");
 }
 
+$originalStudentPassword = $student->password;
 echo "Target Siswa Uji: ID={$student->id}, Email={$student->email}\n\n";
 
 // -------------------------------------------------------------------------
@@ -193,6 +194,11 @@ assertTest(
     "Siswa sukses login dengan kata sandi baru yang baru saja disetel!"
 );
 echo "\n";
+
+// Kembalikan kata sandi asli siswa agar akun riil tidak rusak
+$student->password = $originalStudentPassword;
+$student->save();
+echo "  [RESTORE] Password asli siswa ({$student->email}) berhasil dipulihkan seperti semula.\n\n";
 
 echo "===============================================================\n";
 echo "HASIL AKHIR: $passed UJI BERHASIL (PASS), $failed UJI GAGAL (FAIL)\n";

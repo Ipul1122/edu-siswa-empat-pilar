@@ -97,8 +97,9 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
 
 // Siswa Panel Routes
 Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
-    // Dashboard
+    // Dashboard & Global Cross-Page Live Search
     Route::get('/dashboard', [App\Http\Controllers\Siswa\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/search', [App\Http\Controllers\Siswa\SearchController::class, 'search'])->name('search');
 
     // Reading Materials
     Route::get('/materials', [App\Http\Controllers\Siswa\MaterialController::class, 'index'])->name('materials.index');

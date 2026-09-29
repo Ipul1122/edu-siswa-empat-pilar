@@ -90,6 +90,13 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     Route::get('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'show'])->name('students.show');
     Route::get('/leaderboard', [App\Http\Controllers\Admin\LeaderboardController::class, 'index'])->name('leaderboard');
 
+    // Zoom Virtual Sessions CRUD & Participant Management
+    Route::patch('/zoom-sessions/{zoom_session}/toggle', [App\Http\Controllers\Admin\ZoomSessionController::class, 'toggleStatus'])->name('zoom-sessions.toggle');
+    Route::post('/zoom-sessions/{zoom_session}/participants', [App\Http\Controllers\Admin\ZoomSessionController::class, 'addParticipant'])->name('zoom-sessions.participants.add');
+    Route::delete('/zoom-sessions/{zoom_session}/participants/{user}', [App\Http\Controllers\Admin\ZoomSessionController::class, 'removeParticipant'])->name('zoom-sessions.participants.remove');
+    Route::get('/zoom-sessions/{zoom_session}/export', [App\Http\Controllers\Admin\ZoomSessionController::class, 'exportParticipants'])->name('zoom-sessions.export');
+    Route::resource('zoom-sessions', App\Http\Controllers\Admin\ZoomSessionController::class);
+
     // Admin Profile Settings
     Route::get('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
@@ -100,6 +107,11 @@ Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->
     // Dashboard & Global Cross-Page Live Search
     Route::get('/dashboard', [App\Http\Controllers\Siswa\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/search', [App\Http\Controllers\Siswa\SearchController::class, 'search'])->name('search');
+
+    // Zoom Virtual Sessions
+    Route::get('/zoom-sessions', [App\Http\Controllers\Siswa\ZoomSessionController::class, 'index'])->name('zoom-sessions.index');
+    Route::post('/zoom-sessions/{zoom_session}/join', [App\Http\Controllers\Siswa\ZoomSessionController::class, 'join'])->name('zoom-sessions.join');
+    Route::post('/zoom-sessions/{zoom_session}/leave', [App\Http\Controllers\Siswa\ZoomSessionController::class, 'leave'])->name('zoom-sessions.leave');
 
     // Reading Materials
     Route::get('/materials', [App\Http\Controllers\Siswa\MaterialController::class, 'index'])->name('materials.index');

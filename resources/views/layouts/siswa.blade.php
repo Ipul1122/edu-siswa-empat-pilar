@@ -123,6 +123,11 @@
                         <i class="fi fi-rr-document-signed"></i> <span>Real Materi</span>
                     </a>
                 </li>
+                <li class="sidebar-menu-item {{ Route::is('siswa.zoom-sessions.*') ? 'active' : '' }}">
+                    <a href="{{ route('siswa.zoom-sessions.index') }}" data-title="Sesi Zoom">
+                        <i class="fi fi-rr-video-camera-alt"></i> <span>Sesi Zoom</span>
+                    </a>
+                </li>
                 <li class="sidebar-menu-item {{ Route::is('siswa.leaderboard') ? 'active' : '' }}">
                     <a href="{{ route('siswa.leaderboard') }}" data-title="Papan Peringkat">
                         <i class="fi fi-rr-trophy"></i> <span>Papan Peringkat</span>
@@ -220,5 +225,6 @@
             <span>Peringkat</span>
         </a>
     </nav>
+    @stack('scripts')
 </body>
 </html>

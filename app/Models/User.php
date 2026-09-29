@@ -206,4 +206,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(QuizAttempt::class);
     }
+
+    /**
+     * Relationship to joined Zoom sessions.
+     */
+    public function zoomSessions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(ZoomSession::class, 'zoom_participants')
+            ->withPivot(['id', 'joined_at', 'notes'])
+            ->withTimestamps();
+    }
 }

@@ -97,6 +97,11 @@
                         <i class="fi fi-rr-diploma"></i> <span>Real Materi</span>
                     </a>
                 </li>
+                <li class="sidebar-menu-item {{ Route::is('admin.zoom-sessions.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.zoom-sessions.index') }}" data-title="Sesi Zoom">
+                        <i class="fi fi-rr-video-camera-alt"></i> <span>Sesi Zoom</span>
+                    </a>
+                </li>
                 <li class="sidebar-menu-item {{ Route::is('admin.students.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.students.index') }}" data-title="Pemantauan Siswa">
                         <i class="fi fi-rr-users-alt"></i> <span>Pemantauan Siswa</span>
@@ -174,5 +179,6 @@
             @yield('content')
         </main>
     </div>
+    @stack('scripts')
 </body>
 </html>

@@ -1,0 +1,54 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: empat_pilar_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      APP_NAME: "Empat Pilar SMA/K"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8080"
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: empat_pilar
+      DB_USERNAME: app_user
+      DB_PASSWORD: app_password
+      REDIS_CLIENT: predis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: mysql:8.0
+    container_name: empat_pilar_db
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: empat_pilar
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+      MYSQL_ROOT_PASSWORD: root_secret_password
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306" # Menggunakan port 3307 di komputer lokal agar tidak bentrok dengan XAMPP MySQL
+
+  redis:
+    image: redis:alpine
+    container_name: empat_pilar_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+
+volumes:
+  db_data:

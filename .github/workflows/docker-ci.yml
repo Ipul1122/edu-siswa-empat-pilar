@@ -16,20 +16,38 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Validate Docker Secrets
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+            echo "::error::Secret DOCKERHUB_USERNAME kosong atau tidak terbaca! Pastikan tersimpan di Repository Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "::error::Secret DOCKERHUB_TOKEN kosong atau tidak terbaca! Pastikan tersimpan di Repository Secrets."
+            exit 1
+          fi
+
+      - name: Clean & Prepare Docker Username
+        id: prep
+        run: |
+          # Hilangkan whitespace, baris baru, dan paksa huruf kecil
+          CLEAN_USER=$(echo -n "${{ secrets.DOCKERHUB_USERNAME }}" | tr -d '\r\n ' | tr '[:upper:]' '[:lower:]')
+          echo "username=${CLEAN_USER}" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ steps.prep.outputs.username }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract Docker Metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/edu-siswa-empat-pilar
+          images: ${{ steps.prep.outputs.username }}/edu-siswa-empat-pilar
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=branch

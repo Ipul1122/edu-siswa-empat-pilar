@@ -14,9 +14,9 @@ COPY . .
 RUN npm run build
 
 # ==========================================
-# Tahap 2: Runtime PHP 8.2 & Web Server Nginx
+# Tahap 2: Runtime PHP 8.4 & Web Server Nginx
 # ==========================================
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Install Nginx dan curl untuk runtime web server
 RUN apk add --no-cache nginx curl

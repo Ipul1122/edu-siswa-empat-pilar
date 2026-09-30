@@ -18,24 +18,12 @@ RUN npm run build
 # ==========================================
 FROM php:8.2-fpm-alpine
 
-# Install dependencies sistem, ekstensi PHP & Nginx
-RUN apk add --no-cache \
-    nginx \
-    curl \
-    zip \
-    unzip \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    libxml2-dev \
-    oniguruma-dev \
-    linux-headers \
-    $PHPIZE_DEPS \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql bcmath mbstring opcache gd zip pcntl \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apk del $PHPIZE_DEPS
+# Install Nginx dan curl untuk runtime web server
+RUN apk add --no-cache nginx curl
+
+# Gunakan PHP Extension Installer resmi (Solusi terbaik & stabil di Alpine)
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions pdo_mysql bcmath mbstring opcache gd zip pcntl redis
 
 # Ambil Composer resmi
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -48,8 +36,8 @@ COPY . .
 # Salin hasil build Vite dari tahap 1
 COPY --from=frontend /app/public/build ./public/build
 
-# Install dependensi PHP (production mode tanpa dev package)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Install dependensi PHP (production mode, tanpa dev package & tanpa artisan script)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Setup direktori penyimpanan dan permission
 RUN mkdir -p storage/framework/cache/data \
@@ -63,7 +51,9 @@ RUN mkdir -p storage/framework/cache/data \
 # Konfigurasi Nginx & Entrypoint
 COPY docker/nginx/default.conf /etc/nginx/http.d/default.conf
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+
+# Pastikan line-endings UNIX (LF) dan permission execute untuk entrypoint
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 80
 

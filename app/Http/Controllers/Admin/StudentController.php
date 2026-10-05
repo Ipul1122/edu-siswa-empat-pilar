@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Quiz;
-use App\Models\Material;
-use App\Models\StudentProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -121,31 +119,7 @@ class StudentController extends Controller
             abort(404);
         }
 
-        // Fetch completed material IDs for this student
-        $completedMaterialIds = StudentProgress::query()->where('user_id', $student->id)
-            ->where('is_completed', true)
-            ->pluck('material_id')
-            ->toArray();
-
-        // Fetch text materials
-        $textMaterials = Material::query()->where('type', 'text')->get();
-        foreach ($textMaterials as $material) {
-            $material->is_completed_by_student = in_array($material->id, $completedMaterialIds);
-        }
-
-        // Fetch video materials
-        $videoMaterials = Material::query()->where('type', 'video')->get();
-        foreach ($videoMaterials as $video) {
-            $video->is_completed_by_student = in_array($video->id, $completedMaterialIds);
-        }
-
-        $totalTextCount = $textMaterials->count();
-        $completedTextCount = $textMaterials->where('is_completed_by_student', true)->count();
-
-        $totalVideoCount = $videoMaterials->count();
-        $completedVideoCount = $videoMaterials->where('is_completed_by_student', true)->count();
-
-        // Real Materi Counts
+        // Real Materi (Seleksi) Counts
         $totalRealMateriCount = Quiz::query()->where('type', 'real')->count();
         $completedRealMateriCount = $student->attempts()
             ->whereHas('quiz', function($q) {
@@ -154,8 +128,14 @@ class StudentController extends Controller
             ->distinct('quiz_id')
             ->count('quiz_id');
 
-        // Fetch all quiz attempts by this student
-        $attempts = $student->attempts()->with('quiz')->latest()->get();
+        // Fetch all Seleksi attempts by this student
+        $attempts = $student->attempts()
+            ->whereHas('quiz', function($q) {
+                $q->where('type', 'real');
+            })
+            ->with('quiz')
+            ->latest()
+            ->get();
 
         // Calculate average score
         $averageScore = $attempts->count() > 0 
@@ -172,12 +152,6 @@ class StudentController extends Controller
 
         return view('admin.students.show', compact(
             'student', 
-            'textMaterials', 
-            'videoMaterials', 
-            'completedTextCount', 
-            'totalTextCount', 
-            'completedVideoCount', 
-            'totalVideoCount', 
             'completedRealMateriCount',
             'totalRealMateriCount',
             'attempts', 
@@ -253,10 +227,10 @@ class StudentController extends Controller
                 'Sekolah', 
                 'Dapil',
                 'Alamat',
-                'Real Materi Selesai', 
-                'Total Kuis Diikuti', 
+                'Paket Seleksi Selesai', 
+                'Total Ujian Diikuti', 
                 'Rerata Nilai (%)', 
-                'Total Poin'
+                'Total Skor'
             ]);
 
             foreach ($students as $index => $student) {
@@ -326,5 +300,90 @@ class StudentController extends Controller
         $totalRealMateriCount = Quiz::query()->where('type', '=', 'real')->count('*');
 
         return view('admin.students.report', compact('students', 'totalRealMateriCount'));
+    }
+
+    /**
+     * Grant a re-test to a school that experienced network/power outage trouble during exam day.
+     * Requirement 7: "kalau ada yg trouble pada saat hari tes, diwajibkan melaksanakan tes ulang"
+     */
+    public function grantRetest(Request $request, User $student)
+    {
+        if ($student->role !== 'siswa') {
+            abort(404);
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:500',
+        ], [
+            'reason.required' => 'Alasan izin tes ulang wajib diisi.',
+        ]);
+
+        $reason = $request->input('reason');
+        $adminId = auth('admin')->user()?->id ?? auth()->user()?->id;
+
+        // Remove previous attempt so the school can take the test again cleanly
+        $attempts = $student->attempts()->get();
+        foreach ($attempts as $a) {
+            $a->delete();
+        }
+
+        $student->update([
+            'is_troubled' => false,
+            'trouble_notes' => 'Izin tes ulang disetujui oleh Admin (Alasan: ' . $reason . ') pada ' . now()->format('d/m/Y H:i') . ' WIB',
+        ]);
+
+        // Attempt to send email notification to the school PIC
+        try {
+            if ($student->email) {
+                \Illuminate\Support\Facades\Mail::to($student->email)->send(new \App\Mail\OtpMail(
+                    'RE-TEST',
+                    'Persetujuan Sesi Tes Ulang - Seleksi Empat Pilar MPR RI',
+                    "Permohonan tes ulang sekolah {$student->school_name} telah DISETUJUI oleh Panitia Pusat (Alasan: {$reason}). Silakan login kembali ke sistem untuk memulai sesi tes susulan."
+                ));
+            }
+        } catch (\Exception $e) {
+            logger()->error('Retest mail error: ' . $e->getMessage());
+        }
+
+        return back()->with('success', "Izin Tes Ulang untuk {$student->school_name} berhasil diaktifkan. Sekolah dapat segera melaksanakan tes susulan.");
+    }
+
+    /**
+     * Broadcast announcement / schedule updates / zoom links to schools.
+     * Requirement 7: "blast email, call center selama 13 minggu masa tes (3,5-4 bulan)"
+     */
+    public function broadcast(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+            'province_id' => 'nullable|integer',
+        ], [
+            'subject.required' => 'Judul pengumuman blast wajib diisi.',
+            'message.required' => 'Isi pesan blast wajib diisi.',
+        ]);
+
+        $query = User::query()->where('role', '=', 'siswa');
+        if ($request->filled('province_id')) {
+            $query->where('province_id', $request->province_id);
+        }
+
+        $targetSchools = $query->get(['id', 'email', 'name', 'school_name', 'pic_name']);
+        $count = $targetSchools->count();
+
+        // Queue or send blast
+        foreach ($targetSchools as $target) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($target->email)->send(new \App\Mail\OtpMail(
+                    'INFO-MPR',
+                    $request->subject,
+                    $request->message
+                ));
+            } catch (\Exception $e) {
+                logger()->error('Broadcast email error for ' . $target->email . ': ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', "Pengumuman blast berhasil diproses dan dikirimkan ke {$count} akun sekolah.");
     }
 }

@@ -14,6 +14,10 @@ class ZoomParticipant extends Model
         'zoom_session_id',
         'user_id',
         'joined_at',
+        'left_at',
+        'last_ping_at',
+        'status',
+        'device_info',
         'notes',
     ];
 
@@ -21,6 +25,8 @@ class ZoomParticipant extends Model
     {
         return [
             'joined_at' => 'datetime',
+            'left_at' => 'datetime',
+            'last_ping_at' => 'datetime',
         ];
     }
 

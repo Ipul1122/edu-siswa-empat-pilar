@@ -73,9 +73,11 @@ class RealQuizController extends Controller
     /**
      * Display details of a Real Materi quiz including its questions.
      */
-    public function show(Quiz $real_materi)
+    public function show($quiz)
     {
-        $quiz = $real_materi;
+        if (!$quiz instanceof Quiz) {
+            $quiz = Quiz::findOrFail($quiz);
+        }
         $quiz->load(['questions', 'province']);
         return view('admin.quizzes.show', compact('quiz'));
     }

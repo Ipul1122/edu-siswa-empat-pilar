@@ -50,11 +50,10 @@ class RealQuizController extends Controller
         }
 
         // Get attempt score for each quiz by this user
-        $attempts = QuizAttempt::query()->where('user_id', '=', $user->id)
-            ->selectRaw('quiz_id, max(score) as max_score')
-            ->groupBy('quiz_id')
-            ->pluck('max_score', 'quiz_id')
-            ->toArray();
+        $userAttempts = QuizAttempt::query()->where('user_id', '=', $user->id)
+            ->latest('id')
+            ->get()
+            ->keyBy('quiz_id');
 
         $groupedQuizzes = [
             'pancasila' => [],
@@ -65,14 +64,16 @@ class RealQuizController extends Controller
         ];
 
         foreach ($chosenQuizzes as $quiz) {
-            $quiz->highest_score = $attempts[$quiz->id] ?? null;
-            $quiz->is_completed = array_key_exists($quiz->id, $attempts);
+            $attempt = $userAttempts->get($quiz->id);
+            $quiz->latest_attempt = $attempt;
+            $quiz->highest_score = $attempt?->score;
+            $quiz->is_completed = (bool)$attempt;
             if (array_key_exists($quiz->pillar, $groupedQuizzes)) {
                 $groupedQuizzes[$quiz->pillar][] = $quiz;
             }
         }
 
-        return view('siswa.real_quizzes.index', compact('groupedQuizzes'));
+        return view('siswa.real_quizzes.index', compact('groupedQuizzes', 'chosenQuizzes'));
     }
 
     /**
@@ -177,14 +178,17 @@ class RealQuizController extends Controller
 
             $quiz->load('questions');
             $submittedAnswers = $request->input('answers', []);
+            $draftKey = "draft_answers_{$user->id}_{$quiz->id}";
+            $cachedAnswers = Cache::get($draftKey, []);
+            $finalAnswers = array_replace($cachedAnswers, $submittedAnswers);
 
             // Evaluate answers deterministically
-            $evaluation = $this->shuffler->evaluateAnswers($quiz, $submittedAnswers);
+            $evaluation = $this->shuffler->evaluateAnswers($quiz, $finalAnswers);
             $durationTaken = (int) $request->input('duration_seconds_taken', 0);
             $violationsCount = min(99, max(0, (int) $request->input('violations_count', 0)));
 
             // Save Attempt within database transaction
-            $attempt = DB::transaction(function () use ($user, $quiz, $evaluation, $durationTaken, $violationsCount, $submittedAnswers) {
+            $attempt = DB::transaction(function () use ($user, $quiz, $evaluation, $durationTaken, $violationsCount, $finalAnswers) {
                 return QuizAttempt::create([
                     'user_id' => $user->id,
                     'quiz_id' => $quiz->id,
@@ -193,18 +197,43 @@ class RealQuizController extends Controller
                     'total_questions' => $evaluation['total_count'],
                     'duration_seconds_taken' => $durationTaken,
                     'violations_count' => $violationsCount,
-                    'answers' => $submittedAnswers,
+                    'answers' => $finalAnswers,
                 ]);
             });
 
+            Cache::forget($draftKey);
+
             // Flash student's detailed choices to session as backup
-            session()->flash('last_attempt_answers_' . $attempt->id, $submittedAnswers);
+            session()->flash('last_attempt_answers_' . $attempt->id, $finalAnswers);
 
             return redirect()->route('siswa.real-materi.result', $attempt)
-                ->with('success', 'Kuis Real Materi berhasil diselesaikan!');
+                ->with('success', 'Ujian Seleksi berhasil diselesaikan!');
         } finally {
             $lock->release();
         }
+    }
+
+    /**
+     * Auto-save answer endpoint for zero reload and low bandwidth resilience.
+     */
+    public function saveAnswer(Request $request, Quiz $quiz)
+    {
+        $request->validate([
+            'question_id' => 'required|integer',
+            'answer' => 'required|string|max:5',
+        ]);
+
+        $user = Auth::user();
+        $key = "draft_answers_{$user->id}_{$quiz->id}";
+        $answers = Cache::get($key, []);
+        $answers[$request->question_id] = $request->answer;
+        Cache::put($key, $answers, 86400);
+
+        return response()->json([
+            'success' => true,
+            'saved_at' => now()->format('H:i:s'),
+            'total_answered' => count($answers),
+        ]);
     }
 
     /**

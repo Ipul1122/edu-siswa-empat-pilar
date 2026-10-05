@@ -358,7 +358,7 @@
             <div class="brand-logo">
                 <img src="{{ asset('img/mpr-logo.svg') }}" alt="Logo MPR">
             </div>
-            <h1 class="brand-title text-white">Pendidikan <br><span class="text-black">Empat Pilar</span></h1>
+            <h1 class="brand-title text-white">Seleksi Online <br><span class="text-black">Lomba Cerdas Cermat MPR RI</span></h1>
             <p class="brand-subtitle">Portal Pembelajaran Interaktif Kebangsaan dan Karakter untuk SMA/K. Masuk untuk melatih dan mengukur pemahaman PPKn Anda.</p>
             
             <div class="pillars-grid">

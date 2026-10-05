@@ -3,33 +3,27 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
-use App\Models\Material;
 use App\Models\Quiz;
+use App\Models\ZoomSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class SearchController extends Controller
 {
     /**
      * Universal cross-page global search for student portal.
-     * Features:
-     * - Strict script & XSS injection sanitization
-     * - Searches across Navigation menus (Dashboard, Peringkat, Profil, etc.)
-     * - Searches across Content (Materi Bacaan, Video, Kuis Latihan, Real Materi)
+     * Searches across Seleksi, Sesi Zoom, Papan Peringkat, Profil, and Dashboard.
      */
     public function search(Request $request): JsonResponse
     {
         $rawQuery = (string) $request->input('q', '');
 
-        // 1. Length constraint: limit to 80 chars to prevent memory/buffer abuse
+        // 1. Length constraint: limit to 80 chars
         $trimmed = mb_substr(trim($rawQuery), 0, 80);
 
-        // 2. Security: Strip entire <script>...</script> and <style>...</style> blocks (including inner payload)
+        // 2. Security: Strip scripts, style, and HTML tags
         $sanitized = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $trimmed);
         $sanitized = preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', '', $sanitized);
-
-        // 3. Strip remaining HTML tags & dangerous protocols/events (XSS Protection)
         $sanitized = strip_tags($sanitized);
         $sanitized = preg_replace('/<[^>]*>/', '', $sanitized);
         $sanitized = preg_replace('/(javascript|vbscript|data):/i', '', $sanitized);
@@ -49,11 +43,11 @@ class SearchController extends Controller
         $termLower = strtolower($cleanTerm);
         $escapedSqlTerm = addcslashes($cleanTerm, '%_\\');
 
-        // 3. System Navigation Pages (Dashboard, Peringkat, Profil, dll)
+        // 3. System Navigation Pages
         $systemPages = [
             [
                 'title' => 'Dashboard Siswa',
-                'description' => 'Beranda utama siswa, statistik progres belajar, dan aktivitas terbaru',
+                'description' => 'Beranda utama siswa, capaian seleksi, dan status pengawasan',
                 'category' => 'Halaman Menu',
                 'type' => 'nav',
                 'badge_class' => 'badge-search-nav',
@@ -64,8 +58,32 @@ class SearchController extends Controller
                 'keywords' => ['dashboard', 'beranda', 'home', 'utama', 'statistik', 'ringkasan', 'progres'],
             ],
             [
+                'title' => 'Mulai Seleksi (Evaluasi Resmi)',
+                'description' => 'Paket ujian seleksi resmi Empat Pilar MPR RI (1x pengerjaan)',
+                'category' => 'Halaman Menu',
+                'type' => 'nav',
+                'badge_class' => 'badge-search-nav',
+                'icon' => 'fi fi-rr-document-signed',
+                'pillar' => 'Seleksi Resmi',
+                'meta' => 'Ujian Resmi',
+                'url' => route('siswa.real-materi.index'),
+                'keywords' => ['mulai seleksi', 'real materi', 'evaluasi', 'seleksi', 'ujian resmi', 'tes resmi', 'cat', 'soal'],
+            ],
+            [
+                'title' => 'Sesi Zoom Pengawasan',
+                'description' => 'Jadwal tatap muka dan ruang pengawasan ujian seleksi virtual',
+                'category' => 'Halaman Menu',
+                'type' => 'nav',
+                'badge_class' => 'badge-search-nav',
+                'icon' => 'fi fi-rr-video-camera-alt',
+                'pillar' => 'Pengawasan',
+                'meta' => 'Ruang Virtual',
+                'url' => route('siswa.zoom-sessions.index'),
+                'keywords' => ['zoom', 'sesi zoom', 'pengawas', 'virtual', 'webinar', 'ruang zoom', 'meeting'],
+            ],
+            [
                 'title' => 'Papan Peringkat (Leaderboard)',
-                'description' => 'Pantau peringkat dan klasemen nilai evaluasi tingkat provinsi & nasional',
+                'description' => 'Pantau peringkat dan klasemen nilai seleksi tingkat provinsi & nasional',
                 'category' => 'Halaman Menu',
                 'type' => 'nav',
                 'badge_class' => 'badge-search-nav',
@@ -74,54 +92,6 @@ class SearchController extends Controller
                 'meta' => 'Peringkat & Klasemen',
                 'url' => route('siswa.leaderboard'),
                 'keywords' => ['peringkat', 'leaderboard', 'ranking', 'papan peringkat', 'juara', 'klasemen', 'skor', 'nilai tertinggi'],
-            ],
-            [
-                'title' => 'Latihan Kuis & Try Out',
-                'description' => 'Daftar lengkap paket latihan kuis simulasi PPKn dan TWK Kedinasan',
-                'category' => 'Halaman Menu',
-                'type' => 'nav',
-                'badge_class' => 'badge-search-nav',
-                'icon' => 'fi fi-rr-edit',
-                'pillar' => 'Kuis Simulasi',
-                'meta' => 'Katalog Kuis',
-                'url' => route('siswa.quizzes.index'),
-                'keywords' => ['kuis', 'latihan kuis', 'try out', 'simulasi', 'paket kuis', 'soal latihan'],
-            ],
-            [
-                'title' => 'Real Materi Evaluasi Resmi',
-                'description' => 'Halaman seleksi evaluasi resmi Empat Pilar MPR RI (1x pengerjaan)',
-                'category' => 'Halaman Menu',
-                'type' => 'nav',
-                'badge_class' => 'badge-search-nav',
-                'icon' => 'fi fi-rr-document-signed',
-                'pillar' => 'Seleksi Resmi',
-                'meta' => 'Ujian Resmi',
-                'url' => route('siswa.real-materi.index'),
-                'keywords' => ['real materi', 'evaluasi', 'seleksi', 'ujian resmi', 'tes resmi', 'cat'],
-            ],
-            [
-                'title' => 'Materi Belajar Interaktif',
-                'description' => 'Daftar modul bacaan teks 4 Pilar Kebangsaan',
-                'category' => 'Halaman Menu',
-                'type' => 'nav',
-                'badge_class' => 'badge-search-nav',
-                'icon' => 'fi fi-rr-book-alt',
-                'pillar' => 'Materi Bacaan',
-                'meta' => 'Daftar Materi',
-                'url' => route('siswa.materials.index'),
-                'keywords' => ['materi', 'bacaan', 'modul', 'artikel', 'buku', 'teks materi'],
-            ],
-            [
-                'title' => 'Video Pembelajaran Kebangsaan',
-                'description' => 'Koleksi video materi visual interaktif Empat Pilar MPR RI',
-                'category' => 'Halaman Menu',
-                'type' => 'nav',
-                'badge_class' => 'badge-search-nav',
-                'icon' => 'fi fi-rr-play-alt',
-                'pillar' => 'Video Pembelajaran',
-                'meta' => 'Daftar Video',
-                'url' => route('siswa.videos.index'),
-                'keywords' => ['video', 'tonton', 'rekaman', 'visual', 'youtube', 'daftar video'],
             ],
             [
                 'title' => 'Edit Profil & Kata Sandi Akun',
@@ -153,44 +123,9 @@ class SearchController extends Controller
             return $nav;
         });
 
-        // 4. Intent detection for content
-        $isSearchingQuiz = str_contains($termLower, 'kuis') || str_contains($termLower, 'quiz') || str_contains($termLower, 'try out') || str_contains($termLower, 'simulasi');
-        $isSearchingReal = str_contains($termLower, 'real') || str_contains($termLower, 'evaluasi') || str_contains($termLower, 'seleksi') || str_contains($termLower, 'resmi');
-        $isSearchingVideo = str_contains($termLower, 'video') || str_contains($termLower, 'tonton') || str_contains($termLower, 'youtube');
-        $isSearchingMaterial = str_contains($termLower, 'baca') || str_contains($termLower, 'artikel') || ($termLower === 'materi');
+        // 4. Content Search: Paket Seleksi (Real Materi)
+        $isSearchingReal = str_contains($termLower, 'real') || str_contains($termLower, 'evaluasi') || str_contains($termLower, 'seleksi') || str_contains($termLower, 'resmi') || str_contains($termLower, 'ujian');
 
-        // 5. Kuis Latihan (Practice Quizzes)
-        $quizzes = Quiz::query()
-            ->withCount('questions')
-            ->where('type', 'practice')
-            ->where('is_active', true)
-            ->where(function ($q) use ($escapedSqlTerm, $isSearchingQuiz) {
-                if ($isSearchingQuiz) {
-                    $q->whereNotNull('id');
-                } else {
-                    $q->where('title', 'like', "%{$escapedSqlTerm}%")
-                      ->orWhere('description', 'like', "%{$escapedSqlTerm}%")
-                      ->orWhere('pillar', 'like', "%{$escapedSqlTerm}%")
-                      ->orWhere('package_code', 'like', "%{$escapedSqlTerm}%");
-                }
-            })
-            ->limit(5)
-            ->get()
-            ->map(function ($quiz) {
-                return [
-                    'id' => $quiz->id,
-                    'category' => 'Kuis Latihan',
-                    'type' => 'quiz',
-                    'badge_class' => 'badge-search-quiz',
-                    'icon' => 'fi fi-rr-interrogation',
-                    'title' => htmlspecialchars($quiz->title, ENT_QUOTES, 'UTF-8'),
-                    'pillar' => htmlspecialchars($quiz->formatted_pillar ?? $quiz->pillar, ENT_QUOTES, 'UTF-8'),
-                    'meta' => ($quiz->questions_count ?? 0) . ' Soal • ' . $quiz->duration_minutes . ' Menit',
-                    'url' => route('siswa.quizzes.show', $quiz),
-                ];
-            });
-
-        // 6. Real Materi Evaluasi Resmi
         $realQuizzes = Quiz::query()
             ->withCount('questions')
             ->where('type', 'real')
@@ -210,7 +145,7 @@ class SearchController extends Controller
             ->map(function ($quiz) {
                 return [
                     'id' => $quiz->id,
-                    'category' => 'Real Materi Evaluasi',
+                    'category' => 'Paket Seleksi',
                     'type' => 'real-materi',
                     'badge_class' => 'badge-search-real',
                     'icon' => 'fi fi-rr-shield-check',
@@ -221,71 +156,34 @@ class SearchController extends Controller
                 ];
             });
 
-        // 7. Materi Bacaan (Reading Materials)
-        $materials = Material::query()
-            ->where(function ($q) {
-                $q->where('type', 'text')->orWhereNull('type');
-            })
-            ->where(function ($q) use ($escapedSqlTerm, $isSearchingMaterial) {
-                if ($isSearchingMaterial) {
-                    $q->whereNotNull('id');
-                } else {
-                    $q->where('title', 'like', "%{$escapedSqlTerm}%")
-                      ->orWhere('content', 'like', "%{$escapedSqlTerm}%")
-                      ->orWhere('pillar', 'like', "%{$escapedSqlTerm}%");
-                }
+        // 5. Content Search: Sesi Zoom
+        $zoomSessions = ZoomSession::query()
+            ->where('is_active', true)
+            ->where(function ($q) use ($escapedSqlTerm) {
+                $q->where('title', 'like', "%{$escapedSqlTerm}%")
+                  ->orWhere('description', 'like', "%{$escapedSqlTerm}%");
             })
             ->limit(5)
             ->get()
-            ->map(function ($material) {
+            ->map(function ($session) {
                 return [
-                    'id' => $material->id,
-                    'category' => 'Materi Bacaan',
-                    'type' => 'material',
-                    'badge_class' => 'badge-search-material',
-                    'icon' => 'fi fi-rr-book-alt',
-                    'title' => htmlspecialchars($material->title, ENT_QUOTES, 'UTF-8'),
-                    'pillar' => htmlspecialchars($material->formatted_pillar ?? $material->pillar, ENT_QUOTES, 'UTF-8'),
-                    'meta' => ($material->read_time ?? 5) . ' Menit Baca',
-                    'url' => route('siswa.materials.show', $material),
+                    'id' => $session->id,
+                    'category' => 'Sesi Zoom Pengawas',
+                    'type' => 'zoom',
+                    'badge_class' => 'badge-search-nav',
+                    'icon' => 'fi fi-rr-video-camera-alt',
+                    'title' => htmlspecialchars($session->title, ENT_QUOTES, 'UTF-8'),
+                    'pillar' => 'Pengawasan Ujian',
+                    'meta' => 'Ruang Zoom Resmi',
+                    'url' => route('siswa.zoom-sessions.index'),
                 ];
             });
 
-        // 8. Video Pembelajaran (Video Materials)
-        $videos = Material::query()
-            ->where('type', 'video')
-            ->where(function ($q) use ($escapedSqlTerm, $isSearchingVideo) {
-                if ($isSearchingVideo) {
-                    $q->whereNotNull('id');
-                } else {
-                    $q->where('title', 'like', "%{$escapedSqlTerm}%")
-                      ->orWhere('content', 'like', "%{$escapedSqlTerm}%")
-                      ->orWhere('pillar', 'like', "%{$escapedSqlTerm}%");
-                }
-            })
-            ->limit(5)
-            ->get()
-            ->map(function ($video) {
-                return [
-                    'id' => $video->id,
-                    'category' => 'Video Materi',
-                    'type' => 'video',
-                    'badge_class' => 'badge-search-video',
-                    'icon' => 'fi fi-rr-play-alt',
-                    'title' => htmlspecialchars($video->title, ENT_QUOTES, 'UTF-8'),
-                    'pillar' => htmlspecialchars($video->formatted_pillar ?? $video->pillar, ENT_QUOTES, 'UTF-8'),
-                    'meta' => 'Video Pembelajaran Interaktif',
-                    'url' => route('siswa.videos.show', $video),
-                ];
-            });
-
-        // Combine all results: Navigation first if matched, then content
+        // Combine all results
         $all = collect()
             ->concat($matchedNavs)
             ->concat($realQuizzes)
-            ->concat($quizzes)
-            ->concat($materials)
-            ->concat($videos);
+            ->concat($zoomSessions);
 
         return response()->json([
             'success' => true,

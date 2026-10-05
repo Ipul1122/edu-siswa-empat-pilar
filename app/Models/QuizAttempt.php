@@ -18,12 +18,24 @@ class QuizAttempt extends Model
         'total_questions',
         'duration_seconds_taken',
         'violations_count',
+        'is_retest',
+        'retest_reason',
+        'retest_granted_by',
         'answers',
     ];
 
     protected $casts = [
         'answers' => 'array',
+        'is_retest' => 'boolean',
     ];
+
+    /**
+     * Admin who granted retest.
+     */
+    public function retestGrantedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'retest_granted_by');
+    }
 
     /**
      * Relationship to User.

@@ -9,11 +9,14 @@
         <p>Pantau akumulasi skor seleksi, perolehan poin, dan peringkat siswa se-Indonesia secara realtime berdasarkan Provinsi dan Kabupaten/Kota.</p>
     </div>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="{{ route('admin.students.report') }}" target="_blank" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
-            <i class="fi fi-rr-print"></i> Cetak / PDF Laporan
+        <a href="{{ route('admin.leaderboard.export-top9', request()->query()) }}" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);">
+            <i class="fi fi-rr-trophy"></i> 🏆 Ekspor Top 9 Lolos (.CSV)
         </a>
-        <a href="{{ route('admin.students.export') }}" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
-            <i class="fi fi-rr-download"></i> Ekspor CSV Peringkat
+        <a href="{{ route('admin.leaderboard.export-spreadsheet', request()->query()) }}" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600;">
+            <i class="fi fi-rr-document"></i> Ekspor Spreadsheet Lengkap (.CSV)
+        </a>
+        <a href="{{ route('admin.students.report') }}" target="_blank" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fi fi-rr-print"></i> PDF Laporan
         </a>
     </div>
 </div>
@@ -50,7 +53,7 @@
         <div class="stat-icon info"><i class="fi fi-rr-diploma"></i></div>
         <div class="stat-info">
             <span class="stat-value">{{ $totalRealMateri }}</span>
-            <span class="stat-label">Total Real Materi Seleksi</span>
+            <span class="stat-label">Total Paket Seleksi</span>
         </div>
     </div>
 </div>
@@ -95,6 +98,14 @@
                     <i class="fi fi-rr-search" style="color: rgb(var(--color-primary-rgb));"></i> Cari Siswa / Sekolah
                 </label>
                 <input type="text" name="search" id="search" class="form-control" placeholder="Ketik nama siswa atau sekolah..." value="{{ $search }}">
+            </div>
+
+            <!-- Toggle Top 9 Only -->
+            <div style="min-width: 170px; display: flex; align-items: flex-end; padding-bottom: 2px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 700; color: {{ !empty($filterTop9) ? '#065f46' : 'var(--color-dark)' }}; margin: 0; background: {{ !empty($filterTop9) ? '#d1fae5' : '#f8fafc' }}; padding: 9px 14px; border-radius: 8px; border: 1px solid {{ !empty($filterTop9) ? '#10b981' : 'var(--color-gray-300)' }}; transition: all 0.2s;">
+                    <input type="checkbox" name="top9_only" value="1" {{ !empty($filterTop9) ? 'checked' : '' }} onchange="document.getElementById('admin-leaderboard-filter-form').submit()">
+                    <span>🏆 Top 9 Lolos Saja</span>
+                </label>
             </div>
 
             <!-- Actions -->
@@ -214,7 +225,7 @@
             </div>
         </div>
         <span style="font-size: 0.8rem; color: var(--color-gray-500); font-weight: 500;">
-            Rumus Skor: (Materi Selesai &times; 10) + Total Nilai Real Kuis
+            Sistem Skor: Akumulasi Nilai Ujian Seleksi Resmi
         </span>
     </div>
 
@@ -223,22 +234,23 @@
             <table class="table table-hover" style="margin-bottom: 0; vertical-align: middle;">
                 <thead>
                     <tr style="background-color: var(--color-gray-100);">
-                        <th style="width: 90px; text-align: center;">Peringkat</th>
-                        <th>Siswa</th>
+                        <th style="width: 80px; text-align: center;">Peringkat</th>
+                        <th style="width: 140px; text-align: center;">Status Seleksi</th>
+                        <th>Sekolah / Akun Tim</th>
+                        <th>Guru Pembina (PIC)</th>
                         <th>Asal Wilayah</th>
-                        <th>Kelas & Sekolah</th>
-                        <th style="text-align: center;">Materi Selesai</th>
-                        <th style="text-align: center;">Kuis / Rerata</th>
-                        <th style="text-align: center; width: 130px;">Total Poin</th>
-                        <th style="text-align: center; width: 120px;">Aksi</th>
+                        <th style="text-align: center;">Seleksi Selesai</th>
+                        <th style="text-align: center;">Rerata Nilai</th>
+                        <th style="text-align: center; width: 110px;">Total Skor</th>
+                        <th style="text-align: center; width: 100px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($leaderboard as $index => $student)
                         @php
-                            $rank = $index + 1;
+                            $rank = $student->calculated_rank ?? ($index + 1);
                         @endphp
-                        <tr style="{{ $rank <= 3 ? 'background-color: rgba(254, 243, 199, 0.2);' : '' }}">
+                        <tr style="{{ $rank <= 3 ? 'background-color: rgba(254, 243, 199, 0.2);' : ($rank <= 9 ? 'background-color: rgba(209, 250, 229, 0.15);' : '') }}">
                             <td style="text-align: center;">
                                 @if($rank == 1)
                                     <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-weight: 800; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);">
@@ -258,18 +270,45 @@
                                     </span>
                                 @endif
                             </td>
+                            <td style="text-align: center;">
+                                @if($rank <= 9)
+                                    <span class="badge" style="background-color: #d1fae5; color: #065f46; font-weight: 800; font-size: 0.76rem; padding: 4px 10px; border-radius: 20px; border: 1px solid #6ee7b7; display: inline-flex; align-items: center; gap: 4px;">
+                                        ⭐ TOP 9 LOLOS
+                                    </span>
+                                @elseif($rank <= 11)
+                                    <span class="badge" style="background-color: #fef3c7; color: #92400e; font-weight: 700; font-size: 0.74rem; padding: 4px 10px; border-radius: 20px; border: 1px solid #fcd34d;">
+                                        CADANGAN
+                                    </span>
+                                @else
+                                    <span class="badge" style="background-color: #f1f5f9; color: #64748b; font-weight: 600; font-size: 0.74rem; padding: 4px 8px; border-radius: 20px;">
+                                        Peserta
+                                    </span>
+                                @endif
+                            </td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <img src="{{ $student->image_url }}" alt="{{ $student->name }}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-gray-200); background: #f8fafc; flex-shrink: 0;">
+                                    <img src="{{ $student->image_url }}" alt="{{ $student->school_name ?? $student->name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-gray-200); background: #f8fafc; flex-shrink: 0;">
                                     <div>
                                         <div style="font-weight: 700; color: var(--color-dark); font-size: 0.92rem;">
-                                            {{ $student->name }}
+                                            {{ $student->school_name ?? $student->name }}
                                         </div>
                                         <div style="font-size: 0.78rem; color: var(--color-gray-500);">
-                                            {{ $student->email }}
+                                            {{ $student->email }} • <span style="color: #2563eb;">{{ $student->class_name ?? 'Tim 10 Siswa' }}</span>
                                         </div>
                                     </div>
                                 </div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600; color: var(--color-dark); font-size: 0.85rem;">
+                                    {{ $student->pic_name ?? '-' }}
+                                </div>
+                                @if($student->whatsapp)
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $student->whatsapp) }}" target="_blank" style="font-size: 0.76rem; color: #059669; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                                        <i class="fi fi-rr-phone-call"></i> {{ $student->whatsapp }}
+                                    </a>
+                                @else
+                                    <span style="font-size: 0.75rem; color: var(--color-gray-400);">-</span>
+                                @endif
                             </td>
                             <td>
                                 @if($student->regency || $student->province)
@@ -287,17 +326,9 @@
                                     <span style="color: var(--color-gray-400); font-size: 0.82rem;">-</span>
                                 @endif
                             </td>
-                            <td>
-                                <div style="font-weight: 600; color: var(--color-dark); font-size: 0.88rem;">
-                                    {{ $student->school_name ?? '-' }}
-                                </div>
-                                <div style="font-size: 0.75rem; color: var(--color-gray-500);">
-                                    {{ $student->class_name ?? 'Kelas tidak disetel' }}
-                                </div>
-                            </td>
                             <td style="text-align: center;">
                                 <span class="badge" style="background-color: rgba(16, 185, 129, 0.1); color: #059669; font-weight: 600; font-size: 0.82rem; padding: 4px 10px; border-radius: 20px;">
-                                    <i class="fi fi-rr-check" style="font-size: 0.7rem; margin-right: 2px;"></i> {{ $student->materials_read }} Selesai
+                                    <i class="fi fi-rr-check" style="font-size: 0.7rem; margin-right: 2px;"></i> {{ $student->completed_seleksi_count }}/{{ $totalRealMateri }} Paket
                                 </span>
                             </td>
                             <td style="text-align: center;">
@@ -324,7 +355,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 48px 20px;">
+                            <td colspan="9" style="text-align: center; padding: 48px 20px;">
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                                     <i class="fi fi-rr-search-alt" style="font-size: 2.4rem; color: var(--color-gray-400);"></i>
                                     <h4 style="color: var(--color-dark); margin: 0;">Tidak Ada Siswa Ditemukan</h4>

@@ -2824,4 +2824,277 @@ body.fullpage-mode .fullpage-mobile-pill {
     }
 }
 
+/* ==========================================================================
+   MULAI SELEKSI - 1 BARIS HORIZONTAL CARD TRACK
+   ========================================================================== */
+.selection-track-wrapper {
+    position: relative;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.selection-track-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.selection-track-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.selection-track-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(211, 47, 47, 0.08);
+    color: rgb(211, 47, 47);
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1px solid rgba(211, 47, 47, 0.2);
+}
+
+.selection-track-hint {
+    font-size: 0.85rem;
+    color: var(--color-gray-600);
+}
+
+.selection-track-nav-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.selection-nav-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-gray-200);
+    background: var(--color-white);
+    color: var(--color-dark);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.selection-nav-btn:hover {
+    background: var(--color-gray-100);
+    border-color: rgb(211, 47, 47);
+    color: rgb(211, 47, 47);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.selection-cards-track {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 4px 20px 4px;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(211, 47, 47, 0.35) var(--color-gray-100);
+}
+
+.selection-cards-track::-webkit-scrollbar {
+    height: 6px;
+}
+
+.selection-cards-track::-webkit-scrollbar-track {
+    background: var(--color-gray-100);
+    border-radius: 999px;
+}
+
+.selection-cards-track::-webkit-scrollbar-thumb {
+    background: rgba(211, 47, 47, 0.35);
+    border-radius: 999px;
+}
+
+.selection-cards-track::-webkit-scrollbar-thumb:hover {
+    background: rgb(211, 47, 47);
+}
+
+.selection-card-item {
+    flex: 0 0 280px;
+    width: 280px;
+    min-width: 280px;
+    max-width: 320px;
+    scroll-snap-align: start;
+    background: var(--color-white);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-gray-200);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.selection-card-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 1560px) {
+    .selection-card-item {
+        flex: 1 1 0;
+        min-width: 240px;
+        max-width: none;
+    }
+}
+
+.selection-card-item.pillar-pancasila { border-top: 4px solid #ff5252; }
+.selection-card-item.pillar-uud_1945 { border-top: 4px solid #f59e0b; }
+.selection-card-item.pillar-nkri { border-top: 4px solid #0284c7; }
+.selection-card-item.pillar-bhinneka_tunggal_ika { border-top: 4px solid #10b981; }
+.selection-card-item.pillar-twk_kedinasan { border-top: 4px solid #8b5cf6; }
+
+.selection-card-item.is-closed {
+    opacity: 0.88;
+}
+
+.selection-card-body {
+    padding: 22px 20px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.selection-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selection-card-icon-pill {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    transition: transform 0.2s ease;
+}
+
+.selection-card-item:hover .selection-card-icon-pill {
+    transform: scale(1.08);
+}
+
+.selection-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-dark);
+    line-height: 1.35;
+    margin: 2px 0 0 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.7em;
+}
+
+.selection-meta-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.selection-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--color-gray-100);
+    color: var(--color-gray-700);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.selection-card-desc {
+    font-size: 0.82rem;
+    color: var(--color-gray-600);
+    line-height: 1.45;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.selection-status-badge-box {
+    margin-top: 4px;
+    padding: 10px 12px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selection-status-badge-box.completed {
+    background-color: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: var(--color-success);
+}
+
+.selection-status-badge-box.closed {
+    background-color: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.18);
+    color: var(--color-danger);
+    justify-content: center;
+    font-weight: 500;
+}
+
+.selection-status-badge-box.ready {
+    background-color: var(--color-gray-100);
+    border: 1px solid var(--color-gray-200);
+    color: var(--color-gray-600);
+    justify-content: center;
+    font-weight: 500;
+}
+
+.selection-card-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--color-gray-100);
+    background-color: #fafbfc;
+}
+
+.selection-btn-start {
+    width: 100%;
+    justify-content: center;
+    font-weight: 700;
+    padding: 9px 16px;
+    font-size: 0.88rem;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 10px rgba(211, 47, 47, 0.2);
+    transition: all 0.2s ease;
+}
+
+.selection-btn-start:hover {
+    box-shadow: 0 6px 14px rgba(211, 47, 47, 0.3);
+    transform: translateY(-1px);
+}
+
 

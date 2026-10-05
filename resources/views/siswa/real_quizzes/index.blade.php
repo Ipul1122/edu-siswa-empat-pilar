@@ -1,12 +1,12 @@
 @extends('layouts.siswa')
 
-@section('title', 'Real Materi - Empat Pilar')
+@section('title', 'Mulai Seleksi - Empat Pilar')
 
 @section('content')
 <div class="page-header">
     <div class="page-title">
-        <h1>Evaluasi Real Materi</h1>
-        <p>Uji pemahaman nyata Anda mengenai Empat Pilar Kebangsaan. Kuis evaluasi ini hanya dapat dikerjakan <strong>1 kali saja</strong> dan nilainya akan tercatat di Papan Peringkat.</p>
+        <h1>Mulai Seleksi</h1>
+        <p>Uji pemahaman nyata Anda mengenai Empat Pilar Kebangsaan melalui sesi seleksi evaluasi resmi. Setiap ujian seleksi hanya dapat dikerjakan <strong>1 kali saja</strong> dan nilainya langsung tercatat di Papan Peringkat Nasional & Wilayah.</p>
     </div>
 </div>
 
@@ -27,101 +27,183 @@
             if ($qItem->is_active) $activeQuizzesCount++;
         }
     }
+    $totalPackagesCount = $allQuizzesCount;
 @endphp
 
 @if($allQuizzesCount > 0 && $activeQuizzesCount === 0)
-    <div style="background-color: rgba(239, 68, 68, 0.08); border: 1.5px solid rgba(239, 68, 68, 0.3); border-radius: var(--border-radius-md); padding: 18px 22px; margin-bottom: 30px; display: flex; align-items: center; gap: 16px;">
+    <div style="background-color: rgba(239, 68, 68, 0.08); border: 1.5px solid rgba(239, 68, 68, 0.3); border-radius: var(--border-radius-md); padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px;">
         <i class="fi fi-rr-lock" style="font-size: 2rem; color: var(--color-danger); flex-shrink: 0;"></i>
         <div>
-            <h3 style="font-size: 1.05rem; color: var(--color-danger); margin-bottom: 3px; font-weight: 700;">Akses Evaluasi Real Materi Sedang Ditutup</h3>
+            <h3 style="font-size: 1.05rem; color: var(--color-danger); margin-bottom: 3px; font-weight: 700;">Akses Ujian Seleksi Sedang Ditutup</h3>
             <p style="font-size: 0.88rem; color: var(--color-gray-700); margin: 0;">
-                Seluruh sesi ujian Real Materi saat ini sedang dinonaktifkan / ditutup oleh Guru atau Administrator. Anda dapat kembali lagi nanti saat sesi evaluasi resmi dibuka.
+                Seluruh sesi ujian seleksi saat ini sedang dinonaktifkan / ditutup oleh Guru atau Administrator. Anda dapat kembali lagi nanti saat sesi evaluasi resmi dibuka.
             </p>
         </div>
     </div>
 @endif
 
-<div style="display: flex; flex-direction: column; gap: 40px;">
-    @foreach($groupedQuizzes as $pillar => $quizzesList)
-        <div>
-            <!-- Pillar Header -->
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid var(--color-gray-200); padding-bottom: 12px;">
-                <i class="{{ $pillarsInfo[$pillar]['icon_class'] }}" style="font-size: 1.75rem; color: {{ $pillarsInfo[$pillar]['color'] }}; line-height: 1;"></i>
-                <h2 style="font-size: 1.5rem; color: var(--color-dark);">Evaluasi Real {{ $pillarsInfo[$pillar]['title'] }}</h2>
-            </div>
+<div class="selection-track-wrapper">
+    <div class="selection-track-header">
+        <div class="selection-track-info">
+            <span class="selection-track-count-badge">
+                <i class="fi fi-rr-diploma"></i> {{ $totalPackagesCount }} Paket Seleksi
+            </span>
+            <span class="selection-track-hint">
+                <i class="fi fi-rr-arrows-h"></i> Geser horizontal untuk melihat & memilih paket ujian
+            </span>
+        </div>
+        <div class="selection-track-nav-btns">
+            <button type="button" class="selection-nav-btn" id="btn-scroll-left" title="Geser ke kiri" aria-label="Geser ke kiri">
+                <i class="fi fi-rr-angle-left"></i>
+            </button>
+            <button type="button" class="selection-nav-btn" id="btn-scroll-right" title="Geser ke kanan" aria-label="Geser ke kanan">
+                <i class="fi fi-rr-angle-right"></i>
+            </button>
+        </div>
+    </div>
 
-            <!-- Quizzes Grid -->
+    <!-- 1 Baris Horizontal Track Cards (Tidak scroll ke bawah) -->
+    <div class="selection-cards-track" id="selectionCardsTrack">
+        @foreach($groupedQuizzes as $pillar => $quizzesList)
+            @php
+                $pillarData = $pillarsInfo[$pillar] ?? [
+                    'title' => ucfirst(str_replace('_', ' ', $pillar)),
+                    'icon_class' => 'fi fi-rr-diploma',
+                    'color' => '#8b5cf6'
+                ];
+            @endphp
             @if(count($quizzesList) > 0)
-                <div class="pillars-grid">
-                    @foreach($quizzesList as $quiz)
-                        <div class="card" style="transition: var(--transition-smooth); border: 1px solid var(--color-gray-200); display: flex; flex-direction: column; justify-content: space-between; {{ !$quiz->is_active ? 'opacity: 0.85;' : '' }}">
-                            <div class="card-body" style="padding: 24px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="badge {{ $quiz->pillar }}" style="font-size: 0.7rem;">
-                                        <i class="fi fi-rr-clock" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $quiz->duration_minutes }} Menit
-                                    </span>
-                                    
-                                    @if(!$quiz->is_active)
-                                        <span class="badge badge-danger" style="font-size: 0.7rem; display: inline-flex; align-items: center; gap: 4px;">
-                                            <i class="fi fi-rr-lock" style="font-size: 0.7rem;"></i> Ditutup
+                @foreach($quizzesList as $quiz)
+                    <div class="selection-card-item pillar-{{ $pillar }} {{ !$quiz->is_active ? 'is-closed' : '' }}">
+                        <div class="selection-card-body">
+                            <div class="selection-card-top">
+                                <div class="selection-card-icon-pill" style="background: {{ $pillarData['color'] }}15; color: {{ $pillarData['color'] }};">
+                                    <i class="{{ $pillarData['icon_class'] }}"></i>
+                                </div>
+                                <div>
+                                    @if($quiz->is_completed)
+                                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; font-size: 0.7rem;">
+                                            <i class="fi fi-rr-check"></i> Selesai
+                                        </span>
+                                    @elseif(!$quiz->is_active)
+                                        <span class="badge badge-danger" style="font-size: 0.7rem;">
+                                            <i class="fi fi-rr-lock"></i> Ditutup
                                         </span>
                                     @else
-                                        <span class="badge admin" style="font-size: 0.7rem;">
-                                            <i class="fi fi-rr-list" style="margin-right: 4px; font-size: 0.75rem; vertical-align: middle;"></i>{{ $quiz->questions_count }} Soal
+                                        <span class="badge" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 700; font-size: 0.7rem;">
+                                            <i class="fi fi-rr-badge-check"></i> Siap Ujian
                                         </span>
                                     @endif
                                 </div>
-                                
-                                <h3 style="font-size: 1.1rem; color: var(--color-dark); font-weight: 600; line-height: 1.4; margin-top: 4px;">
+                            </div>
+
+                            <div>
+                                <span class="badge {{ $quiz->pillar }}" style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    {{ $pillarData['title'] }}
+                                </span>
+                                <h3 class="selection-card-title" title="{{ $quiz->title }}">
                                     {{ $quiz->title }}
                                 </h3>
-                                
-                                <p style="color: var(--color-gray-600); font-size: 0.85rem; flex-grow: 1;">
-                                    {{ Str::limit(strip_tags($quiz->description), 80) }}
-                                </p>
+                            </div>
 
-                                @if($quiz->is_completed)
-                                    <div style="margin-top: 12px; padding: 8px 12px; background-color: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--border-radius-sm); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
-                                        <span style="color: var(--color-success); font-weight: 600;">Sudah Dikerjakan (Nilai):</span>
-                                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--color-success)">
-                                            {{ $quiz->highest_score }}
-                                        </span>
-                                    </div>
-                                @elseif(!$quiz->is_active)
-                                    <div style="margin-top: 12px; padding: 8px 12px; background-color: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: var(--border-radius-sm); text-align: center; font-size: 0.82rem; color: var(--color-danger); font-weight: 500;">
-                                        <i class="fi fi-rr-info" style="margin-right: 4px;"></i> Akses ujian ditutup oleh Admin
-                                    </div>
-                                @else
-                                    <div style="margin-top: 12px; padding: 8px 12px; background-color: var(--color-gray-100); border-radius: var(--border-radius-sm); text-align: center; font-size: 0.85rem; color: var(--color-gray-400); font-style: italic;">
-                                        Belum pernah dikerjakan
-                                    </div>
+                            <div class="selection-meta-chips">
+                                <span class="selection-meta-chip">
+                                    <i class="fi fi-rr-clock"></i> {{ $quiz->duration_minutes }} Menit
+                                </span>
+                                <span class="selection-meta-chip">
+                                    <i class="fi fi-rr-list"></i> {{ $quiz->questions_count }} Soal
+                                </span>
+                                @if($quiz->package_code)
+                                    <span class="selection-meta-chip" style="background: rgba(139, 92, 246, 0.1); color: #7c3aed;">
+                                        <i class="fi fi-rr-box"></i> {{ $quiz->package_code }}
+                                    </span>
+                                @endif
+                                @if($quiz->province)
+                                    <span class="selection-meta-chip" style="background: rgba(245, 158, 11, 0.12); color: #b45309;">
+                                        <i class="fi fi-rr-marker"></i> {{ $quiz->province->name }}
+                                    </span>
                                 @endif
                             </div>
-                            <div style="padding: 16px 24px; border-top: 1px solid var(--color-gray-100); background-color: var(--color-gray-100);">
-                                @if($quiz->is_completed)
-                                    <a href="#" class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center; font-weight: 600; opacity: 0.7; cursor: not-allowed;" onclick="event.preventDefault(); Swal.fire('Informasi', 'Setiap kuis Real Materi hanya dapat dikerjakan 1 kali saja.', 'info');">
-                                        Sudah Selesai
-                                    </a>
-                                @elseif(!$quiz->is_active)
-                                    <button type="button" class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center; font-weight: 600; opacity: 0.6; cursor: not-allowed;" onclick="Swal.fire('Ujian Ditutup', 'Paket evaluasi Real Materi ini sedang ditutup oleh Admin.', 'warning');">
-                                        <i class="fi fi-rr-lock" style="margin-right: 4px;"></i> Akses Ditutup
-                                    </button>
-                                @else
-                                    <a href="{{ route('siswa.real-materi.show', $quiz) }}" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; font-weight: 600;">
-                                        Mulai Evaluasi
-                                    </a>
-                                @endif
-                            </div>
+
+                            <p class="selection-card-desc">
+                                {{ Str::limit(strip_tags($quiz->description ?: 'Uji pemahaman nyata Anda mengenai pilar ini melalui paket evaluasi seleksi resmi.'), 85) }}
+                            </p>
+
+                            @if($quiz->is_completed)
+                                <div class="selection-status-badge-box completed">
+                                    <span style="font-weight: 600;">Skor Nilai:</span>
+                                    <span style="font-weight: 800; font-size: 1.15rem;">{{ $quiz->highest_score ?? 0 }} <small style="font-size: 0.75rem; font-weight: 500;">/ 100</small></span>
+                                </div>
+                            @elseif(!$quiz->is_active)
+                                <div class="selection-status-badge-box closed">
+                                    <i class="fi fi-rr-lock" style="margin-right: 5px;"></i> Sesi ujian ditutup oleh Admin
+                                </div>
+                            @else
+                                <div class="selection-status-badge-box ready">
+                                    <i class="fi fi-rr-shield-check" style="margin-right: 5px; color: var(--color-success);"></i> 1x Kesempatan Ujian
+                                </div>
+                            @endif
                         </div>
-                    @endforeach
-                </div>
+
+                        <div class="selection-card-footer">
+                            @if($quiz->is_completed)
+                                @if($quiz->latest_attempt)
+                                    <a href="{{ route('siswa.real-materi.result', $quiz->latest_attempt) }}" class="btn btn-secondary btn-sm w-100" style="font-weight: 600; justify-content: center;">
+                                        <i class="fi fi-rr-eye" style="margin-right: 4px;"></i> Lihat Hasil Ujian
+                                    </a>
+                                @else
+                                    <button type="button" class="btn btn-secondary btn-sm w-100" style="font-weight: 600; opacity: 0.8; justify-content: center; cursor: not-allowed;" onclick="Swal.fire('Informasi', 'Setiap ujian Seleksi hanya dapat dikerjakan 1 kali saja.', 'info');">
+                                        <i class="fi fi-rr-check-circle" style="margin-right: 4px;"></i> Sudah Selesai
+                                    </button>
+                                @endif
+                            @elseif(!$quiz->is_active)
+                                <button type="button" class="btn btn-secondary btn-sm w-100" style="opacity: 0.65; cursor: not-allowed; justify-content: center;" onclick="Swal.fire('Ujian Ditutup', 'Paket seleksi ini sedang ditutup oleh Admin.', 'warning');">
+                                    <i class="fi fi-rr-lock" style="margin-right: 4px;"></i> Akses Ditutup
+                                </button>
+                            @else
+                                <a href="{{ route('siswa.real-materi.show', $quiz) }}" class="btn btn-primary btn-sm selection-btn-start">
+                                    <i class="fi fi-rr-play" style="margin-right: 6px;"></i> Mulai Seleksi
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
             @else
-                <div style="background-color: var(--color-white); border-radius: var(--border-radius-md); padding: 30px; text-align: center; border: 1px solid var(--color-gray-200); color: var(--color-gray-400);">
-                    <p style="font-size: 1.5rem; margin-bottom: 4px;"><i class="fi fi-rr-box-open" style="color: var(--color-gray-400); font-size: 1.5rem;"></i></p>
-                    <p>Evaluasi Real Materi untuk kategori ini belum ditambahkan oleh Admin.</p>
+                <div class="selection-card-item pillar-{{ $pillar }}" style="opacity: 0.7;">
+                    <div class="selection-card-body" style="text-align: center; justify-content: center; align-items: center; min-height: 240px;">
+                        <div class="selection-card-icon-pill" style="background: {{ $pillarData['color'] }}15; color: {{ $pillarData['color'] }}; margin: 0 auto;">
+                            <i class="{{ $pillarData['icon_class'] }}"></i>
+                        </div>
+                        <h3 class="selection-card-title" style="margin-top: 10px;">{{ $pillarData['title'] }}</h3>
+                        <p class="selection-card-desc" style="text-align: center;">Paket seleksi untuk kategori ini belum ditambahkan oleh Admin.</p>
+                    </div>
+                    <div class="selection-card-footer">
+                        <button type="button" class="btn btn-secondary btn-sm w-100" disabled style="opacity: 0.5; justify-content: center; cursor: not-allowed;">
+                            Belum Tersedia
+                        </button>
+                    </div>
                 </div>
             @endif
-        </div>
-    @endforeach
+        @endforeach
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const track = document.getElementById('selectionCardsTrack');
+        const btnLeft = document.getElementById('btn-scroll-left');
+        const btnRight = document.getElementById('btn-scroll-right');
+
+        if (track && btnLeft && btnRight) {
+            btnLeft.addEventListener('click', function() {
+                track.scrollBy({ left: -300, behavior: 'smooth' });
+            });
+            btnRight.addEventListener('click', function() {
+                track.scrollBy({ left: 300, behavior: 'smooth' });
+            });
+        }
+    });
+</script>
+@endpush

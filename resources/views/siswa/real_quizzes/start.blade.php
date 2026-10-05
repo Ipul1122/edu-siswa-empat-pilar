@@ -1,6 +1,6 @@
 @extends('layouts.siswa')
 
-@section('title', 'Mengerjakan Real Materi - Empat Pilar')
+@section('title', 'Mengerjakan Ujian Seleksi - Empat Pilar')
 
 @section('content')
 <div class="quiz-wrapper">
@@ -18,7 +18,7 @@
                     </span>
                 @endif
             </div>
-            <p style="font-size: 0.75rem; color: var(--color-gray-300); margin: 0;">Pilar: {{ $quiz->formatted_pillar }} (Real Materi Evaluasi Resmi)</p>
+            <p style="font-size: 0.75rem; color: var(--color-gray-300); margin: 0;">Pilar: {{ $quiz->formatted_pillar }} (Ujian Seleksi Resmi)</p>
         </div>
         <div style="text-align: right; display: flex; align-items: center; gap: 14px;">
             <div class="exam-violation-pill" id="exam-violation-pill" title="Indikator Pelanggaran Layar">
@@ -35,7 +35,11 @@
     </div>
 
     <!-- Questions Form -->
-    <form action="{{ route('siswa.real-materi.submit', $quiz) }}" method="POST" id="quiz-form">
+    <form action="{{ route('siswa.real-materi.submit', $quiz) }}" 
+          method="POST" 
+          id="quiz-form"
+          data-quiz-id="{{ $quiz->id }}"
+          data-save-url="{{ route('siswa.real-materi.save-answer', $quiz) }}">
         @csrf
         @include('siswa.partials.exam_security')
         <!-- Field to store seconds taken -->
@@ -79,7 +83,7 @@
                 <!-- Submit Panel -->
                 <div style="margin-top: 40px; display: flex; justify-content: space-between; align-items: center; background-color: var(--color-white); padding: 24px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-gray-200);">
                     <div style="font-size: 0.9rem; color: var(--color-gray-600); font-weight: 500;">
-                        Kuis Real Materi hanya dapat dikerjakan 1 kali. Harap periksa kembali semua jawaban sebelum mengirim.
+                        Ujian Seleksi hanya dapat dikerjakan 1 kali. Harap periksa kembali semua jawaban sebelum mengirim.
                     </div>
                     <button type="submit" class="btn btn-primary" style="background-color: var(--color-success); border: none; padding: 12px 28px; font-size: 1rem;">
                         💾 Selesai

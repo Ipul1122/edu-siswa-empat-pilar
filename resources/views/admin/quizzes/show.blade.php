@@ -1,26 +1,26 @@
 @extends('layouts.admin')
 
-@section('title', 'Kelola Soal: ' . $quiz->title . ' - Admin')
+@section('title', 'Kelola Soal Seleksi: ' . $quiz->title . ' - Admin')
 
 @section('content')
 <div class="page-header">
     <div class="page-title">
-        <h1>Kelola Soal: {{ $quiz->title }}</h1>
+        <h1>Kelola Soal Seleksi: {{ $quiz->title }}</h1>
         <p>
-            Tipe: <span class="badge {{ $quiz->type === 'real' ? 'admin' : 'siswa' }}" style="{{ $quiz->type === 'real' ? 'background: #d32f2f; color: white;' : '' }}">{{ $quiz->type === 'real' ? 'Real Materi' : 'Latihan Kuis' }}</span>
+            Tipe: <span class="badge" style="background: #d32f2f; color: white;">Paket Seleksi</span>
             | Kategori: <span class="badge {{ $quiz->pillar }}">{{ $quiz->formatted_pillar }}</span> 
             | <i class="fi fi-rr-clock" style="margin-right: 2px; vertical-align: middle; font-size: 0.85rem;"></i> {{ $quiz->duration_minutes }} Menit
         </p>
     </div>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <a href="{{ $quiz->type === 'real' ? route('admin.real-materi.index') : route('admin.quizzes.index') }}" class="btn btn-secondary">
-            ← {{ $quiz->type === 'real' ? 'Daftar Real Materi' : 'Daftar Latihan Kuis' }}
+        <a href="{{ route('admin.real-materi.index') }}" class="btn btn-secondary">
+            ← Daftar Soal Seleksi
         </a>
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('import-csv-modal').style.display='flex'">
             <i class="fi fi-rr-file-import"></i> Import CSV
         </button>
         <a href="{{ route('admin.questions.create', $quiz) }}" class="btn btn-primary">
-            <i class="fi fi-rr-plus"></i> Tambah Soal
+            <i class="fi fi-rr-plus"></i> Tambah Butir Soal
         </a>
     </div>
 </div>
@@ -39,7 +39,7 @@
                             <a href="{{ route('admin.questions.edit', $question) }}" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;">
                                 <i class="fi fi-rr-pencil"></i> Edit
                             </a>
-                            <form action="{{ route('admin.questions.destroy', $question) }}" method="POST" class="delete-confirm-form" data-item-type="soal kuis">
+                            <form action="{{ route('admin.questions.destroy', $question) }}" method="POST" class="delete-confirm-form" data-item-type="soal seleksi">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm" style="padding: 4px 8px; font-size: 0.75rem;">

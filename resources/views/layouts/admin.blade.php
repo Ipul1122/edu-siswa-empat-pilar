@@ -77,24 +77,9 @@
                         <i class="fi fi-rr-chart-pie"></i> <span>Dashboard</span>
                     </a>
                 </li>
-                <li class="sidebar-menu-item {{ Route::is('admin.materials.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.materials.index') }}" data-title="Materi Belajar">
-                        <i class="fi fi-rr-book-alt"></i> <span>Materi Belajar</span>
-                    </a>
-                </li>
-                <li class="sidebar-menu-item {{ Route::is('admin.videos.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.videos.index') }}" data-title="Materi Video">
-                        <i class="fi fi-rr-play-alt"></i> <span>Materi Video</span>
-                    </a>
-                </li>
-                <li class="sidebar-menu-item {{ Route::is('admin.quizzes.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.quizzes.index') }}" data-title="Latihan Kuis">
-                        <i class="fi fi-rr-clipboard-list"></i> <span>Latihan Kuis</span>
-                    </a>
-                </li>
                 <li class="sidebar-menu-item {{ Route::is('admin.real-materi.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.real-materi.index') }}" data-title="Real Materi">
-                        <i class="fi fi-rr-diploma"></i> <span>Real Materi</span>
+                    <a href="{{ route('admin.real-materi.index') }}" data-title="Soal Seleksi">
+                        <i class="fi fi-rr-diploma"></i> <span>Soal Seleksi</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item {{ Route::is('admin.zoom-sessions.*') ? 'active' : '' }}">

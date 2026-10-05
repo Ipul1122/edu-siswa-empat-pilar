@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Material;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
+use App\Models\ZoomSession;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -17,19 +17,26 @@ class DashboardController extends Controller
     public function index()
     {
         $totalStudents = User::query()->where('role', '=', 'siswa', 'and')->count('*');
-        $totalMaterials = Material::query()->count('*');
-        $totalPracticeQuizzes = Quiz::query()->where('type', '=', 'practice', 'and')->count('*');
         $totalRealQuizzes = Quiz::query()->where('type', '=', 'real', 'and')->count('*');
-        $totalAttempts = QuizAttempt::query()->count('*');
+        $totalZoomSessions = ZoomSession::query()->count('*');
+        $totalAttempts = QuizAttempt::query()
+            ->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id')
+            ->where('quizzes.type', 'real')
+            ->count('*');
 
-        // Get 5 recent attempts with student and quiz relations
-        $recentAttempts = QuizAttempt::with(['user', 'quiz'])
-            ->latest()
+        // Get 5 recent attempts for Seleksi
+        $recentAttempts = QuizAttempt::query()
+            ->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id')
+            ->where('quizzes.type', 'real')
+            ->select('quiz_attempts.*')
+            ->with(['user', 'quiz'])
+            ->latest('quiz_attempts.created_at')
             ->take(5)
             ->get();
 
-        // 1. Calculate global average scores per pillar for Chart.js
+        // 1. Calculate global average scores per pillar for Chart.js (filtered by Seleksi)
         $pillarScores = QuizAttempt::query()->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id', 'inner', false)
+            ->where('quizzes.type', 'real')
             ->selectRaw('quizzes.pillar, AVG(quiz_attempts.score) as avg_score')
             ->groupBy('quizzes.pillar')
             ->pluck('avg_score', 'quizzes.pillar')
@@ -42,11 +49,13 @@ class DashboardController extends Controller
             'bhinneka_tunggal_ika' => round($pillarScores['bhinneka_tunggal_ika'] ?? 0),
         ];
 
-        // 2. Calculate daily quiz attempts over the last 7 days in a single optimized query
+        // 2. Calculate daily seleksi attempts over the last 7 days
         $startDate = Carbon::today()->subDays(6)->startOfDay();
         $rawCounts = QuizAttempt::query()
-            ->where('created_at', '>=', $startDate)
-            ->selectRaw('DATE(created_at) as date_str, COUNT(*) as total')
+            ->join('quizzes', 'quiz_attempts.quiz_id', '=', 'quizzes.id')
+            ->where('quizzes.type', 'real')
+            ->where('quiz_attempts.created_at', '>=', $startDate)
+            ->selectRaw('DATE(quiz_attempts.created_at) as date_str, COUNT(*) as total')
             ->groupBy('date_str')
             ->pluck('total', 'date_str')
             ->toArray();
@@ -61,9 +70,8 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'totalStudents', 
-            'totalMaterials', 
-            'totalPracticeQuizzes',
             'totalRealQuizzes',
+            'totalZoomSessions',
             'totalAttempts', 
             'recentAttempts',
             'chartData',
@@ -71,3 +79,4 @@ class DashboardController extends Controller
         ));
     }
 }
+

@@ -174,7 +174,7 @@
         
         <!-- Kop Surat -->
         <div class="kop-surat">
-            <h1>Laporan Kemajuan Belajar Siswa</h1>
+            <h1>Laporan Hasil Seleksi Siswa</h1>
             <h2>Platform Pendidikan Empat Pilar Kebangsaan</h2>
             <p>Mata Pelajaran: Pendidikan Pancasila dan Kewarganegaraan (PPKN)</p>
             <p style="margin-top: 4px;">SMA / SMK / MA Tingkat Nasional</p>
@@ -188,7 +188,7 @@
             </div>
             <div class="meta-group" style="text-align: right;">
                 <div class="meta-item">Total Siswa Terdaftar: <span>{{ count($students) }} Siswa</span></div>
-                <div class="meta-item">Total Paket Real Materi: <span>{{ $totalRealMateriCount }} Paket</span></div>
+                <div class="meta-item">Total Paket Seleksi: <span>{{ $totalRealMateriCount }} Paket</span></div>
             </div>
         </div>
 
@@ -200,10 +200,10 @@
                     <th>Nama Siswa</th>
                     <th>Sekolah</th>
                     <th style="width: 130px;">Dapil</th>
-                    <th style="text-align: center; width: 110px;">Real Materi Selesai</th>
-                    <th style="text-align: center; width: 90px;">Kuis Diikuti</th>
+                    <th style="text-align: center; width: 110px;">Seleksi Selesai</th>
+                    <th style="text-align: center; width: 90px;">Ujian Diikuti</th>
                     <th style="text-align: center; width: 90px;">Rerata Nilai</th>
-                    <th style="text-align: center; width: 70px;">Poin</th>
+                    <th style="text-align: center; width: 70px;">Total Skor</th>
                 </tr>
             </thead>
             <tbody>

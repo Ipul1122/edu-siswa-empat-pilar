@@ -8,31 +8,60 @@
         <h1>Rapor & Evaluasi Siswa</h1>
         <p>Analisis capaian kompetensi Empat Pilar Kebangsaan dan rekam jejak evaluasi.</p>
     </div>
-    <div class="page-actions">
+    <div class="page-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn" onclick="document.getElementById('retestModal').style.display='flex'" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+            <i class="fi fi-rr-refresh"></i> Izinkan Tes Ulang (Reset Sesi)
+        </button>
         <a href="{{ route('admin.students.index') }}" class="btn btn-secondary">
             ← Kembali ke Daftar Siswa
         </a>
     </div>
 </div>
 
+@if(session('success'))
+    <div style="background: #ecfdf5; border: 1px solid #10b981; color: #065f46; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <i class="fi fi-rr-check-circle" style="font-size: 1.2rem;"></i>
+        <span>{{ session('success') }}</span>
+    </div>
+@endif
+
+@if($student->is_troubled || $student->trouble_notes)
+    <div style="background: #fff7ed; border: 1px solid #f97316; color: #9a3412; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 12px;">
+        <i class="fi fi-rr-exclamation" style="font-size: 1.3rem; margin-top: 2px; color: #ea580c;"></i>
+        <div>
+            <strong style="font-size: 0.95rem;">Catatan Kendala Jaringan / Teknis:</strong>
+            <p style="margin: 4px 0 0 0; font-size: 0.88rem;">{{ $student->trouble_notes ?? 'Sekolah mengalami kendala jaringan saat sesi ujian.' }}</p>
+        </div>
+    </div>
+@endif
+
 <!-- Student Header Card -->
 <div class="card" style="background: linear-gradient(135deg, var(--color-dark), var(--color-dark-light)); color: var(--color-white); border: none;">
     <div class="card-body" style="padding: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
         <div style="display: flex; align-items: center; gap: 24px;">
-            <img src="{{ $student->image_url }}" alt="{{ $student->name }}" style="width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.2); flex-shrink: 0; background: #fff;">
+            <img src="{{ $student->image_url }}" alt="{{ $student->school_name ?? $student->name }}" style="width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.2); flex-shrink: 0; background: #fff;">
             <div>
-                <h2 style="color: var(--color-white); font-size: 1.75rem; margin-bottom: 4px;">{{ $student->name }}</h2>
-                <p style="color: var(--color-gray-300); font-size: 0.95rem; margin-top: 2px;">
-                    Sekolah: <strong>{{ $student->school_name }}</strong>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <h2 style="color: var(--color-white); font-size: 1.75rem; margin-bottom: 0;">{{ $student->school_name ?? $student->name }}</h2>
+                    <span class="badge" style="background: rgba(37, 99, 235, 0.4); color: #93c5fd; border: 1px solid #3b82f6;">{{ $student->class_name ?? 'Tim 10 Siswa' }}</span>
+                </div>
+                <p style="color: var(--color-gray-300); font-size: 0.95rem; margin-top: 6px;">
+                    Wilayah: <strong>{{ $student->regency->name ?? '-' }}, {{ $student->province->name ?? '-' }}</strong>
                     @if($student->dapil)
                         | Dapil: <span class="badge" style="background-color: var(--color-secondary); color: var(--color-dark); font-weight: 700; font-size: 0.75rem; vertical-align: middle;">{{ $student->dapil }}</span>
                     @endif
                 </p>
-                <p style="color: var(--color-gray-400); font-size: 0.85rem; margin-top: 4px;">
-                    Email: {{ $student->email }} | Terdaftar sejak: {{ $student->created_at->format('d M Y') }}
-                </p>
+                <div style="color: var(--color-gray-300); font-size: 0.88rem; margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap;">
+                    <span><i class="fi fi-rr-user"></i> PIC: <strong>{{ $student->pic_name ?? '-' }}</strong></span>
+                    @if($student->whatsapp)
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $student->whatsapp) }}" target="_blank" style="color: #6ee7b7; text-decoration: none;">
+                            <i class="fi fi-rr-phone-call"></i> WA: <strong>{{ $student->whatsapp }}</strong>
+                        </a>
+                    @endif
+                    <span><i class="fi fi-rr-envelope"></i> {{ $student->email }}</span>
+                </div>
                 @if($student->address)
-                    <p style="color: var(--color-gray-300); font-size: 0.85rem; margin-top: 4px; display: flex; align-items: flex-start; gap: 4px;">
+                    <p style="color: var(--color-gray-300); font-size: 0.85rem; margin-top: 6px; display: flex; align-items: flex-start; gap: 4px;">
                         <i class="fi fi-rr-marker" style="font-size: 0.9rem; margin-top: 2px;"></i>
                         <span>Alamat: {{ $student->address }}</span>
                     </p>
@@ -50,7 +79,7 @@
                 <span style="display: block; font-size: 2rem; font-weight: 700; color: var(--color-white); font-family: var(--font-heading);">
                     {{ $completedRealMateriCount }}/{{ $totalRealMateriCount }}
                 </span>
-                <span style="font-size: 0.8rem; color: var(--color-gray-300); text-transform: uppercase; letter-spacing: 0.5px;">Real Materi Selesai</span>
+                <span style="font-size: 0.8rem; color: var(--color-gray-300); text-transform: uppercase; letter-spacing: 0.5px;">Seleksi Selesai</span>
             </div>
         </div>
     </div>
@@ -107,13 +136,13 @@
 <!-- Attempt History Table -->
 <div class="card" style="margin-top: 24px;">
     <div class="card-header">
-        <h3 class="card-title">Riwayat Pengerjaan Evaluasi & Kuis</h3>
+        <h3 class="card-title">Riwayat Pengerjaan Ujian Seleksi</h3>
     </div>
     <div class="card-body" style="padding: 0;">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Judul Kuis / Evaluasi</th>
+                    <th>Paket Seleksi</th>
                     <th>Pilar Kebangsaan</th>
                     <th>Waktu Mulai</th>
                     <th>Durasi</th>
@@ -169,7 +198,7 @@
                     <tr>
                         <td colspan="8" class="empty-state">
                             <i class="fi fi-rr-document" style="font-size: 2rem; color: var(--color-gray-400);"></i>
-                            <p style="margin-top: 8px;">Siswa ini belum pernah mengerjakan kuis evaluasi.</p>
+                            <p style="margin-top: 8px;">Siswa ini belum pernah mengerjakan ujian seleksi.</p>
                         </td>
                     </tr>
                 @endforelse
@@ -228,4 +257,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+<!-- Modal Izinkan Tes Ulang -->
+<div id="retestModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: white; border-radius: 12px; width: 100%; max-width: 520px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); overflow: hidden; animation: modalPop 0.2s ease-out;">
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 18px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i class="fi fi-rr-refresh"></i> Konfirmasi Izin Tes Ulang
+            </h3>
+            <button type="button" onclick="document.getElementById('retestModal').style.display='none'" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; line-height: 1;">✕</button>
+        </div>
+        <form action="{{ route('admin.students.grant-retest', $student) }}" method="POST" style="padding: 24px;">
+            @csrf
+            <p style="font-size: 0.9rem; color: #475569; margin-top: 0; line-height: 1.5;">
+                Anda akan memberikan izin sesi <strong>Tes Ulang (Susulan)</strong> untuk sekolah <strong>{{ $student->school_name ?? $student->name }}</strong>.
+            </p>
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 18px; font-size: 0.83rem; color: #92400e;">
+                ⚠️ <strong>Perhatian:</strong> Riwayat jawaban sebelumnya akan direset sehingga tim sekolah dapat memulai tes kembali dengan set soal yang diacak ulang. Notifikasi persetujuan resmi juga akan dikirimkan ke email PIC sekolah.
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="reason" style="display: block; font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 6px;">
+                    Alasan Izin Tes Ulang <span style="color: #ef4444;">*</span>
+                </label>
+                <textarea name="reason" id="reason" rows="3" required class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px; font-size: 0.88rem; box-sizing: border-box;" placeholder="Contoh: Terjadi gangguan jaringan internet di wilayah NTT selama 40 menit pada saat tes berlangsung."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="document.getElementById('retestModal').style.display='none'" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn" style="background: #d97706; color: white; font-weight: 600;">Ya, Berikan Izin Tes Ulang</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection

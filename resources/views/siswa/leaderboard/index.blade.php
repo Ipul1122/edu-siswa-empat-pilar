@@ -20,21 +20,21 @@
                 </div>
                 <div>
                     <h3 style="color: var(--color-white); font-size: 1.2rem; margin-bottom: 4px;">Peringkat Anda saat ini</h3>
-                    <p style="color: rgba(255,255,255,0.85); font-size: 0.9rem;">Terus tingkatkan nilai kuis dan pelajari semua materi!</p>
+                    <p style="color: rgba(255,255,255,0.85); font-size: 0.9rem;">Raih nilai terbaik pada setiap paket ujian seleksi resmi!</p>
                 </div>
             </div>
             <div style="display: flex; gap: 24px;">
                 <div style="text-align: center;">
                     <div style="font-size: 1.5rem; font-weight: 700; color: #ffd740;">{{ $currentUserData->points }}</div>
-                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 500; text-transform: uppercase;">Total Poin</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 500; text-transform: uppercase;">Total Skor</div>
                 </div>
                 <div style="text-align: center; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 24px;">
-                    <div style="font-size: 1.5rem; font-weight: 700;">{{ $currentUserData->materials_read }}</div>
-                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 500; text-transform: uppercase;">Materi Dibaca</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;">{{ $currentUserData->completed_seleksi_count }}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 500; text-transform: uppercase;">Seleksi Selesai</div>
                 </div>
                 <div style="text-align: center; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 24px;">
                     <div style="font-size: 1.5rem; font-weight: 700;">{{ $currentUserData->average_score }}%</div>
-                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 500; text-transform: uppercase;">Rata-rata Nilai</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 500; text-transform: uppercase;">Rerata Nilai</div>
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@
                 @endif
             </div>
         </div>
-        <span style="font-size: 0.8rem; color: var(--color-gray-500); font-weight: 500;">Sistem poin: (Materi Dibaca x 10 Poin) + Total Nilai Kuis</span>
+        <span style="font-size: 0.8rem; color: var(--color-gray-500); font-weight: 500;">Sistem skor: Akumulasi Nilai Ujian Seleksi Resmi</span>
     </div>
     <div class="card-body" style="padding: 0;">
         <div class="table-responsive">
@@ -113,9 +113,9 @@
                         <th>Siswa</th>
                         <th>Asal Wilayah</th>
                         <th>Kelas & Sekolah</th>
-                        <th style="text-align: center;">Materi Dibaca</th>
+                        <th style="text-align: center;">Seleksi Selesai</th>
                         <th style="text-align: center;">Rerata Nilai</th>
-                        <th style="text-align: center; width: 120px;">Total Poin</th>
+                        <th style="text-align: center; width: 120px;">Total Skor</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -161,7 +161,7 @@
                                 <div style="font-size: 0.75rem; color: var(--color-gray-500);">{{ $student->school_name }}</div>
                             </td>
                             <td style="text-align: center; font-size: 0.95rem; color: var(--color-gray-700);">
-                                <span style="font-weight: 600;">{{ $student->materials_read }}</span> materi
+                                <span style="font-weight: 600;">{{ $student->completed_seleksi_count }}</span> / {{ $totalRealMateri }} Paket
                             </td>
                             <td style="text-align: center;">
                                 <span style="font-weight: 700; color: {{ $student->average_score >= 70 ? 'var(--color-success)' : ($student->average_score > 0 ? 'var(--color-danger)' : 'var(--color-gray-400)') }}">

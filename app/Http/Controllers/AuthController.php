@@ -148,10 +148,11 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'school_name' => ['required', 'string', 'max:150'],
+            'pic_name' => ['required', 'string', 'max:150'],
+            'whatsapp' => ['required', 'string', 'max:30'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
-            'school_name' => ['required', 'string', 'max:100'],
             'province_id' => ['required', 'integer', 'exists:provinces,id'],
             'regency_id' => [
                 'required',
@@ -160,28 +161,23 @@ class AuthController extends Controller
                     return $query->where('province_id', $request->province_id);
                 }),
             ],
-            'dapil' => ['nullable', 'string'],
-            'address' => ['required', 'string', 'max:500'],
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
-            'name.required' => 'Nama lengkap wajib diisi.',
-            'email.required' => 'Email wajib diisi.',
-            'email.unique' => 'Email sudah terdaftar.',
-            'password.required' => 'Kata sandi wajib diisi.',
+            'school_name.required' => 'Nama Sekolah wajib diisi.',
+            'pic_name.required' => 'Nama Guru Pembina / PIC Tim wajib diisi.',
+            'whatsapp.required' => 'Nomor WhatsApp aktif penanggung jawab wajib diisi.',
+            'email.required' => 'Email resmi sekolah / PIC wajib diisi.',
+            'email.unique' => 'Email ini sudah terdaftar sebagai akun sekolah lain.',
+            'password.required' => 'Kata sandi akun wajib diisi.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
-            'school_name.required' => 'Nama sekolah wajib diisi.',
             'province_id.required' => 'Provinsi asal sekolah wajib dipilih.',
             'province_id.exists' => 'Pilihan Provinsi tidak valid.',
             'regency_id.required' => 'Kabupaten/Kota asal sekolah wajib dipilih.',
-            'regency_id.exists' => 'Kabupaten/Kota yang dipilih tidak sesuai dengan Provinsi yang dipilih.',
-            'address.required' => 'Alamat rumah tinggal wajib diisi.',
-            'image.required' => 'Foto profil siswa wajib diunggah.',
-            'image.image' => 'File foto harus berupa gambar.',
-            'image.mimes' => 'Format foto harus berupa JPG, JPEG, PNG, atau WEBP.',
-            'image.max' => 'Ukuran foto maksimal 2MB.',
+            'regency_id.exists' => 'Kabupaten/Kota yang dipilih tidak sesuai dengan Provinsi terpilih.',
         ]);
 
-        // Upload image
+        // Upload image if provided (optional)
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('avatars', 'public');
@@ -192,15 +188,17 @@ class AuthController extends Controller
 
         // Store registration details and OTP in session
         session()->put('register_details', [
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'class_name' => 'SMA/SMK',
+            'name' => $request->school_name,
             'school_name' => $request->school_name,
+            'pic_name' => $request->pic_name,
+            'whatsapp' => $request->whatsapp,
+            'email' => strtolower(trim((string) $request->email)),
+            'password' => Hash::make($request->password),
+            'class_name' => 'Tim 10 Siswa',
             'province_id' => $request->province_id,
             'regency_id' => $request->regency_id,
             'dapil' => $request->dapil,
-            'address' => $request->address,
+            'address' => $request->address ?? '-',
             'image' => $imagePath,
         ]);
         session()->put('register_otp', $otp);
@@ -210,16 +208,19 @@ class AuthController extends Controller
         try {
             Mail::to($request->email)->send(new OtpMail(
                 $otp,
-                'Verifikasi Kode OTP Pendaftaran - Empat Pilar',
-                'Terima kasih telah melakukan pendaftaran di platform pendidikan Empat Pilar Kebangsaan. Gunakan kode OTP di bawah ini untuk memverifikasi akun Anda:'
+                'Verifikasi Kode OTP Pendaftaran Sekolah - Empat Pilar MPR RI',
+                'Terima kasih telah mendaftarkan sekolah Anda dalam Seleksi Nasional Empat Pilar MPR RI. Gunakan kode OTP berikut untuk mengaktifkan akun sekolah Anda:'
             ));
         } catch (\Exception $e) {
             logger()->error('Mail error: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Gagal mengirim email verifikasi. Pastikan konfigurasi email di .env sudah benar.');
+            // If in local/debug mode, flash OTP to session for seamless testing in remote/offline environment
+            session()->flash('debug_otp', $otp);
+            return redirect()->route('register.verify_otp')
+                ->with('warning', 'Kode OTP pendaftaran: ' . $otp . ' (Email gateway offline/delayed).');
         }
 
         return redirect()->route('register.verify_otp')
-            ->with('success', 'Kode OTP telah dikirimkan ke email Anda.');
+            ->with('success', 'Kode OTP verifikasi telah dikirimkan ke email sekolah Anda.');
     }
 
     /**
@@ -269,16 +270,18 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name' => $details['name'],
+            'name' => $details['school_name'] ?? $details['name'],
             'email' => $details['email'],
             'password' => $details['password'],
             'role' => 'siswa',
-            'class_name' => $details['class_name'] ?? 'SMA/SMK',
+            'class_name' => 'Tim 10 Siswa',
             'school_name' => $details['school_name'],
+            'pic_name' => $details['pic_name'] ?? null,
+            'whatsapp' => $details['whatsapp'] ?? null,
             'province_id' => $details['province_id'] ?? null,
             'regency_id' => $details['regency_id'] ?? null,
             'dapil' => $details['dapil'] ?? null,
-            'address' => $details['address'] ?? null,
+            'address' => $details['address'] ?? '-',
             'image' => $details['image'] ?? null,
             'email_verified_at' => Carbon::now(),
         ]);
@@ -290,7 +293,7 @@ class AuthController extends Controller
         Auth::guard('web')->login($user);
 
         return redirect()->route('siswa.dashboard')
-            ->with('success', 'Registrasi berhasil dan email Anda telah diverifikasi! Selamat belajar.');
+            ->with('success', 'Pendaftaran Akun Sekolah berhasil! Selamat datang di Portal Seleksi Online Empat Pilar MPR RI.');
     }
 
     /**

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Soal Kuis - Admin')
+@section('title', 'Tambah Soal Seleksi - Admin')
 
 @section('content')
 <!-- Quill.js Rich Text Editor CDN Stylesheet -->
@@ -33,10 +33,10 @@
 
 <div class="page-header">
     <div class="page-title">
-        <h1>Tambah Soal Baru</h1>
-        <p>Kuis: <strong>{{ $quiz->title }}</strong> | Kategori: <span class="badge {{ $quiz->pillar }}">{{ $quiz->formatted_pillar }}</span></p>
+        <h1>Tambah Butir Soal Seleksi</h1>
+        <p>Paket Seleksi: <strong>{{ $quiz->title }}</strong> | Kategori: <span class="badge {{ $quiz->pillar }}">{{ $quiz->formatted_pillar }}</span></p>
     </div>
-    <a href="{{ route('admin.quizzes.show', $quiz) }}" class="btn btn-secondary">
+    <a href="{{ route('admin.real-materi.show', $quiz) }}" class="btn btn-secondary">
         ← Batal
     </a>
 </div>
@@ -140,7 +140,7 @@
             </div>
 
             <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px;">
-                <a href="{{ route('admin.quizzes.show', $quiz) }}" class="btn btn-secondary">Batal</a>
+                <a href="{{ route('admin.real-materi.show', $quiz) }}" class="btn btn-secondary">Batal</a>
                 <button type="submit" class="btn btn-primary">Simpan Soal</button>
             </div>
         </form>

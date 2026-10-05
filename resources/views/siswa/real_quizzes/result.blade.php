@@ -1,11 +1,11 @@
 @extends('layouts.siswa')
 
-@section('title', 'Hasil Real Materi - Empat Pilar')
+@section('title', 'Hasil Seleksi - Empat Pilar')
 
 @section('content')
 <div class="page-header" style="border: none; padding-bottom: 0;">
     <a href="{{ route('siswa.real-materi.index') }}" class="btn btn-secondary btn-sm">
-        ← Kembali ke Real Materi
+        ← Kembali ke Mulai Seleksi
     </a>
 </div>
 
@@ -174,7 +174,7 @@
     <!-- Bottom Actions -->
     <div style="margin-top: 40px; display: flex; justify-content: center; gap: 16px;">
         <a href="{{ route('siswa.real-materi.index') }}" class="btn btn-secondary">
-            Kembali ke Real Materi
+            Kembali ke Mulai Seleksi
         </a>
         <a href="{{ route('siswa.dashboard') }}" class="btn btn-primary">
             Kembali ke Dashboard

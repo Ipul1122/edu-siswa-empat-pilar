@@ -342,10 +342,54 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Radio change updates palette state & progress
+        // Radio change updates palette state & progress with auto-save & offline caching
+        const quizFormEl = document.getElementById('quiz-form');
+        const quizId = quizFormEl ? quizFormEl.dataset.quizId : null;
+        const saveUrl = quizFormEl ? quizFormEl.dataset.saveUrl : null;
+        const csrfToken = document.querySelector('input[name="_token"]')?.value;
+
+        // Restore cached answers from localStorage on page load if any
+        if (quizId) {
+            document.querySelectorAll('input[type="radio"][name^="answers["]').forEach(radio => {
+                const qId = radio.dataset.questionId;
+                const cachedVal = localStorage.getItem('cbt_ans_' + quizId + '_' + qId);
+                if (cachedVal && radio.value === cachedVal) {
+                    radio.checked = true;
+                }
+            });
+        }
+
         document.querySelectorAll('input[type="radio"][name^="answers["]').forEach(radio => {
             radio.addEventListener('change', function () {
                 updatePaletteProgress();
+
+                const qId = this.dataset.questionId;
+                const ans = this.value;
+
+                if (quizId && qId && ans) {
+                    // 1. Cache to local storage immediately (0ms)
+                    try {
+                        localStorage.setItem('cbt_ans_' + quizId + '_' + qId, ans);
+                    } catch (e) {}
+
+                    // 2. Asynchronous background save to server (<50 bytes payload)
+                    if (saveUrl && csrfToken) {
+                        fetch(saveUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                question_id: qId,
+                                answer: ans
+                            })
+                        }).catch(() => {
+                            // Handled silently by local cache if internet briefly disconnected
+                        });
+                    }
+                }
             });
         });
 

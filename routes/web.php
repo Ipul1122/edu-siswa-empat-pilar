@@ -10,10 +10,10 @@ Route::get('/', function () {
     $stats = Cache::remember('welcome_stats', 600, function () {
         return [
             'siswaCount' => \App\Models\User::query()->where('role', '=', 'siswa', 'and')->count('*'),
-            'materiCount' => \App\Models\Material::query()->where('type', '=', 'text', 'and')->count('*'),
-            'videoCount' => \App\Models\Material::query()->where('type', '=', 'video', 'and')->count('*'),
-            'quizCount' => \App\Models\Quiz::query()->count('*'),
-            'soalCount' => \App\Models\Question::query()->count('*'),
+            'seleksiCount' => \App\Models\Quiz::query()->where('type', '=', 'real', 'and')->count('*'),
+            'soalCount' => \App\Models\Question::query()->whereHas('quiz', function ($q) {
+                $q->where('type', '=', 'real');
+            })->count('*'),
         ];
     });
 
@@ -60,21 +60,13 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
-    // Materials CRUD
-    Route::resource('materials', App\Http\Controllers\Admin\MaterialController::class)->except(['show']);
-
-    // Videos CRUD
-    Route::resource('videos', App\Http\Controllers\Admin\VideoMaterialController::class)->except(['show']);
-
-    // Quizzes (Latihan Kuis) CRUD
-    Route::resource('quizzes', App\Http\Controllers\Admin\QuizController::class);
-
-    // Real Materi CRUD & Global / Individual Toggle Status
+    // Soal Seleksi (Real Materi) CRUD & Global / Individual Toggle Status
     Route::post('/real-materi/toggle-all', [App\Http\Controllers\Admin\RealQuizController::class, 'toggleAll'])->name('real-materi.toggle-all');
     Route::patch('/real-materi/{real_materi}/toggle', [App\Http\Controllers\Admin\RealQuizController::class, 'toggleStatus'])->name('real-materi.toggle');
     Route::resource('real-materi', App\Http\Controllers\Admin\RealQuizController::class)->names('real-materi');
+    Route::get('/quizzes/{quiz}', [App\Http\Controllers\Admin\RealQuizController::class, 'show'])->name('quizzes.show');
 
-    // Questions CRUD (Nest within quiz context)
+    // Butir Soal Seleksi CRUD (Terkait dengan paket seleksi)
     Route::get('/quizzes/{quiz}/questions/template', [App\Http\Controllers\Admin\QuestionController::class, 'template'])->name('questions.template');
     Route::post('/quizzes/{quiz}/questions/import', [App\Http\Controllers\Admin\QuestionController::class, 'import'])->name('questions.import');
     Route::get('/quizzes/{quiz}/questions/create', [App\Http\Controllers\Admin\QuestionController::class, 'create'])->name('questions.create');
@@ -83,12 +75,18 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     Route::put('/questions/{question}', [App\Http\Controllers\Admin\QuestionController::class, 'update'])->name('questions.update');
     Route::delete('/questions/{question}', [App\Http\Controllers\Admin\QuestionController::class, 'destroy'])->name('questions.destroy');
 
-    // Student Monitoring & Leaderboard
+    // Pemantauan Siswa & Leaderboard
     Route::get('/students', [App\Http\Controllers\Admin\StudentController::class, 'index'])->name('students.index');
     Route::get('/students/export', [App\Http\Controllers\Admin\StudentController::class, 'export'])->name('students.export');
     Route::get('/students/report', [App\Http\Controllers\Admin\StudentController::class, 'report'])->name('students.report');
+    Route::post('/students/broadcast', [App\Http\Controllers\Admin\StudentController::class, 'broadcast'])->name('students.broadcast');
+    Route::post('/students/{student}/grant-retest', [App\Http\Controllers\Admin\StudentController::class, 'grantRetest'])->name('students.grant-retest');
     Route::get('/students/{student}', [App\Http\Controllers\Admin\StudentController::class, 'show'])->name('students.show');
+
+    // Leaderboard & Spreadsheet Exports (Requirement 3 & 10)
     Route::get('/leaderboard', [App\Http\Controllers\Admin\LeaderboardController::class, 'index'])->name('leaderboard');
+    Route::get('/leaderboard/export-spreadsheet', [App\Http\Controllers\Admin\LeaderboardController::class, 'exportSpreadsheet'])->name('leaderboard.export-spreadsheet');
+    Route::get('/leaderboard/export-top9', [App\Http\Controllers\Admin\LeaderboardController::class, 'exportTop9'])->name('leaderboard.export-top9');
 
     // Zoom Virtual Sessions CRUD & Participant Management
     Route::patch('/zoom-sessions/{zoom_session}/toggle', [App\Http\Controllers\Admin\ZoomSessionController::class, 'toggleStatus'])->name('zoom-sessions.toggle');
@@ -102,45 +100,38 @@ Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')
     Route::put('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
 });
 
-// Siswa Panel Routes
+// Siswa (School Mode) Panel Routes
 Route::middleware(['auth:web', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
     // Dashboard & Global Cross-Page Live Search
     Route::get('/dashboard', [App\Http\Controllers\Siswa\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/search', [App\Http\Controllers\Siswa\SearchController::class, 'search'])->name('search');
 
-    // Zoom Virtual Sessions
+    // 1. Tutorial Penggunaan & Petunjuk Teknis
+    Route::get('/tutorial', [App\Http\Controllers\Siswa\TutorialController::class, 'index'])->name('tutorial');
+
+    // 3. Zoom Virtual Sessions & Live Connection Ping/Trouble Tracking
     Route::get('/zoom-sessions', [App\Http\Controllers\Siswa\ZoomSessionController::class, 'index'])->name('zoom-sessions.index');
     Route::post('/zoom-sessions/{zoom_session}/join', [App\Http\Controllers\Siswa\ZoomSessionController::class, 'join'])->name('zoom-sessions.join');
     Route::post('/zoom-sessions/{zoom_session}/leave', [App\Http\Controllers\Siswa\ZoomSessionController::class, 'leave'])->name('zoom-sessions.leave');
+    Route::post('/zoom-sessions/{zoom_session}/ping', [App\Http\Controllers\Siswa\ZoomSessionController::class, 'ping'])->name('zoom-sessions.ping');
+    Route::post('/zoom-sessions/{zoom_session}/report-trouble', [App\Http\Controllers\Siswa\ZoomSessionController::class, 'reportTrouble'])->name('zoom-sessions.report_trouble');
 
-    // Reading Materials
-    Route::get('/materials', [App\Http\Controllers\Siswa\MaterialController::class, 'index'])->name('materials.index');
-    Route::get('/materials/{material}', [App\Http\Controllers\Siswa\MaterialController::class, 'show'])->name('materials.show');
-    Route::post('/materials/{material}/complete', [App\Http\Controllers\Siswa\MaterialController::class, 'complete'])->name('materials.complete');
-
-    // Video Materials
-    Route::get('/videos', [App\Http\Controllers\Siswa\VideoMaterialController::class, 'index'])->name('videos.index');
-    Route::get('/videos/{material}', [App\Http\Controllers\Siswa\VideoMaterialController::class, 'show'])->name('videos.show');
-    Route::post('/videos/{material}/complete', [App\Http\Controllers\Siswa\VideoMaterialController::class, 'complete'])->name('videos.complete');
-
-    // Quizzes & pengerjaan
-    Route::get('/quizzes', [App\Http\Controllers\Siswa\QuizController::class, 'index'])->name('quizzes.index');
-    Route::get('/quizzes/{quiz}', [App\Http\Controllers\Siswa\QuizController::class, 'show'])->name('quizzes.show');
-    Route::get('/quizzes/{quiz}/start', [App\Http\Controllers\Siswa\QuizController::class, 'start'])->name('quizzes.start');
-    Route::post('/quizzes/{quiz}/submit', [App\Http\Controllers\Siswa\QuizController::class, 'submit'])->name('quizzes.submit');
-    Route::get('/attempts/{attempt}/result', [App\Http\Controllers\Siswa\QuizController::class, 'result'])->name('quizzes.result');
-
-    // Real Materi & pengerjaan (Hanya 1x pengerjaan)
+    // 4. Ujian Seleksi Online (CBT) & Asynchronous Zero-Reload Auto-Save
     Route::get('/real-materi', [App\Http\Controllers\Siswa\RealQuizController::class, 'index'])->name('real-materi.index');
     Route::get('/real-materi/{quiz}', [App\Http\Controllers\Siswa\RealQuizController::class, 'show'])->name('real-materi.show');
     Route::get('/real-materi/{quiz}/start', [App\Http\Controllers\Siswa\RealQuizController::class, 'start'])->name('real-materi.start');
+    Route::post('/real-materi/{quiz}/save-answer', [App\Http\Controllers\Siswa\RealQuizController::class, 'saveAnswer'])->name('real-materi.save-answer');
     Route::post('/real-materi/{quiz}/submit', [App\Http\Controllers\Siswa\RealQuizController::class, 'submit'])->name('real-materi.submit');
     Route::get('/real-attempts/{attempt}/result', [App\Http\Controllers\Siswa\RealQuizController::class, 'result'])->name('real-materi.result');
 
-    // Leaderboard
+    // 5. Hasil Skor Mandiri Sekolah (Kerahasiaan Terjaga)
+    Route::get('/hasil-tes', [App\Http\Controllers\Siswa\ResultController::class, 'index'])->name('my-results');
     Route::get('/leaderboard', [App\Http\Controllers\Siswa\LeaderboardController::class, 'index'])->name('leaderboard');
 
-    // Profile Settings
+    // 6. Customer Service Chatbot API
+    Route::post('/chatbot/ask', [App\Http\Controllers\Siswa\ChatbotController::class, 'ask'])->name('chatbot.ask');
+
+    // 7. Pengaturan Akun Sekolah & PIC
     Route::get('/profile', [App\Http\Controllers\Siswa\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [App\Http\Controllers\Siswa\ProfileController::class, 'update'])->name('profile.update');
 });

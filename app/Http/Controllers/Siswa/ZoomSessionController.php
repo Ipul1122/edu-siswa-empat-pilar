@@ -83,27 +83,34 @@ class ZoomSessionController extends Controller
             return redirect()->away($zoom_session->zoom_link);
         }
 
-        try {
-            DB::transaction(function () use ($zoom_session, $user) {
-                // Lock session row to ensure strict capacity checks without race conditions
-                $lockedSession = ZoomSession::where('id', $zoom_session->id)->lockForUpdate()->first();
-                $currentCount = $lockedSession->participants()->count();
+        $deviceInfo = substr((string) $request->userAgent(), 0, 255);
 
-                if ($currentCount >= $lockedSession->capacity) {
+        try {
+            DB::transaction(function () use ($zoom_session, $user, $deviceInfo) {
+                // Lock session row to ensure strict capacity checks without race conditions
+                $lockedSession = ZoomSession::query()->where('id', '=', $zoom_session->id)->lockForUpdate()->first();
+                $currentCount = $lockedSession ? $lockedSession->participants()->count() : 0;
+
+                if ($lockedSession && $currentCount >= $lockedSession->capacity) {
                     throw new \RuntimeException('CAPACITY_EXCEEDED');
                 }
 
-                $lockedSession->participants()->syncWithoutDetaching([
-                    $user->id => [
-                        'joined_at' => now(),
-                        'notes' => 'Peserta Mandiri Siswa',
-                    ]
-                ]);
+                if ($lockedSession) {
+                    $lockedSession->participants()->syncWithoutDetaching([
+                        $user->id => [
+                            'joined_at' => now(),
+                            'last_ping_at' => now(),
+                            'status' => 'connected',
+                            'device_info' => $deviceInfo,
+                            'notes' => 'Terhubung Tim Sekolah (10 Siswa)',
+                        ]
+                    ]);
+                }
             });
 
             return redirect()->route('siswa.zoom-sessions.index')
-                ->with('swal_title', 'Berhasil Bergabung!')
-                ->with('swal_text', "Anda telah terdaftar di sesi \"{$zoom_session->title}\". Kuota berhasil diamankan. Klik tombol 'Buka Ruang Zoom' untuk masuk ke aplikasi Zoom.")
+                ->with('swal_title', 'Berhasil Terhubung ke Zoom!')
+                ->with('swal_text', "Sekolah Anda telah terhubung di sesi \"{$zoom_session->title}\". Kamera pengawas dapat dibuka via HP/tablet terpisah.")
                 ->with('swal_icon', 'success')
                 ->with('open_zoom_url', $zoom_session->zoom_link)
                 ->with('open_zoom_title', $zoom_session->title);
@@ -111,8 +118,8 @@ class ZoomSessionController extends Controller
         } catch (\RuntimeException $e) {
             if ($e->getMessage() === 'CAPACITY_EXCEEDED') {
                 return redirect()->route('siswa.zoom-sessions.index')
-                    ->with('swal_title', 'Kuota Sesi Ini Sudah Penuh!')
-                    ->with('swal_text', "Maaf, kapasitas sesi \"{$zoom_session->title}\" telah mencapai batas maksimum ({$zoom_session->capacity} peserta). Silakan pilih dan gabung ke link Zoom alternatif lainnya yang masih tersedia di bawah.")
+                    ->with('swal_title', 'Kapasitas Batch Penuh (Maks 500 Sekolah)!')
+                    ->with('swal_text', "Maaf, kapasitas batch sesi \"{$zoom_session->title}\" telah mencapai batas maksimum ({$zoom_session->capacity} sekolah). Silakan pilih Batch Zoom alternatif lainnya.")
                     ->with('swal_icon', 'warning');
             }
 
@@ -121,16 +128,64 @@ class ZoomSessionController extends Controller
     }
 
     /**
-     * Student cancels join from a Zoom session (frees up capacity for others).
+     * Periodic ping endpoint from student device to track active connection.
+     * Requirement 2: mencatat status join/leave/terkendala internet pada sistem.
+     */
+    public function ping(Request $request, ZoomSession $zoom_session)
+    {
+        $user = Auth::user();
+        DB::table('zoom_participants')
+            ->where('zoom_session_id', $zoom_session->id)
+            ->where('user_id', $user->id)
+            ->update([
+                'last_ping_at' => now(),
+                'status' => 'connected',
+            ]);
+
+        return response()->json(['status' => 'ok', 'time' => now()->format('H:i:s')]);
+    }
+
+    /**
+     * Report internet/connection trouble from student.
+     */
+    public function reportTrouble(Request $request, ZoomSession $zoom_session)
+    {
+        $user = Auth::user();
+        $notes = $request->input('notes', 'Terkendala koneksi internet daerah');
+
+        DB::table('zoom_participants')
+            ->where('zoom_session_id', $zoom_session->id)
+            ->where('user_id', $user->id)
+            ->update([
+                'status' => 'trouble',
+                'notes' => $notes,
+            ]);
+
+        $user->update([
+            'is_troubled' => true,
+            'trouble_notes' => "Laporan kendala pada sesi Zoom {$zoom_session->title}: {$notes}",
+        ]);
+
+        return response()->json(['status' => 'trouble_recorded', 'message' => 'Status kendala berhasil dicatat panitia pengawas.']);
+    }
+
+    /**
+     * Student leaves a Zoom session.
      */
     public function leave(Request $request, ZoomSession $zoom_session)
     {
         $user = Auth::user();
 
         if ($zoom_session->hasUserJoined($user->id)) {
-            $zoom_session->participants()->detach($user->id);
+            DB::table('zoom_participants')
+                ->where('zoom_session_id', $zoom_session->id)
+                ->where('user_id', $user->id)
+                ->update([
+                    'status' => 'left',
+                    'left_at' => now(),
+                ]);
 
-            return back()->with('info', "Anda telah membatalkan keikutsertaan di sesi \"{$zoom_session->title}\". Kuota Anda telah dilepaskan dan Anda dapat bergabung ke sesi Zoom lainnya.");
+            return back()->with('info', "Sekolah Anda telah mencatatkan keluar dari ruang Zoom \"{$zoom_session->title}\".");
         }
 
         return back();

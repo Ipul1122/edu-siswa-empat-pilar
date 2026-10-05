@@ -1,15 +1,15 @@
 @extends('layouts.admin')
 
-@section('title', 'Manajemen Real Materi - Admin Empat Pilar')
+@section('title', 'Manajemen Soal Seleksi - Admin Empat Pilar')
 
 @section('content')
 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div class="page-title">
-        <h1>Manajemen Real Materi</h1>
-        <p>Kelola paket evaluasi resmi Real Materi dan kontrol akses pengerjaan serentak untuk seluruh siswa.</p>
+        <h1>Manajemen Soal Seleksi</h1>
+        <p>Kelola paket evaluasi resmi ujian Seleksi dan kontrol akses pengerjaan serentak untuk seluruh siswa.</p>
     </div>
     <a href="{{ route('admin.real-materi.create') }}" class="btn btn-primary">
-        <i class="fi fi-rr-plus"></i> Tambah Real Materi
+        <i class="fi fi-rr-plus"></i> Tambah Paket Seleksi
     </a>
 </div>
 
@@ -21,19 +21,19 @@
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
                     @if($isAllClosed)
                         <span class="badge" style="background-color: #ef4444; color: #fff; font-weight: 700; font-size: 0.82rem; padding: 5px 12px; border-radius: 20px;">
-                            <i class="fi fi-rr-lock" style="margin-right: 4px;"></i> STATUS: SELURUH REAL MATERI DITUTUP
+                            <i class="fi fi-rr-lock" style="margin-right: 4px;"></i> STATUS: SELURUH PAKET SELEKSI DITUTUP
                         </span>
                     @else
                         <span class="badge" style="background-color: #10b981; color: #fff; font-weight: 700; font-size: 0.82rem; padding: 5px 12px; border-radius: 20px;">
-                            <i class="fi fi-rr-unlock" style="margin-right: 4px;"></i> STATUS: REAL MATERI TERBUKA ({{ $activeRealCount }}/{{ $totalRealCount }} Aktif)
+                            <i class="fi fi-rr-unlock" style="margin-right: 4px;"></i> STATUS: PAKET SELEKSI TERBUKA ({{ $activeRealCount }}/{{ $totalRealCount }} Aktif)
                         </span>
                     @endif
                 </div>
                 <p style="margin: 0; font-size: 0.88rem; color: var(--color-gray-700);">
                     @if($isAllClosed)
-                        <strong>Akses Ditutup Total:</strong> Seluruh siswa <strong>tidak dapat</strong> mengakses, memulai, atau mengerjakan paket evaluasi Real Materi.
+                        <strong>Akses Ditutup Total:</strong> Seluruh siswa <strong>tidak dapat</strong> mengakses, memulai, atau mengerjakan paket ujian Seleksi.
                     @else
-                        <strong>Akses Terbuka:</strong> Siswa yang belum ujian dapat mengakses dan mengerjakan kuis Real Materi.
+                        <strong>Akses Terbuka:</strong> Siswa yang belum ujian dapat mengakses dan mengerjakan paket ujian Seleksi.
                     @endif
                 </p>
             </div>
@@ -45,7 +45,7 @@
                         @csrf
                         <input type="hidden" name="status" value="0">
                         <button type="button" class="btn btn-danger" style="padding: 10px 18px; font-weight: 600; box-shadow: var(--shadow-sm); display: inline-flex; align-items: center; gap: 6px;" onclick="confirmCloseAll()">
-                            <i class="fi fi-rr-lock"></i> Tutup Semua Real Materi
+                            <i class="fi fi-rr-lock"></i> Tutup Semua Seleksi
                         </button>
                     </form>
                 @endif
@@ -55,7 +55,7 @@
                         @csrf
                         <input type="hidden" name="status" value="1">
                         <button type="button" class="btn btn-success" style="padding: 10px 18px; font-weight: 600; box-shadow: var(--shadow-sm); display: inline-flex; align-items: center; gap: 6px;" onclick="confirmOpenAll()">
-                            <i class="fi fi-rr-unlock"></i> Buka Semua Real Materi
+                            <i class="fi fi-rr-unlock"></i> Buka Semua Seleksi
                         </button>
                     </form>
                 @endif
@@ -66,7 +66,7 @@
 
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Daftar Paket Real Materi ({{ $totalRealCount }} Paket)</h3>
+        <h3 class="card-title">Daftar Paket Seleksi ({{ $totalRealCount }} Paket)</h3>
     </div>
     <div class="card-body">
         @if($quizzes->count() > 0)
@@ -75,7 +75,7 @@
                     <thead>
                         <tr>
                             <th>Kategori / Pilar</th>
-                            <th>Judul Real Materi & Paket</th>
+                            <th>Judul Paket Seleksi</th>
                             <th>Sasaran Wilayah</th>
                             <th style="text-align: center;">Pengacakan</th>
                             <th>Status Akses</th>
@@ -145,10 +145,10 @@
                                         <a href="{{ route('admin.real-materi.edit', $quiz) }}" class="btn btn-secondary btn-sm" style="padding: 6px 12px;" title="Edit Pengaturan">
                                             <i class="fi fi-rr-pencil"></i> Edit
                                         </a>
-                                        <form action="{{ route('admin.real-materi.destroy', $quiz) }}" method="POST" class="delete-confirm-form" data-item-type="real materi">
+                                        <form action="{{ route('admin.real-materi.destroy', $quiz) }}" method="POST" class="delete-confirm-form" data-item-type="paket seleksi">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" style="padding: 6px 12px;" title="Hapus Real Materi">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="padding: 6px 12px;" title="Hapus Paket Seleksi">
                                                 <i class="fi fi-rr-trash"></i> Hapus
                                             </button>
                                         </form>
@@ -162,9 +162,9 @@
         @else
             <div style="text-align: center; padding: 60px 20px; color: var(--color-gray-400);">
                 <p style="font-size: 2.5rem; margin-bottom: 12px;"><i class="fi fi-rr-diploma" style="color: var(--color-gray-400); font-size: 2.5rem;"></i></p>
-                <h3>Belum Ada Evaluasi Real Materi</h3>
-                <p style="margin-top: 4px; margin-bottom: 20px;">Silakan buat paket evaluasi Real Materi pertama untuk siswa.</p>
-                <a href="{{ route('admin.real-materi.create') }}" class="btn btn-primary">Buat Real Materi Pertama</a>
+                <h3>Belum Ada Paket Seleksi</h3>
+                <p style="margin-top: 4px; margin-bottom: 20px;">Silakan buat paket evaluasi Seleksi pertama untuk siswa.</p>
+                <a href="{{ route('admin.real-materi.create') }}" class="btn btn-primary">Buat Paket Seleksi Pertama</a>
             </div>
         @endif
     </div>
@@ -173,8 +173,8 @@
 <script>
     function confirmCloseAll() {
         Swal.fire({
-            title: 'Tutup Seluruh Real Materi?',
-            text: 'Seluruh siswa tidak akan bisa mengakses, memulai, atau mengerjakan kuis Real Materi sampai Anda membukanya kembali.',
+            title: 'Tutup Seluruh Akses Seleksi?',
+            text: 'Seluruh siswa tidak akan bisa mengakses, memulai, atau mengerjakan paket ujian Seleksi sampai Anda membukanya kembali.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc2626',
@@ -190,8 +190,8 @@
 
     function confirmOpenAll() {
         Swal.fire({
-            title: 'Buka Seluruh Real Materi?',
-            text: 'Seluruh paket evaluasi Real Materi akan dibuka dan siswa dapat mengerjakan ujian.',
+            title: 'Buka Seluruh Akses Seleksi?',
+            text: 'Seluruh paket ujian Seleksi akan dibuka dan siswa yang belum ujian dapat mengerjakan.',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#10b981',

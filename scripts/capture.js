@@ -10,6 +10,18 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function dismissAlerts(page) {
+  try {
+    await page.evaluate(() => {
+      if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+        Swal.close();
+      }
+      const toast = document.querySelector('.swal2-container');
+      if (toast) toast.remove();
+    });
+  } catch (e) {}
+}
+
 async function capture(page, url, filename, options = {}) {
   const filePath = path.join(SCREENSHOT_DIR, filename);
   console.log(`\n[Capturing] ${filename} from ${url || 'current page'}`);
@@ -17,11 +29,13 @@ async function capture(page, url, filename, options = {}) {
     if (url) {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     }
-    await sleep(options.delay || 1200);
+    await sleep(options.delay || 1500);
+    await dismissAlerts(page);
 
     if (options.action) {
       await options.action(page);
       await sleep(options.postActionDelay || 800);
+      await dismissAlerts(page);
     }
 
     await page.screenshot({
@@ -37,13 +51,23 @@ async function capture(page, url, filename, options = {}) {
 }
 
 async function main() {
-  console.log('===============================================================');
-  console.log('    AUTOMATISASI LENGKAP PENGAMBILAN SCREENSHOT EDU EMPAT PILAR ');
-  console.log('===============================================================');
+  console.log('========================================================================');
+  console.log('    AUTOMATISASI LENGKAP PENGAMBILAN SCREENSHOT DESKTOP EDU EMPAT PILAR ');
+  console.log('    Platform Seleksi Online Empat Pilar MPR RI (Laravel 12 + Vite)      ');
+  console.log('========================================================================');
 
   if (!fs.existsSync(SCREENSHOT_DIR)) {
     fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
   }
+
+  // Bersihkan file .png lama agar folder rapi dan akurat dengan aplikasi saat ini
+  const existingFiles = fs.readdirSync(SCREENSHOT_DIR);
+  for (const file of existingFiles) {
+    if (file.endsWith('.png')) {
+      fs.unlinkSync(path.join(SCREENSHOT_DIR, file));
+    }
+  }
+  console.log('Folder screenshots telah disterilkan untuk pembaruan terkini.');
 
   const browser = await puppeteer.launch({
     executablePath: CHROME_PATH,
@@ -64,34 +88,34 @@ async function main() {
   const page = await browser.newPage();
 
   // ================================================================
-  // FASE 1: HALAMAN PUBLIK & AUTENTIKASI
+  // FASE 1: HALAMAN PUBLIK & AUTENTIKASI (6 FILE)
   // ================================================================
   console.log('\n>>> FASE 1: HALAMAN PUBLIK & AUTENTIKASI <<<');
 
-  // 01. Beranda Landing Page (Viewport)
+  // 01. Beranda Utama (Hero Viewport 1440x900)
   await capture(page, `${BASE_URL}/`, '01-landing-page.png', { delay: 1800 });
 
-  // 02. Beranda Landing Page (Full Page)
+  // 02. Beranda Utama Lengkap (Full Page)
   await capture(page, null, '02-landing-page-full.png', { fullPage: true });
 
-  // 03. Login Siswa
+  // 03. Masuk Akun Siswa / Sekolah
   await capture(page, `${BASE_URL}/login`, '03-login-siswa.png');
 
-  // 04. Register Siswa
-  await capture(page, `${BASE_URL}/register`, '04-register-siswa.png');
+  // 04. Pendaftaran Akun Sekolah Baru (Tim 10 Siswa)
+  await capture(page, `${BASE_URL}/register`, '04-register-siswa.png', { delay: 1500 });
 
-  // 05. Lupa Password Siswa
+  // 05. Pemulihan Kata Sandi Akun Siswa (Verifikasi OTP)
   await capture(page, `${BASE_URL}/forgot-password`, '05-lupa-password.png');
 
-  // 06. Login Administrator
+  // 06. Masuk Panel Administrator MPR RI
   await capture(page, `${BASE_URL}/admin/login`, '06-login-admin.png');
 
   // ================================================================
-  // FASE 2: PANEL SISWA (PORTAL PESERTA DIDIK)
+  // FASE 2: PORTAL SISWA / SEKOLAH (13 FILE)
   // ================================================================
-  console.log('\n>>> FASE 2: PANEL SISWA (PORTAL PESERTA DIDIK) <<<');
+  console.log('\n>>> FASE 2: PORTAL SISWA / SEKOLAH (SCHOOL MODE) <<<');
 
-  console.log('Melakukan login Siswa (msyaifulloh2024@gmail.com)...');
+  console.log('Melakukan login akun Siswa (msyaifulloh2024@gmail.com)...');
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
   await page.type('#email', 'msyaifulloh2024@gmail.com');
   await page.type('#password', 'password');
@@ -100,69 +124,57 @@ async function main() {
     page.click('button.submit-btn')
   ]);
   console.log('Berhasil login sebagai Siswa! URL:', page.url());
+  await sleep(1500);
 
   // 07. Dashboard Siswa (Viewport)
-  await capture(page, `${BASE_URL}/siswa/dashboard`, '07-siswa-dashboard.png', { delay: 1800 });
+  await capture(page, `${BASE_URL}/siswa/dashboard`, '07-siswa-dashboard.png', { delay: 2000 });
 
   // 08. Dashboard Siswa (Full Page)
   await capture(page, null, '08-siswa-dashboard-full.png', { fullPage: true });
 
-  // 09. Katalog Materi Bacaan
-  await capture(page, `${BASE_URL}/siswa/materials`, '09-siswa-materi-bacaan.png');
+  // 09. Tutorial & Petunjuk Teknis Seleksi Online (Viewport)
+  await capture(page, `${BASE_URL}/siswa/tutorial`, '09-siswa-tutorial-panduan.png', { delay: 1500 });
 
-  // 10. Detail Membaca Materi Edukasi (Viewport)
-  await capture(page, `${BASE_URL}/siswa/materials/1`, '10-siswa-detail-materi.png', { delay: 1500 });
+  // 10. Tutorial & Petunjuk Teknis Seleksi Online (Full Page)
+  await capture(page, null, '10-siswa-tutorial-panduan-full.png', { fullPage: true });
 
-  // 11. Detail Membaca Materi Edukasi (Full Page)
-  await capture(page, null, '11-siswa-detail-materi-full.png', { fullPage: true });
+  // 11. Katalog Modul Ujian Seleksi Online CBT (Real Materi)
+  await capture(page, `${BASE_URL}/siswa/real-materi`, '11-siswa-katalog-ujian-cbt.png', { delay: 1500 });
 
-  // 12. Katalog Video Edukasi
-  await capture(page, `${BASE_URL}/siswa/videos`, '12-siswa-video-edukasi.png');
+  // 12. Lembar Konfirmasi & Peraturan Ujian Seleksi
+  await capture(page, `${BASE_URL}/siswa/real-materi/6`, '12-siswa-konfirmasi-ujian.png', { delay: 1500 });
 
-  // 13. Detail & Player Video Edukasi
-  await capture(page, `${BASE_URL}/siswa/videos/6`, '13-siswa-detail-video.png', { delay: 1500 });
+  // 13. Antarmuka Ujian Seleksi CBT Mode Layar Penuh (Zero Reload & Anti-Cheat)
+  await capture(page, `${BASE_URL}/siswa/real-materi/6/start`, '13-siswa-pengerjaan-ujian-cbt.png', { delay: 1800 });
 
-  // 14. Katalog Latihan Kuis
-  await capture(page, `${BASE_URL}/siswa/quizzes`, '14-siswa-latihan-kuis.png');
+  // 14. Lembar Pengumuman Hasil Nilai Ujian Seleksi & Pembahasan
+  await capture(page, `${BASE_URL}/siswa/real-attempts/34/result`, '14-siswa-hasil-ujian-cbt.png', { delay: 1800 });
 
-  // 15. Detail Petunjuk Latihan Kuis
-  await capture(page, `${BASE_URL}/siswa/quizzes/1`, '15-siswa-detail-kuis.png');
+  // 15. Portal Sesi Pengawasan Virtual Zoom & Lapor Gangguan
+  await capture(page, `${BASE_URL}/siswa/zoom-sessions`, '15-siswa-sesi-zoom-pengawas.png', { delay: 1500 });
 
-  // 16. Antarmuka Pengerjaan Soal Kuis Latihan
-  await capture(page, `${BASE_URL}/siswa/quizzes/2/start`, '16-siswa-pengerjaan-kuis.png', { delay: 1500 });
+  // 16. Rekapitulasi Hasil Skor Mandiri Tim Sekolah (Kerahasiaan Nilai)
+  await capture(page, `${BASE_URL}/siswa/hasil-tes`, '16-siswa-hasil-skor-mandiri.png', { delay: 1500 });
 
-  // 17. Hasil Skor 100 & Pembahasan Kuis Siswa
-  await capture(page, `${BASE_URL}/siswa/attempts/1/result`, '17-siswa-hasil-kuis.png', { delay: 1500 });
+  // 17. Papan Peringkat (Leaderboard) Siswa
+  await capture(page, `${BASE_URL}/siswa/leaderboard`, '17-siswa-papan-peringkat.png', { delay: 1800 });
 
-  // 18. Katalog Real Materi / Ujian
-  await capture(page, `${BASE_URL}/siswa/real-materi`, '18-siswa-real-materi-ujian.png');
+  // 18. Profil Sekolah & Kontak PIC (Viewport)
+  await capture(page, `${BASE_URL}/siswa/profile`, '18-siswa-profil-sekolah.png', { delay: 1500 });
 
-  // 19. Detail Informasi Ujian Real
-  await capture(page, `${BASE_URL}/siswa/real-materi/7`, '19-siswa-detail-real-materi.png');
-
-  // 20. Hasil Lembar Nilai Ujian Real Siswa
-  await capture(page, `${BASE_URL}/siswa/real-attempts/2/result`, '20-siswa-hasil-real-ujian.png', { delay: 1500 });
-
-  // 21. Leaderboard / Papan Peringkat Siswa Nasional
-  await capture(page, `${BASE_URL}/siswa/leaderboard`, '21-siswa-leaderboard.png', { delay: 1500 });
-
-  // 22. Profil Siswa
-  await capture(page, `${BASE_URL}/siswa/profile`, '22-siswa-profil.png', { delay: 1200 });
-
-  // 23. Profil Siswa (Full Page)
-  await capture(page, null, '23-siswa-profil-full.png', { fullPage: true });
+  // 19. Profil Sekolah & Kontak PIC (Full Page)
+  await capture(page, null, '19-siswa-profil-sekolah-full.png', { fullPage: true });
 
   // ================================================================
-  // FASE 3: PANEL ADMIN (PORTAL ADMINISTRATOR)
+  // FASE 3: PORTAL ADMINISTRATOR MPR RI (17 FILE)
   // ================================================================
-  console.log('\n>>> FASE 3: PANEL ADMIN (PORTAL ADMINISTRATOR) <<<');
+  console.log('\n>>> FASE 3: PORTAL ADMINISTRATOR MPR RI <<<');
 
-  // Buat new context/page terpisah untuk admin
   const adminContext = await browser.createBrowserContext();
   const adminPage = await adminContext.newPage();
   await adminPage.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1.5 });
 
-  console.log('Melakukan login Admin (admin@gmail.com)...');
+  console.log('Melakukan login Admin MPR RI (admin@gmail.com)...');
   await adminPage.goto(`${BASE_URL}/admin/login`, { waitUntil: 'domcontentloaded' });
   await adminPage.type('#email', 'admin@gmail.com');
   await adminPage.type('#password', 'password');
@@ -171,59 +183,63 @@ async function main() {
     adminPage.click('button.submit-btn')
   ]);
   console.log('Berhasil login sebagai Admin! URL:', adminPage.url());
+  await sleep(1500);
 
-  // 24. Dashboard Admin (Viewport)
-  await capture(adminPage, `${BASE_URL}/admin/dashboard`, '24-admin-dashboard.png', { delay: 2500 });
+  // 20. Dashboard Administrator (Monitoring & Statistik - Viewport)
+  await capture(adminPage, `${BASE_URL}/admin/dashboard`, '20-admin-dashboard.png', { delay: 2000 });
 
-  // 25. Dashboard Admin (Full Page)
-  await capture(adminPage, null, '25-admin-dashboard-full.png', { fullPage: true });
+  // 21. Dashboard Administrator (Full Page)
+  await capture(adminPage, null, '21-admin-dashboard-full.png', { fullPage: true });
 
-  // 26. Kelola Bahan Bacaan
-  await capture(adminPage, `${BASE_URL}/admin/materials`, '26-admin-kelola-materi.png');
+  // 22. Manajemen Soal Seleksi (Master Real Materi & Toggle Switch Akses)
+  await capture(adminPage, `${BASE_URL}/admin/real-materi`, '22-admin-kelola-soal-seleksi.png', { delay: 1500 });
 
-  // 27. Tambah Bahan Bacaan Baru
-  await capture(adminPage, `${BASE_URL}/admin/materials/create`, '27-admin-tambah-materi.png');
+  // 23. Formulir Tambah Paket Seleksi Baru
+  await capture(adminPage, `${BASE_URL}/admin/real-materi/create`, '23-admin-tambah-paket-seleksi.png', { delay: 1500 });
 
-  // 28. Edit Bahan Bacaan
-  await capture(adminPage, `${BASE_URL}/admin/materials/1/edit`, '28-admin-edit-materi.png');
+  // 24. Formulir Edit Paket Seleksi & Penetapan Wilayah
+  await capture(adminPage, `${BASE_URL}/admin/real-materi/6/edit`, '24-admin-edit-paket-seleksi.png', { delay: 1500 });
 
-  // 29. Kelola Video Edukasi
-  await capture(adminPage, `${BASE_URL}/admin/videos`, '29-admin-kelola-video.png');
+  // 25. Bank Soal Seleksi & Opsi Import Excel/CSV
+  await capture(adminPage, `${BASE_URL}/admin/quizzes/6`, '25-admin-bank-soal-seleksi.png', { delay: 1800 });
 
-  // 30. Tambah Video Edukasi Baru
-  await capture(adminPage, `${BASE_URL}/admin/videos/create`, '30-admin-tambah-video.png');
+  // 26. Formulir Tambah Butir Soal Seleksi (Opsi A-E & Kunci Pembahasan)
+  await capture(adminPage, `${BASE_URL}/admin/quizzes/6/questions/create`, '26-admin-tambah-butir-soal.png', { delay: 1500 });
 
-  // 31. Kelola Latihan Kuis
-  await capture(adminPage, `${BASE_URL}/admin/quizzes`, '31-admin-kelola-kuis.png');
+  // 27. Manajemen Sesi Pengawasan Zoom (Meeting ID, Status & Kuota Peserta - Viewport)
+  await capture(adminPage, `${BASE_URL}/admin/zoom-sessions`, '27-admin-kelola-sesi-zoom.png', { delay: 1800 });
 
-  // 32. Tambah Latihan Kuis Baru
-  await capture(adminPage, `${BASE_URL}/admin/quizzes/create`, '32-admin-tambah-kuis.png');
+  // 28. Manajemen Sesi Pengawasan Zoom (Full Page)
+  await capture(adminPage, null, '28-admin-kelola-sesi-zoom-full.png', { fullPage: true });
 
-  // 33. Kelola Butir Soal Kuis (Bank Soal & Import)
-  await capture(adminPage, `${BASE_URL}/admin/quizzes/1`, '33-admin-kelola-soal.png', { delay: 1500 });
+  // 29. Formulir Pembuatan Sesi Zoom Pengawas Baru
+  await capture(adminPage, `${BASE_URL}/admin/zoom-sessions/create`, '29-admin-tambah-sesi-zoom.png', { delay: 1500 });
 
-  // 34. Tambah Butir Soal Kuis Baru
-  await capture(adminPage, `${BASE_URL}/admin/quizzes/1/questions/create`, '34-admin-tambah-soal.png');
+  // 30. Formulir Edit Sesi Zoom Pengawas
+  await capture(adminPage, `${BASE_URL}/admin/zoom-sessions/5/edit`, '30-admin-edit-sesi-zoom.png', { delay: 1500 });
 
-  // 35. Kelola Real Materi / Ujian (Toggle Status)
-  await capture(adminPage, `${BASE_URL}/admin/real-materi`, '35-admin-kelola-real-materi.png');
+  // 31. Tabel Direktori Pemantauan Peserta & Sekolah Terdaftar
+  await capture(adminPage, `${BASE_URL}/admin/students`, '31-admin-pemantauan-siswa.png', { delay: 1800 });
 
-  // 36. Monitoring Siswa
-  await capture(adminPage, `${BASE_URL}/admin/students`, '36-admin-monitoring-siswa.png');
+  // 32. Rekapitulasi & Laporan Nilai Seleksi Nasional/Wilayah
+  await capture(adminPage, `${BASE_URL}/admin/students/report`, '32-admin-laporan-rekapitulasi.png', { delay: 1800 });
 
-  // 37. Laporan & Rekapitulasi Nilai Siswa
-  await capture(adminPage, `${BASE_URL}/admin/students/report`, '37-admin-laporan-rekap.png', { delay: 1500 });
+  // 33. Detail Akun Sekolah & Histori Nilai Peserta (Pemberian Hak Retest)
+  await capture(adminPage, `${BASE_URL}/admin/students/2`, '33-admin-detail-peserta.png', { delay: 1800 });
 
-  // 38. Detail Siswa & Riwayat Nilai
-  await capture(adminPage, `${BASE_URL}/admin/students/2`, '38-admin-detail-siswa.png', { delay: 1500 });
+  // 34. Papan Peringkat Berjenjang (Nasional, Provinsi & Kab/Kota - Viewport)
+  await capture(adminPage, `${BASE_URL}/admin/leaderboard`, '34-admin-papan-peringkat.png', { delay: 2000 });
 
-  // 39. Profil Administrator
-  await capture(adminPage, `${BASE_URL}/admin/profile`, '39-admin-profil.png');
+  // 35. Papan Peringkat Berjenjang (Full Page)
+  await capture(adminPage, null, '35-admin-papan-peringkat-full.png', { fullPage: true });
+
+  // 36. Pengaturan Profil Administrator MPR RI
+  await capture(adminPage, `${BASE_URL}/admin/profile`, '36-admin-profil.png', { delay: 1500 });
 
   await browser.close();
-  console.log('\n===============================================================');
-  console.log('    SEMUA 39 SCREENSHOT PNG BERHASIL DIAMBIL & DISIMPAN!       ');
-  console.log('===============================================================\n');
+  console.log('\n========================================================================');
+  console.log('    SEMUA 36 SCREENSHOT DESKTOP BERHASIL DIAMBIL & DIPERBARUI!          ');
+  console.log('========================================================================\n');
 }
 
 main().catch((err) => {

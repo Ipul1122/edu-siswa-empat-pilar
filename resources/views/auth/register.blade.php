@@ -559,62 +559,25 @@
                 </a>
             </div>
             <div class="form-header">
-                <h3>Daftar Akun Siswa</h3>
-                <p>Lengkapi formulir biodata diri Anda (bidang bertanda <span class="required-star">*</span> wajib diisi).</p>
+                <h3>Pendaftaran Akun Sekolah</h3>
+                <p>Registrasi tim sekolah seleksi Empat Pilar MPR RI (1 Akun = Tim 10 Siswa, 1 Perangkat).</p>
+            </div>
+
+            <!-- Notice School Mode -->
+            <div style="background: rgba(var(--color-primary-rgb), 0.08); border-left: 4px solid rgb(var(--color-primary-rgb)); padding: 12px 14px; border-radius: 8px; margin-bottom: 18px; font-size: 0.82rem; color: #1e293b; line-height: 1.4;">
+                <div style="font-weight: 700; color: rgb(var(--color-primary-rgb)); margin-bottom: 2px;">
+                    <i class="fi fi-rr-info" style="margin-right: 4px;"></i> Ketentuan Akun Sekolah:
+                </div>
+                Pendaftaran dilakukan <strong>per sekolah</strong>. Ujian seleksi online dikerjakan bersama oleh <strong>10 siswa</strong> menggunakan <strong>1 perangkat</strong> yang terhubung dengan ruang Zoom pengawas.
             </div>
             
             <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data" id="register-form" novalidate>
                 @csrf
-                
-                <!-- Mandatory Profile Photo with Camera Icon Trigger -->
-                <div class="register-avatar-container">
-                    <div class="register-avatar-wrapper" onclick="document.getElementById('image').click()" title="Klik untuk mengunggah foto profil">
-                        <img id="register-avatar-preview" src="https://ui-avatars.com/api/?name=Siswa&background=dc2626&color=ffffff&size=120" alt="Preview Foto" class="register-avatar-preview">
-                        <div class="register-camera-badge">
-                            <i class="fi fi-rr-camera" style="font-size: 0.9rem; line-height: 1; display: flex; align-items: center; justify-content: center;"></i>
-                        </div>
-                    </div>
 
-                    <input type="file" name="image" id="image" style="display: none;" accept="image/jpeg,image/png,image/jpg,image/webp" required onchange="previewRegisterAvatar(event)">
-                    
-                    <button type="button" class="btn btn-secondary btn-sm" style="padding: 4px 12px; font-size: 0.78rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; background: var(--color-gray-100); border: 1px solid var(--color-gray-300);" onclick="document.getElementById('image').click()">
-                        <i class="fi fi-rr-camera" style="font-size: 0.8rem; color: rgb(var(--color-primary-rgb));"></i> Upload Foto Profil <span class="required-star">*</span>
-                    </button>
-                    <div style="font-size: 0.72rem; color: var(--color-gray-500); margin-top: 3px;">Format JPG, PNG, WEBP (Maks 2MB)</div>
-
-                    @error('image')
-                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="custom-form-group">
-                    <label for="name">Nama Lengkap Siswa <span class="required-star">*</span></label>
-                    <input type="text" name="name" id="name" class="custom-input @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Nama lengkap Anda" required autocomplete="name" autofocus>
-                    @error('name')
-                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
-                    @enderror
-                </div>
-                
-                <div class="custom-form-group">
-                    <label for="email">Alamat Email <span class="required-star">*</span></label>
-                    <input type="email" name="email" id="email" class="custom-input @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="Contoh: siswa@gmail.com" required autocomplete="email">
-                    @error('email')
-                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="custom-form-group">
-                    <label for="school_name">Asal Sekolah (SMA / SMK) <span class="required-star">*</span></label>
-                    <input type="text" name="school_name" id="school_name" class="custom-input @error('school_name') is-invalid @enderror" value="{{ old('school_name') }}" placeholder="Contoh: SMAN 1 Jakarta / SMKN 2 Bandung" required>
-                    @error('school_name')
-                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Cascading Regional Dropdowns (Provinsi & Kabupaten/Kota) -->
+                <!-- Regional Dropdowns (Provinsi & Kabupaten/Kota) -->
                 <div class="input-row">
                     <div class="custom-form-group">
-                        <label for="province_id">Provinsi Asal Sekolah <span class="required-star">*</span></label>
+                        <label for="province_id">a. Provinsi Asal Sekolah <span class="required-star">*</span></label>
                         <select name="province_id" id="province_id" class="@error('province_id') is-invalid @enderror" required>
                             <option value="">-- Pilih Provinsi --</option>
                             @foreach($provinces as $province)
@@ -629,7 +592,7 @@
                     </div>
 
                     <div class="custom-form-group">
-                        <label for="regency_id">Kabupaten / Kota <span class="required-star">*</span></label>
+                        <label for="regency_id">b. Kabupaten / Kota <span class="required-star">*</span></label>
                         <select name="regency_id" id="regency_id" class="@error('regency_id') is-invalid @enderror" required>
                             <option value="">-- Pilih Provinsi Dahulu --</option>
                         </select>
@@ -639,18 +602,47 @@
                     </div>
                 </div>
 
-                <!-- Address (Mandatory) -->
+                <!-- School Name -->
                 <div class="custom-form-group">
-                    <label for="address">Alamat Rumah Tinggal Lengkap <span class="required-star">*</span></label>
-                    <input type="text" name="address" id="address" class="custom-input @error('address') is-invalid @enderror" value="{{ old('address') }}" placeholder="Alamat lengkap tempat tinggal siswa (Jalan, RT/RW, Kel/Kec)" required>
-                    @error('address')
+                    <label for="school_name">c. Nama Resmi Sekolah (SMA / SMK / MA) <span class="required-star">*</span></label>
+                    <input type="text" name="school_name" id="school_name" class="custom-input @error('school_name') is-invalid @enderror" value="{{ old('school_name') }}" placeholder="Contoh: SMAN 1 Denpasar / SMKN 2 Bandung" required autofocus>
+                    @error('school_name')
                         <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
                     @enderror
                 </div>
 
+                <!-- PIC Name & WhatsApp -->
                 <div class="input-row">
                     <div class="custom-form-group">
-                        <label for="password">Kata Sandi <span class="required-star">*</span></label>
+                        <label for="pic_name">Nama Guru Pembina / PIC Tim <span class="required-star">*</span></label>
+                        <input type="text" name="pic_name" id="pic_name" class="custom-input @error('pic_name') is-invalid @enderror" value="{{ old('pic_name') }}" placeholder="Nama penanggung jawab tim 10 siswa" required>
+                        @error('pic_name')
+                            <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="custom-form-group">
+                        <label for="whatsapp">No. WhatsApp Aktif PIC <span class="required-star">*</span></label>
+                        <input type="text" name="whatsapp" id="whatsapp" class="custom-input @error('whatsapp') is-invalid @enderror" value="{{ old('whatsapp') }}" placeholder="08xxxxxxxxxx (Untuk info & CS)" required>
+                        @error('whatsapp')
+                            <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="custom-form-group">
+                    <label for="email">Alamat Email Resmi Sekolah / PIC <span class="required-star">*</span></label>
+                    <input type="email" name="email" id="email" class="custom-input @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="Contoh: sman1denpasar@sch.id atau email pic" required autocomplete="email">
+                    @error('email')
+                        <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div class="input-row">
+                    <div class="custom-form-group">
+                        <label for="password">Kata Sandi Akun <span class="required-star">*</span></label>
                         <input type="password" name="password" id="password" class="custom-input @error('password') is-invalid @enderror" placeholder="Min. 8 karakter" required autocomplete="new-password">
                         @error('password')
                             <span class="invalid-feedback" style="display: block; margin-top: 4px;">{{ $message }}</span>
@@ -663,7 +655,7 @@
                 </div>
                 
                 <button type="submit" class="submit-btn" id="btn-register-submit">
-                    <span>Daftar Akun Baru</span> ➔
+                    <span>Daftarkan Sekolah</span> ➔
                 </button>
             </form>
             
@@ -821,29 +813,53 @@
                     el.classList.remove('input-shake', 'avatar-shake', 'ts-shake');
                 });
 
-                // A. Validasi Foto Profil
-                const imageInput = document.getElementById('image');
-                const avatarWrapper = document.querySelector('.register-avatar-wrapper');
-                if (!imageInput.files || imageInput.files.length === 0) {
+                // A. Validasi Provinsi
+                const provVal = provinceSelectInstance ? provinceSelectInstance.getValue() : (provElement ? provElement.value : '');
+                const provTs = provElement ? provElement.closest('.custom-form-group').querySelector('.ts-wrapper') : null;
+                if (!provVal) {
                     e.preventDefault();
-                    if (avatarWrapper) avatarWrapper.classList.add('avatar-shake');
-                    return showToastWarning('Foto profil siswa wajib diunggah!', avatarWrapper);
-                }
-                if (imageInput.files[0].size > 2 * 1024 * 1024) {
-                    e.preventDefault();
-                    if (avatarWrapper) avatarWrapper.classList.add('avatar-shake');
-                    return showToastWarning('Ukuran foto profil maksimal 2MB!', avatarWrapper);
+                    if (provTs) provTs.classList.add('ts-shake');
+                    return showToastWarning('a. Provinsi asal sekolah wajib dipilih!', provTs || provElement, () => {
+                        if (provinceSelectInstance) provinceSelectInstance.focus();
+                    });
                 }
 
-                // B. Validasi Nama Lengkap Siswa
-                const nameInput = document.getElementById('name');
-                if (!nameInput.value.trim()) {
+                // B. Validasi Kabupaten / Kota
+                const regVal = regencySelectInstance ? regencySelectInstance.getValue() : (regElement ? regElement.value : '');
+                const regTs = regElement ? regElement.closest('.custom-form-group').querySelector('.ts-wrapper') : null;
+                if (!regVal) {
                     e.preventDefault();
-                    nameInput.classList.add('input-shake');
-                    return showToastWarning('Nama lengkap siswa belum diisi!', nameInput);
+                    if (regTs) regTs.classList.add('ts-shake');
+                    return showToastWarning('b. Kabupaten / Kota asal sekolah wajib dipilih!', regTs || regElement, () => {
+                        if (regencySelectInstance) regencySelectInstance.focus();
+                    });
                 }
 
-                // C. Validasi Alamat Email
+                // C. Validasi Nama Sekolah
+                const schoolInput = document.getElementById('school_name');
+                if (!schoolInput.value.trim()) {
+                    e.preventDefault();
+                    schoolInput.classList.add('input-shake');
+                    return showToastWarning('c. Nama resmi sekolah belum diisi!', schoolInput);
+                }
+
+                // D. Validasi Nama PIC Tim
+                const picInput = document.getElementById('pic_name');
+                if (!picInput.value.trim()) {
+                    e.preventDefault();
+                    picInput.classList.add('input-shake');
+                    return showToastWarning('Nama guru pembina / PIC tim belum diisi!', picInput);
+                }
+
+                // E. Validasi No. WhatsApp
+                const waInput = document.getElementById('whatsapp');
+                if (!waInput.value.trim()) {
+                    e.preventDefault();
+                    waInput.classList.add('input-shake');
+                    return showToastWarning('Nomor WhatsApp aktif PIC belum diisi!', waInput);
+                }
+
+                // F. Validasi Alamat Email
                 const emailInput = document.getElementById('email');
                 const emailVal = emailInput.value.trim();
                 if (!emailVal) {
@@ -858,45 +874,7 @@
                     return showToastWarning('Format alamat email tidak valid!', emailInput);
                 }
 
-                // D. Validasi Asal Sekolah
-                const schoolInput = document.getElementById('school_name');
-                if (!schoolInput.value.trim()) {
-                    e.preventDefault();
-                    schoolInput.classList.add('input-shake');
-                    return showToastWarning('Asal sekolah (SMA / SMK) belum diisi!', schoolInput);
-                }
-
-                // E. Validasi Provinsi
-                const provVal = provinceSelectInstance ? provinceSelectInstance.getValue() : (provElement ? provElement.value : '');
-                const provTs = provElement ? provElement.closest('.custom-form-group').querySelector('.ts-wrapper') : null;
-                if (!provVal) {
-                    e.preventDefault();
-                    if (provTs) provTs.classList.add('ts-shake');
-                    return showToastWarning('Provinsi asal sekolah belum dipilih!', provTs || provElement, () => {
-                        if (provinceSelectInstance) provinceSelectInstance.focus();
-                    });
-                }
-
-                // F. Validasi Kabupaten / Kota
-                const regVal = regencySelectInstance ? regencySelectInstance.getValue() : (regElement ? regElement.value : '');
-                const regTs = regElement ? regElement.closest('.custom-form-group').querySelector('.ts-wrapper') : null;
-                if (!regVal) {
-                    e.preventDefault();
-                    if (regTs) regTs.classList.add('ts-shake');
-                    return showToastWarning('Kabupaten / Kota asal sekolah belum dipilih!', regTs || regElement, () => {
-                        if (regencySelectInstance) regencySelectInstance.focus();
-                    });
-                }
-
-                // G. Validasi Alamat Tempat Tinggal
-                const addressInput = document.getElementById('address');
-                if (!addressInput.value.trim()) {
-                    e.preventDefault();
-                    addressInput.classList.add('input-shake');
-                    return showToastWarning('Alamat rumah tinggal siswa belum diisi!', addressInput);
-                }
-
-                // H. Validasi Kata Sandi
+                // G. Validasi Kata Sandi
                 const passwordInput = document.getElementById('password');
                 if (!passwordInput.value) {
                     e.preventDefault();
@@ -909,7 +887,7 @@
                     return showToastWarning('Kata sandi minimal 8 karakter!', passwordInput);
                 }
 
-                // I. Validasi Konfirmasi Sandi
+                // H. Validasi Konfirmasi Sandi
                 const confirmInput = document.getElementById('password_confirmation');
                 if (!confirmInput.value) {
                     e.preventDefault();

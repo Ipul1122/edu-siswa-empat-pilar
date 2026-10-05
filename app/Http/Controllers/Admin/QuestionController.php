@@ -161,12 +161,12 @@ class QuestionController extends Controller
                 if (count($errors) > 5) {
                     $errorSummary .= '<br>...dan ' . (count($errors) - 5) . ' kesalahan lainnya.';
                 }
-                return redirect()->route('admin.quizzes.show', $quiz)
+                return redirect()->route('admin.real-materi.show', $quiz)
                     ->with('error', 'Gagal memproses berkas CSV:<br>' . $errorSummary);
             }
 
             if (empty($rows)) {
-                return redirect()->route('admin.quizzes.show', $quiz)
+                return redirect()->route('admin.real-materi.show', $quiz)
                     ->with('error', 'Tidak ada data soal valid yang ditemukan dalam berkas CSV.');
             }
 
@@ -186,23 +186,23 @@ class QuestionController extends Controller
             }
 
             if (empty($filteredRows)) {
-                return redirect()->route('admin.quizzes.show', $quiz)
-                    ->with('error', 'Semua soal dalam berkas CSV sudah ada di kuis ini (duplikat).');
+                return redirect()->route('admin.real-materi.show', $quiz)
+                    ->with('error', 'Semua soal dalam berkas CSV sudah ada di paket seleksi ini (duplikat).');
             }
 
             DB::transaction(function () use ($filteredRows) {
                 Question::insert($filteredRows);
             });
 
-            $successMsg = 'Berhasil mengimpor ' . count($filteredRows) . ' soal ke dalam kuis!';
+            $successMsg = 'Berhasil mengimpor ' . count($filteredRows) . ' butir soal ke dalam paket seleksi!';
             if ($duplicateCount > 0) {
-                $successMsg .= " ({$duplicateCount} soal dilewati karena sudah ada/duplikat).";
+                $successMsg .= " ({$duplicateCount} butir soal dilewati karena sudah ada/duplikat).";
             }
 
-            return redirect()->route('admin.quizzes.show', $quiz)->with('success', $successMsg);
+            return redirect()->route('admin.real-materi.show', $quiz)->with('success', $successMsg);
         }
 
-        return redirect()->route('admin.quizzes.show', $quiz)->with('error', 'Gagal membuka berkas CSV.');
+        return redirect()->route('admin.real-materi.show', $quiz)->with('error', 'Gagal membuka berkas CSV.');
     }
 
     /**
@@ -235,7 +235,7 @@ class QuestionController extends Controller
             'explanation' => ['nullable', 'string'],
         ], [
             'question_text.required' => 'Pertanyaan wajib diisi.',
-            'question_text.unique' => 'Pertanyaan ini sudah ada di dalam kuis.',
+            'question_text.unique' => 'Pertanyaan ini sudah ada di dalam paket seleksi.',
             'option_a.required' => 'Pilihan A wajib diisi.',
             'option_b.required' => 'Pilihan B wajib diisi.',
             'option_c.required' => 'Pilihan C wajib diisi.',
@@ -247,8 +247,8 @@ class QuestionController extends Controller
 
         $quiz->questions()->create($request->all());
 
-        return redirect()->route('admin.quizzes.show', $quiz)
-            ->with('success', 'Soal kuis berhasil ditambahkan!');
+        return redirect()->route('admin.real-materi.show', $quiz)
+            ->with('success', 'Butir soal seleksi berhasil ditambahkan!');
     }
 
     /**
@@ -284,7 +284,7 @@ class QuestionController extends Controller
             'explanation' => ['nullable', 'string'],
         ], [
             'question_text.required' => 'Pertanyaan wajib diisi.',
-            'question_text.unique' => 'Pertanyaan ini sudah ada di dalam kuis.',
+            'question_text.unique' => 'Pertanyaan ini sudah ada di dalam paket seleksi.',
             'option_a.required' => 'Pilihan A wajib diisi.',
             'option_b.required' => 'Pilihan B wajib diisi.',
             'option_c.required' => 'Pilihan C wajib diisi.',
@@ -296,8 +296,8 @@ class QuestionController extends Controller
 
         $question->update($request->all());
 
-        return redirect()->route('admin.quizzes.show', $question->quiz_id)
-            ->with('success', 'Soal kuis berhasil diperbarui!');
+        return redirect()->route('admin.real-materi.show', $question->quiz_id)
+            ->with('success', 'Butir soal seleksi berhasil diperbarui!');
     }
 
     /**
@@ -308,7 +308,7 @@ class QuestionController extends Controller
         $quizId = $question->quiz_id;
         Question::destroy($question->id);
 
-        return redirect()->route('admin.quizzes.show', $quizId)
-            ->with('success', 'Soal kuis berhasil dihapus!');
+        return redirect()->route('admin.real-materi.show', $quizId)
+            ->with('success', 'Butir soal seleksi berhasil dihapus!');
     }
 }

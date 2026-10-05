@@ -48,21 +48,22 @@
     <!-- Hero Section -->
     <header class="hero-section">
         <div class="hero-content">
-            <h1><span>Empat Pilar Kebangsaan</span></h1>
+            <h1><span>Seleksi Online Lomba Cerdas Cermat MPR RI</span></h1>
             <p>
-                Platform pembelajaran digital interaktif mengenai kewarganegaraan, konstitusi, dan harmoni keberagaman Indonesia. Dirancang khusus untuk siswa/siswi tingkat SMA, SMK, dan MA demi memupuk jiwa nasionalisme yang unggul.
+                Platform Seleksi Online interaktif mengenai kewarganegaraan, konstitusi, dan harmoni keberagaman Indonesia. Dirancang khusus untuk siswa/siswi tingkat SMA, SMK, dan MA demi memupuk jiwa nasionalisme yang unggul.
             </p>
             <div class="hero-buttons">
                 @if(Auth::guard('web')->check() || Auth::guard('admin')->check())
                     @if(Auth::guard('web')->check())
-                        <a href="{{ route('siswa.materials.index') }}" class="btn btn-primary">Mulai Belajar Sekarang</a>
+                        <a href="{{ route('siswa.real-materi.index') }}" class="btn btn-primary">Mulai Seleksi</a>
+                        <a href="{{ route('siswa.dashboard') }}" class="btn btn-secondary">Dashboard Siswa</a>
                     @endif
                     @if(Auth::guard('admin')->check())
                         <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">Masuk ke Panel Admin</a>
                     @endif
                 @else
-                    <a href="{{ route('register') }}" class="btn btn-primary">Mulai Belajar Mandiri 🚀</a>
-                    <a href="{{ route('login') }}" class="btn btn-secondary">Masuk ke Akun</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary">Mulai Seleksi</a>
+                    <a href="{{ route('login') }}" class="btn btn-secondary">Daftar Akun</a>
                 @endif
             </div>
         </div>
@@ -104,31 +105,13 @@
                 <div class="stat-desc">Siswa Terdaftar</div>
             </div>
 
-            <!-- Materi Bacaan -->
-            <div class="stat-box materi-box">
+            <!-- Total Paket Seleksi -->
+            <div class="stat-box seleksi-box">
                 <div class="stat-icon-wrapper">
-                    <i class="fi fi-rr-book-open-reader"></i>
+                    <i class="fi fi-rr-diploma"></i>
                 </div>
-                <div class="stat-numbers">{{ number_format($materiCount) }}</div>
-                <div class="stat-desc">Materi Bacaan</div>
-            </div>
-
-            <!-- Video Belajar -->
-            <div class="stat-box video-box">
-                <div class="stat-icon-wrapper">
-                    <i class="fi fi-rr-play-alt"></i>
-                </div>
-                <div class="stat-numbers">{{ number_format($videoCount) }}</div>
-                <div class="stat-desc">Video Belajar</div>
-            </div>
-
-            <!-- Kuis Evaluasi -->
-            <div class="stat-box quiz-box">
-                <div class="stat-icon-wrapper">
-                    <i class="fi fi-rr-clipboard-list"></i>
-                </div>
-                <div class="stat-numbers">{{ number_format($quizCount) }}</div>
-                <div class="stat-desc">Kuis Evaluasi</div>
+                <div class="stat-numbers">{{ number_format($seleksiCount ?? 0) }}</div>
+                <div class="stat-desc">Paket Seleksi</div>
             </div>
 
             <!-- Total Soal -->
@@ -137,7 +120,7 @@
                     <i class="fi fi-rr-question"></i>
                 </div>
                 <div class="stat-numbers">{{ number_format($soalCount) }}</div>
-                <div class="stat-desc">Total Soal</div>
+                <div class="stat-desc">Butir Soal</div>
             </div>
         </div>
     </section>
@@ -200,9 +183,9 @@
     <!-- Steps Section -->
     <section class="steps-section" id="steps">
         <div class="section-title">
-            <h2>Langkah Memulai Pembelajaran</h2>
+            <h2>Alur Mengikuti Seleksi Online</h2>
             <p style="max-width: 600px; margin: 8px auto 0 auto; color: var(--color-gray-600);">
-                Ikuti 4 langkah mudah berikut ini sebelum kamu mulai membaca materi dan melaksanakan kuis evaluasi 4 Pilar Kebangsaan.
+                Ikuti 4 langkah mudah berikut ini untuk mengikuti seleksi online Empat Pilar Kebangsaan MPR RI.
             </p>
         </div>
 
@@ -215,7 +198,7 @@
                 </div>
                 <h3>1. Registrasi Akun</h3>
                 <p>
-                    Tekan tombol <strong>Daftar</strong> di pojok kanan atas, lalu lengkapi biodata dirimu seperti nama lengkap, sekolah, kelas, email aktif, dan kata sandi.
+                    Tekan tombol <strong>Daftar</strong> di pojok kanan atas, lalu lengkapi biodata dirimu seperti nama lengkap, sekolah, kelas, provinsi, kabupaten/kota, email, dan kata sandi.
                 </p>
             </div>
 
@@ -235,11 +218,11 @@
             <div class="step-card">
                 <div class="step-badge">03</div>
                 <div class="step-icon-wrapper">
-                    <i class="fi fi-rr-sign-in-alt"></i>
+                    <i class="fi fi-rr-video-camera-alt"></i>
                 </div>
-                <h3>3. Masuk (Login)</h3>
+                <h3>3. Ruang Zoom Pengawas</h3>
                 <p>
-                    Setelah akun aktif, silakan masuk ke platform menggunakan email dan kata sandi yang telah didaftarkan melalui tombol <strong>Masuk</strong>.
+                    Masuk ke sesi Zoom pengawasan resmi pada jadwal yang telah ditentukan bersama pengawas seleksi nasional.
                 </p>
             </div>
 
@@ -247,11 +230,11 @@
             <div class="step-card">
                 <div class="step-badge">04</div>
                 <div class="step-icon-wrapper">
-                    <i class="fi fi-rr-graduation-cap"></i>
+                    <i class="fi fi-rr-document-signed"></i>
                 </div>
-                <h3>4. Mulai Belajar!</h3>
+                <h3>4. Mulai Ujian Seleksi</h3>
                 <p>
-                    Akses menu dashboard siswa untuk mulai membaca materi literasi, menonton video interaktif, dan kerjakan kuis evaluasi untuk menguji pemahamanmu.
+                    Akses menu Mulai Seleksi dan kerjakan paket soal ujian secara jujur dan tertib. Nilai akan langsung tercatat di papan peringkat.
                 </p>
             </div>
         </div>
@@ -260,14 +243,14 @@
     <!-- About Section -->
     <section class="pillars-section" id="about" style="background-color: var(--color-gray-100);">
         <div class="section-title" style="margin-bottom: 32px;">
-            <h2>Tentang Platform Pembelajaran</h2>
+            <h2>Tentang Platform Seleksi Online</h2>
         </div>
         <div style="max-width: 800px; margin: 0 auto; text-align: left; line-height: 1.8; color: var(--color-gray-600); display: flex; flex-direction: column; gap: 16px;">
             <p>
-                Platform ini dibuat selayaknya <strong>Buku PPKN Modern</strong> untuk jenjang Sekolah Menengah Atas dan Kejuruan (SMA/K). Di sini, siswa tidak hanya disuguhkan materi bacaan yang sistematis untuk masing-masing pilar kebangsaan, tetapi juga didukung oleh sistem evaluasi interaktif.
+                Platform ini dikembangkan khusus sebagai sistem evaluasi dan seleksi online <strong>Lomba Cerdas Cermat Empat Pilar Kebangsaan MPR RI</strong> untuk jenjang Sekolah Menengah Atas, Kejuruan, dan Madrasah Aliyah (SMA/SMK/MA) di seluruh Indonesia.
             </p>
             <p>
-                Terdapat <strong>Kuis Evaluasi Khusus</strong> untuk mengukur pemahaman materi setelah siswa membaca. Admin/Guru juga dibekali menu khusus untuk memantau aktivitas pengerjaan kuis siswa, rata-rata skor, serta persentase progres membaca materi untuk tiap-tiap siswa secara real-time.
+                Didukung oleh sistem pengawasan virtual Zoom terpadu, keamanan ujian anti-curang, sistem pengacakan butir soal, dan pemantauan papan peringkat berjenjang (Nasional, Provinsi, dan Kabupaten/Kota) secara transparan dan akuntabel.
             </p>
         </div>
     </section>

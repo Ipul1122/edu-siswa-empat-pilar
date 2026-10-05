@@ -6,7 +6,7 @@
 <div class="page-header">
     <div class="page-title">
         <h1>Dashboard Admin</h1>
-        <p>Ringkasan data aktivitas belajar dan evaluasi siswa mengenai Empat Pilar Kebangsaan.</p>
+        <p>Ringkasan data aktivitas pengerjaan seleksi dan pengawasan siswa mengenai Empat Pilar Kebangsaan.</p>
     </div>
 </div>
 
@@ -19,36 +19,28 @@
             <span class="stat-label">Siswa Terdaftar</span>
         </div>
     </div>
-    
-    <div class="stat-card">
-        <div class="stat-icon info"><i class="fi fi-rr-book-alt"></i></div>
-        <div class="stat-info">
-            <span class="stat-value">{{ $totalMaterials }}</span>
-            <span class="stat-label">Total Materi & Video</span>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-icon success"><i class="fi fi-rr-clipboard-list"></i></div>
-        <div class="stat-info">
-            <span class="stat-value">{{ $totalPracticeQuizzes }}</span>
-            <span class="stat-label">Latihan Kuis</span>
-        </div>
-    </div>
 
     <div class="stat-card">
         <div class="stat-icon warning" style="background-color: rgba(239, 68, 68, 0.1); color: #dc2626;"><i class="fi fi-rr-diploma"></i></div>
         <div class="stat-info">
             <span class="stat-value">{{ $totalRealQuizzes }}</span>
-            <span class="stat-label">Real Materi</span>
+            <span class="stat-label">Paket Soal Seleksi</span>
         </div>
     </div>
     
     <div class="stat-card">
-        <div class="stat-icon secondary"><i class="fi fi-rr-edit"></i></div>
+        <div class="stat-icon success" style="background-color: rgba(16, 185, 129, 0.1); color: #059669;"><i class="fi fi-rr-document-signed"></i></div>
         <div class="stat-info">
             <span class="stat-value">{{ $totalAttempts }}</span>
-            <span class="stat-label">Kuis Dikerjakan</span>
+            <span class="stat-label">Ujian Dikerjakan</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon info" style="background-color: rgba(59, 130, 246, 0.1); color: #2563eb;"><i class="fi fi-rr-video-camera-alt"></i></div>
+        <div class="stat-info">
+            <span class="stat-value">{{ $totalZoomSessions }}</span>
+            <span class="stat-label">Sesi Zoom Terjadwal</span>
         </div>
     </div>
 </div>
@@ -58,7 +50,7 @@
     <!-- Pillar Average Scores Chart -->
     <div class="card">
         <div class="card-header">
-            <h3>Rata-rata Nilai per Pilar</h3>
+            <h3>Rata-rata Nilai per Pilar (Seleksi)</h3>
         </div>
         <div class="card-body" style="padding: 20px;">
             <div style="position: relative; height: 220px; width: 100%;">
@@ -70,7 +62,7 @@
     <!-- 7 Days Activity Chart -->
     <div class="card">
         <div class="card-header">
-            <h3>Aktivitas Pengerjaan Kuis (7 Hari Terakhir)</h3>
+            <h3>Aktivitas Pengerjaan Seleksi (7 Hari Terakhir)</h3>
         </div>
         <div class="card-body" style="padding: 20px;">
             <div style="position: relative; height: 220px; width: 100%;">
@@ -84,7 +76,7 @@
     <!-- Recent Attempts -->
     <div class="card">
         <div class="card-header">
-            <h3>Pengerjaan Kuis Terbaru</h3>
+            <h3>Pengerjaan Seleksi Terbaru</h3>
             <a href="{{ route('admin.students.index') }}" style="font-size: 0.85rem; font-weight: 600;">Lihat Semua Siswa →</a>
         </div>
         <div class="card-body">
@@ -94,7 +86,7 @@
                         <thead>
                             <tr>
                                 <th>Siswa</th>
-                                <th>Kuis / Pilar</th>
+                                <th>Paket Seleksi / Pilar</th>
                                 <th>Skor</th>
                                 <th>Tanggal</th>
                             </tr>
@@ -126,7 +118,7 @@
             @else
                 <div style="text-align: center; padding: 40px 20px; color: var(--color-gray-400);">
                     <p style="font-size: 1.5rem; margin-bottom: 8px;"><i class="fi fi-rr-box-open" style="color: var(--color-gray-400); font-size: 2rem;"></i></p>
-                    <p>Belum ada siswa yang mengerjakan kuis.</p>
+                    <p>Belum ada siswa yang mengerjakan ujian seleksi.</p>
                 </div>
             @endif
         </div>
@@ -138,19 +130,22 @@
             <h3>Pintasan Menu</h3>
         </div>
         <div class="card-body" style="display: flex; flex-direction: column; gap: 16px;">
-            <a href="{{ route('admin.materials.create') }}" class="btn btn-primary" style="width: 100%; text-align: left; justify-content: flex-start;">
-                <i class="fi fi-rr-plus"></i> Tambah Materi Baru
+            <a href="{{ route('admin.real-materi.create') }}" class="btn btn-primary" style="width: 100%; text-align: left; justify-content: flex-start;">
+                <i class="fi fi-rr-plus"></i> Tambah Paket Seleksi
             </a>
-            <a href="{{ route('admin.quizzes.create') }}" class="btn btn-secondary" style="width: 100%; text-align: left; justify-content: flex-start; background: #f8fafc;">
-                <i class="fi fi-rr-plus"></i> Buat Kuis Baru
+            <a href="{{ route('admin.zoom-sessions.create') }}" class="btn btn-secondary" style="width: 100%; text-align: left; justify-content: flex-start; background: #f8fafc;">
+                <i class="fi fi-rr-video-camera-alt"></i> Buat Sesi Zoom Baru
             </a>
             <a href="{{ route('admin.leaderboard') }}" class="btn btn-secondary" style="width: 100%; text-align: left; justify-content: flex-start; background: #fffbeb; border-color: #fde68a; color: #b45309;">
                 <i class="fi fi-rr-trophy" style="color: #d97706;"></i> Lihat Papan Peringkat Siswa
             </a>
+            <a href="{{ route('admin.students.index') }}" class="btn btn-secondary" style="width: 100%; text-align: left; justify-content: flex-start;">
+                <i class="fi fi-rr-users-alt"></i> Pemantauan Siswa & Rapor
+            </a>
             <hr style="border: 0; border-top: 1px solid var(--color-gray-200);">
             <div style="background-color: var(--color-gray-100); padding: 16px; border-radius: var(--border-radius-sm); font-size: 0.85rem; color: var(--color-gray-600);">
-                <p style="font-weight: 600; color: var(--color-dark); margin-bottom: 4px;"><i class="fi fi-rr-info" style="margin-right: 4px; vertical-align: middle;"></i> Informasi Guru/Admin:</p>
-                Anda dapat menambahkan materi di menu <strong>Materi Belajar</strong> dan membuat soal latihan di menu <strong>Kuis & Soal</strong> untuk menguji kompetensi PPKN siswa.
+                <p style="font-weight: 600; color: var(--color-dark); margin-bottom: 4px;"><i class="fi fi-rr-info" style="margin-right: 4px; vertical-align: middle;"></i> Informasi Pengawas/Admin:</p>
+                Anda dapat mengelola paket ujian di menu <strong>Soal Seleksi</strong> dan menyiapkan ruang pengawasan di menu <strong>Sesi Zoom</strong> untuk kelancaran seleksi online.
             </div>
         </div>
     </div>

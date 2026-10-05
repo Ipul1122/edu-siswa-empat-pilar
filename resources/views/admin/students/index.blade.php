@@ -143,6 +143,9 @@
         <p>Pantau data kependudukan (Dapil & Asal Sekolah), kemajuan materi, dan capaian skor evaluasi siswa.</p>
     </div>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="button" class="btn" onclick="document.getElementById('broadcastModal').style.display='flex'" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);">
+            <i class="fi fi-rr-bullhorn"></i> Blast Pengumuman (Email)
+        </button>
         <a href="{{ route('admin.leaderboard') }}" class="btn btn-secondary" style="background-color: #fffbeb; border: 1px solid #fde68a; color: #b45309; display: inline-flex; align-items: center; gap: 6px;">
             <i class="fi fi-rr-trophy" style="color: #d97706;"></i> Papan Peringkat
         </a>
@@ -154,6 +157,13 @@
         </a>
     </div>
 </div>
+
+@if(session('success'))
+    <div style="background: #ecfdf5; border: 1px solid #10b981; color: #065f46; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <i class="fi fi-rr-check-circle" style="font-size: 1.2rem;"></i>
+        <span>{{ session('success') }}</span>
+    </div>
+@endif
 
 <!-- Filter Toolbar (Search, Dapil, Sort, ASC/DESC, Per-Page) - Auto-apply on change -->
 <div class="filter-card">
@@ -205,8 +215,8 @@
                     <option value="name" {{ ($sortBy ?? '') === 'name' ? 'selected' : '' }}>Nama Siswa</option>
                     <option value="school_name" {{ ($sortBy ?? '') === 'school_name' ? 'selected' : '' }}>Asal Sekolah</option>
                     <option value="average_score" {{ ($sortBy ?? '') === 'average_score' ? 'selected' : '' }}>Rerata Skor</option>
-                    <option value="total_quizzes_taken" {{ ($sortBy ?? '') === 'total_quizzes_taken' ? 'selected' : '' }}>Total Kuis</option>
-                    <option value="completed_progress_count" {{ ($sortBy ?? '') === 'completed_progress_count' ? 'selected' : '' }}>Real Materi Selesai</option>
+                    <option value="total_quizzes_taken" {{ ($sortBy ?? '') === 'total_quizzes_taken' ? 'selected' : '' }}>Total Ujian Seleksi</option>
+                    <option value="completed_progress_count" {{ ($sortBy ?? '') === 'completed_progress_count' ? 'selected' : '' }}>Paket Seleksi Selesai</option>
                     <option value="created_at" {{ ($sortBy ?? '') === 'created_at' ? 'selected' : '' }}>Waktu Pendaftaran</option>
                 </select>
             </div>
@@ -263,14 +273,14 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th style="width: 50px; text-align: center;">No</th>
-                            <th>Siswa</th>
-                            <th>Sekolah</th>
+                            <th style="width: 45px; text-align: center;">No</th>
+                            <th>Sekolah / Akun Tim</th>
+                            <th>Guru Pembina (PIC)</th>
                             <th>Wilayah (Prov / Kota)</th>
-                            <th style="width: 200px;">Progres</th>
-                            <th style="text-align: center;">Kuis</th>
-                            <th style="text-align: center;">Skor</th>
-                            <th style="width: 120px; text-align: center;">Aksi</th>
+                            <th>Status</th>
+                            <th style="width: 170px;">Progres Seleksi</th>
+                            <th style="text-align: center;">Ujian & Skor</th>
+                            <th style="width: 175px; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -281,17 +291,26 @@
                                 </td>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <img src="{{ $student->image_url }}" alt="{{ $student->name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-gray-200); background: #f8fafc; flex-shrink: 0;">
+                                        <img src="{{ $student->image_url }}" alt="{{ $student->school_name ?? $student->name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-gray-200); background: #f8fafc; flex-shrink: 0;">
                                         <div>
-                                            <div style="font-weight: 600; color: var(--color-dark);">{{ $student->name }}</div>
-                                            <div style="font-size: 0.78rem; color: var(--color-gray-500);">{{ $student->email }}</div>
+                                            <div style="font-weight: 600; color: var(--color-dark);">{{ $student->school_name ?? $student->name }}</div>
+                                            <div style="font-size: 0.78rem; color: var(--color-gray-500);">
+                                                {{ $student->email }} • <span style="color: #2563eb;">{{ $student->class_name ?? 'Tim 10 Siswa' }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span style="font-weight: 500; color: var(--color-gray-800);">
-                                        {{ $student->school_name ?? '-' }}
-                                    </span>
+                                    <div style="font-weight: 600; color: var(--color-dark); font-size: 0.85rem;">
+                                        {{ $student->pic_name ?? '-' }}
+                                    </div>
+                                    @if($student->whatsapp)
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $student->whatsapp) }}" target="_blank" style="font-size: 0.76rem; color: #059669; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                                            <i class="fi fi-rr-phone-call"></i> {{ $student->whatsapp }}
+                                        </a>
+                                    @else
+                                        <span style="font-size: 0.75rem; color: var(--color-gray-400);">-</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($student->regency || $student->province)
@@ -310,6 +329,17 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @if($student->is_troubled)
+                                        <span class="badge" style="background-color: #fee2e2; color: #b91c1c; font-weight: 700; font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;" title="{{ $student->trouble_notes }}">
+                                            ⚠️ Kendala Sinyal
+                                        </span>
+                                    @else
+                                        <span class="badge" style="background-color: #dcfce7; color: #15803d; font-weight: 600; font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
+                                            ✓ Normal
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
                                     <!-- Real Materi progress bar -->
                                     @php
                                         $progressPercent = $totalRealMateriCount > 0 
@@ -321,26 +351,27 @@
                                             <div class="progress-bar-fill" style="width: {{ $progressPercent }}%;"></div>
                                         </div>
                                         <span style="font-size: 0.72rem; color: var(--color-gray-600); font-weight: 500;">
-                                            {{ $student->completed_progress_count }}/{{ $totalRealMateriCount }} Real Materi ({{ $progressPercent }}%)
+                                            {{ $student->completed_progress_count }}/{{ $totalRealMateriCount }} Paket ({{ $progressPercent }}%)
                                         </span>
                                     </div>
                                 </td>
                                 <td style="text-align: center;">
-                                    <span style="font-weight: 600;">{{ $student->total_quizzes_taken }}</span> <span style="font-size: 0.75rem; color: var(--color-gray-500);">Ujian</span>
+                                    <div style="font-weight: 700; font-size: 0.95rem; color: {{ is_numeric($student->average_score) && $student->average_score >= 70 ? 'var(--color-success)' : (is_numeric($student->average_score) ? 'var(--color-danger)' : 'var(--color-gray-400)') }};">
+                                        {{ $student->average_score !== '-' ? $student->average_score . '%' : '-' }}
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--color-gray-500);">
+                                        {{ $student->total_quizzes_taken }}x Ujian
+                                    </div>
                                 </td>
                                 <td style="text-align: center;">
-                                    @if($student->average_score !== '-')
-                                        <span style="font-weight: 700; font-size: 1rem; color: {{ $student->average_score >= 70 ? 'var(--color-success)' : 'var(--color-danger)' }}">
-                                            {{ $student->average_score }}
-                                        </span>
-                                    @else
-                                        <span style="color: var(--color-gray-400); font-size: 0.8rem;">-</span>
-                                    @endif
-                                </td>
-                                <td style="text-align: center;">
-                                    <a href="{{ route('admin.students.show', $student) }}" class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-weight: 500; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">
-                                        <i class="fi fi-rr-eye"></i> Rapor
-                                    </a>
+                                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                                        <a href="{{ route('admin.students.show', $student) }}" class="btn btn-secondary btn-sm" style="padding: 6px 10px; font-weight: 500; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;" title="Lihat Rapor">
+                                            <i class="fi fi-rr-eye"></i> Rapor
+                                        </a>
+                                        <button type="button" onclick="openRetestModal({{ $student->id }}, '{{ addslashes($student->school_name ?? $student->name) }}')" class="btn btn-sm" style="padding: 6px 10px; font-size: 0.78rem; background: #fff7ed; border: 1px solid #fdba74; color: #c2410c; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Izinkan Tes Ulang (Reset Sesi Bermasalah)">
+                                            <i class="fi fi-rr-refresh"></i> Tes Ulang
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -435,5 +466,94 @@
         regSelect.disabled = false;
         document.getElementById('filter-form').submit();
     }
+
+    function openRetestModal(studentId, schoolName) {
+        document.getElementById('retest_school_name').textContent = schoolName;
+        document.getElementById('retestForm').action = "{{ url('/admin/students') }}/" + studentId + "/grant-retest";
+        document.getElementById('retestModal').style.display = 'flex';
+    }
+
+    function openBroadcastModal() {
+        document.getElementById('broadcastModal').style.display = 'flex';
+    }
 </script>
+
+<!-- Modal Izinkan Tes Ulang -->
+<div id="retestModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: white; border-radius: 12px; width: 100%; max-width: 520px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 18px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i class="fi fi-rr-refresh"></i> Izin Tes Ulang (Susulan)
+            </h3>
+            <button type="button" onclick="document.getElementById('retestModal').style.display='none'" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; line-height: 1;">✕</button>
+        </div>
+        <form id="retestForm" method="POST" style="padding: 24px;">
+            @csrf
+            <p style="font-size: 0.9rem; color: #475569; margin-top: 0; line-height: 1.5;">
+                Berikan persetujuan sesi <strong>Tes Ulang (Susulan)</strong> untuk sekolah: <br>
+                <strong id="retest_school_name" style="color: #1e293b; font-size: 1rem;">-</strong>
+            </p>
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 18px; font-size: 0.83rem; color: #92400e;">
+                ⚠️ <strong>Perhatian Panitia:</strong> Riwayat lembar jawaban sebelumnya akan dihapus sehingga perangkat sekolah dapat kembali login dan mengerjakan tes dari nomor 1 secara adil (soal diacak otomatis). Notifikasi akan otomatis terkirim ke email PIC.
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="retest_reason" style="display: block; font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 6px;">
+                    Alasan / Keterangan Kendala <span style="color: #ef4444;">*</span>
+                </label>
+                <textarea name="reason" id="retest_reason" rows="3" required class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px; font-size: 0.88rem; box-sizing: border-box;" placeholder="Contoh: Gangguan jaringan internet kabel putus dan pemadaman PLN di wilayah setempat."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="document.getElementById('retestModal').style.display='none'" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn" style="background: #d97706; color: white; font-weight: 600;">Setujui & Buka Sesi Ulang</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Blast Pengumuman / Info -->
+<div id="broadcastModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: white; border-radius: 12px; width: 100%; max-width: 600px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 18px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i class="fi fi-rr-bullhorn"></i> Blast Pengumuman & Jadwal Seleksi
+            </h3>
+            <button type="button" onclick="document.getElementById('broadcastModal').style.display='none'" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; line-height: 1;">✕</button>
+        </div>
+        <form action="{{ route('admin.students.broadcast') }}" method="POST" style="padding: 24px;">
+            @csrf
+            <div style="margin-bottom: 16px;">
+                <label for="broadcast_province_id" style="display: block; font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 6px;">
+                    Target Wilayah Penerima
+                </label>
+                <select name="province_id" id="broadcast_province_id" class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px; font-size: 0.88rem; box-sizing: border-box;">
+                    <option value="">🇮🇩 Seluruh Indonesia (Semua Sekolah Terdaftar)</option>
+                    @foreach($provinces as $prov)
+                        <option value="{{ $prov->id }}">{{ $prov->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label for="broadcast_subject" style="display: block; font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 6px;">
+                    Judul Pengumuman <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="text" name="subject" id="broadcast_subject" required class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px; font-size: 0.88rem; box-sizing: border-box;" placeholder="Contoh: Jadwal Sesi Zoom Batch 1 & Petunjuk Ujian Seleksi Maret 2026">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="broadcast_message" style="display: block; font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 6px;">
+                    Isi Pesan Pengumuman <span style="color: #ef4444;">*</span>
+                </label>
+                <textarea name="message" id="broadcast_message" rows="5" required class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px; font-size: 0.88rem; box-sizing: border-box; line-height: 1.5;" placeholder="Tuliskan informasi teknis, tautan zoom, petunjuk tryout simulasi, atau instruksi seleksi resmi..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="document.getElementById('broadcastModal').style.display='none'" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 600;">Kirim Blast Sekarang</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection

@@ -1,11 +1,11 @@
 @extends('layouts.siswa')
 
-@section('title', 'Detail Real Materi - Empat Pilar')
+@section('title', 'Detail Seleksi - Empat Pilar')
 
 @section('content')
 <div class="page-header" style="border: none; padding-bottom: 0;">
     <a href="{{ route('siswa.real-materi.index') }}" class="btn btn-secondary btn-sm">
-        ← Kembali
+        ← Kembali ke Mulai Seleksi
     </a>
 </div>
 
@@ -13,7 +13,7 @@
     <div class="card-body" style="padding: 40px; text-align: center; display: flex; flex-direction: column; gap: 24px;">
         <div>
             <span class="badge {{ $quiz->pillar }}" style="font-size: 0.85rem; margin-bottom: 12px; font-weight: 700; padding: 6px 14px;">
-                Evaluasi Real {{ $quiz->formatted_pillar }}
+                Evaluasi Seleksi {{ $quiz->formatted_pillar }}
             </span>
             <h2 style="font-size: 1.75rem; color: var(--color-dark); font-family: var(--font-heading);">{{ $quiz->title }}</h2>
         </div>
@@ -37,7 +37,7 @@
         <div style="background-color: #fee2e2; border-left: 4px solid var(--color-danger); padding: 12px 16px; text-align: left; font-size: 0.85rem; color: #991b1b; border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;">
             <strong>⚠️ PENTING: Perhatian Sebelum Memulai!</strong>
             <ul style="margin-left: 20px; margin-top: 4px;">
-                <li>Kuis Real Materi ini <strong>hanya dapat diambil 1 kali saja</strong>.</li>
+                <li>Ujian Seleksi ini <strong>hanya dapat diambil 1 kali saja</strong>.</li>
                 <li>Setelah menekan tombol mulai, waktu pengerjaan akan terus berjalan dan tidak dapat dihentikan.</li>
                 <li>Pastikan koneksi internet Anda stabil and Anda siap mengerjakan.</li>
             </ul>
@@ -45,7 +45,7 @@
 
         <div style="margin-top: 8px;">
             <button id="btn-start-real-materi" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px;">
-                Mulai Real Materi Sekarang
+                Mulai Seleksi Sekarang
             </button>
         </div>
     </div>
@@ -57,27 +57,17 @@
         if (btnStart) {
             btnStart.addEventListener('click', function() {
                 Swal.fire({
-                    title: 'Mulai Real Materi?',
-                    text: 'Apakah anda sudah membaca terkait materi?',
-                    icon: 'question',
+                    title: 'Mulai Ujian Seleksi?',
+                    text: 'Pastikan koneksi internet Anda stabil dan Anda sudah siap. Ujian ini hanya dapat dikerjakan 1 kali.',
+                    icon: 'warning',
                     showCancelButton: true,
-                    showDenyButton: true,
-                    confirmButtonText: 'Sudah',
-                    denyButtonText: 'Belum',
+                    confirmButtonText: 'Ya, Mulai Sekarang',
                     cancelButtonText: 'Batal',
-                    confirmButtonColor: '#3085d6',
-                    denyButtonColor: '#d32f2f',
-                    cancelButtonColor: '#aaa',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // sudah => lanjut kerjakan real materi
                         window.location.href = "{{ route('siswa.real-materi.start', $quiz) }}";
-                    } else if (result.isDenied) {
-                        // pergi ke halaman materi jika Belum
-                        window.location.href = "{{ route('siswa.materials.index') }}";
-                    } else {
-                        // batal => back
-                        window.location.href = "{{ route('siswa.real-materi.index') }}";
                     }
                 });
             });
